@@ -77,15 +77,6 @@ public class MapCreater
         }
     }
 
-    public Join[] GetJoin()
-    {
-        return join;
-    }
-    public int[] GetCell()
-    {
-        return cel;
-    }
-
     public List<AreaData> GetAreaDataList()
     {
         return areaDataList;
@@ -160,7 +151,10 @@ public class MapCreater
         // 면적 10 이하의 영역을 지우기
         for (int i = 1; i < num_area; i++)
         {
-            if (areaDataList[i].cel.Count <= 10) areaDataList[i].ClearCel();
+            if (areaDataList[i].cel.Count <= 10) 
+            {
+                areaDataList[i].ClearCel();
+            } 
         }
 
         for (int i = 0; i < cel_max; i++)

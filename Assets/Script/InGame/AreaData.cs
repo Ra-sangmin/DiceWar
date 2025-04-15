@@ -8,28 +8,12 @@ using UnityEngine.UI;
 public class AreaData
 {
     public int id;
-    //public int size { get; set; }      // 0. 부재 1~
-    //public int cpos = 0;      // 중심 셀
-    //public int arm=0;       // 속군
     public int dice = 0;     // 주사위 수
-
-    //private int cx;        // left,right 중간지
-    //private int cy;        // top,bottom 중간지
-    //public Hexagon centerHexagon;
     private MapDice mapDice;
-    //public int len_min { get; set; }
-
-    //주변 라인용
-    //public int[] line_cel = new int[101];
-    //public int[] line_dir = new int[101];
-    //private int[] join = new int[100]; // Assuming 6 directions
 
     public PlayerEnum player = PlayerEnum.Player_None;
     public bool choisOn { get; set; }
-    //public bool choisOn  {
-    //    set{  _choisOn = value; }
-    //    get { return _choisOn; }
-    //}
+
     private List<int> adj = new List<int>();
     private List<Hexagon> hexagonList = new List<Hexagon>();
 
@@ -46,40 +30,28 @@ public class AreaData
     {
         this.id = areaData.id;
 
-        //this.size = areaData.size;
-        //this.cpos = areaData.cpos;
         this.dice = areaData.dice;
         this.mapDice = areaData.mapDice;
 
         this.player = areaData.player;
         this.adj = areaData.adj;
         this.hexagonList = areaData.hexagonList;
-
-        //Debug.LogWarning("areaIndex = " + areaIndex + " , " + hexagonList.Count + " , "+ this.size);
     }
 
     public void AddCel(int cel)
     {
         this.cel.Add(cel);
-        //this.size = celList.Count;
     }
 
     public void ClearCel()
     {
         cel.Clear();
-        //this.size = celList.Count;
     }
 
     public bool IsHaveCelData(int celIndex)
     {
         return cel.Contains(celIndex);
     }
-
-
-    //public int[] GetJoin()
-    //{
-    //    return join;
-    //}
 
     public void SetAdj(Join[] join)
     {
@@ -97,8 +69,6 @@ public class AreaData
                 {
                     adj.Add(currentAreaData);
                 }
-
-                //join[cel].dir[z] = cel;
             }
         }
     }
@@ -108,19 +78,12 @@ public class AreaData
         return adj;
     }
 
-    //public void SetHexagonList(List<Hexagon> hexagonList)
-    //{
-    //    this.hexagonList = hexagonList;
-    //}
-
     public void AddHexagon(Hexagon hexagon)
     {
         if (hexagonList == null)
         {
             hexagonList = new List<Hexagon>();
         }
-
-        //Debug.LogWarning(hexagonList);
 
         this.hexagonList.Add(hexagon);
     }
@@ -243,20 +206,6 @@ public class AreaData
         }
     }
 
-    //public void SetConnectedPieceList()
-    //{
-    //    for (int i = 0; i < join.Length; i++)
-    //    {
-    //        if (join[i] == 1)
-    //        {
-    //            if (adj.Contains(i) == false) 
-    //            {
-    //                adj.Add(i);
-    //            }
-    //        }
-    //    }
-    //}
-
     public void SetBundleKey(List<AreaData> adat, PlayerEnum playerEnum, string bundleKey)
     {
         this.bundleKey = bundleKey;
@@ -274,13 +223,6 @@ public class AreaData
 
     public bool GetIsOnConnectedArea(int checkAreaIndex)
     {
-        //Debug.LogWarning(" ==========    checkAreaIndex " + checkAreaIndex);
-
-        //foreach (var item in adj)
-        //{
-        //    Debug.LogWarning(item);
-        //}
-
         return adj.Contains(checkAreaIndex);
     }
 }

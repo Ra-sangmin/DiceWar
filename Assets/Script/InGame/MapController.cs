@@ -76,15 +76,11 @@ public class MapController : MonoBehaviour
         join = DataManager.Instance.GetJoinData();
         SetHexagonPanel();
         CreateHexagon();
-        //CreateHexagonLine();
-        //CreateMapDice();
         CreateMap();
     }
 
     void SetHexagonPanel()
     {
-        //InGameDataManager.Instance.SetMapSize();
-
         hexagonPanel.anchoredPosition3D = DataManager.Instance.GetHexagonPanelPos();
     }
 
@@ -99,65 +95,11 @@ public class MapController : MonoBehaviour
 
             hexagon.gameObject.SetActive(true);
             hexagon.SetPos(i);
-            //hexagon.SetJoin(InGameDataManager.Instance.mapCreater.GetJoin()[i]);
             hexagon.clickOn = HexagonClickOn;
 
             hexagonList.Add(hexagon);
         }
     }
-
-    //void CreateHexagonLine()
-    //{
-    //    RectTransform rectTransform = hexagonLinePrefab.transform as RectTransform;
-    //    rectTransform.sizeDelta = InGameDataManager.Instance.GetHexagonSizeDelta();
-
-    //    for (int i = 0; i < InGameDataManager.Instance.cel_max; i++)
-    //    {
-    //        HexagonLine hexagonLine = Instantiate(hexagonLinePrefab, hexagonLinePrefab.transform.parent);
-
-    //        hexagonLine.gameObject.SetActive(true);
-    //        hexagonLine.SetPos(i);
-
-    //        hexagonLineList.Add(hexagonLine);
-    //    }
-    //}
-
-    //void CreateMapDice()
-    //{
-    //    //Vector2 cellSize = Vector2.zero;
-    //    //switch (InGameDataManager.Instance.mapSizeEnum)
-    //    //{
-    //    //    case MapSizeEnum.Small: cellSize = new Vector2(50, 50); break;
-    //    //    case MapSizeEnum.Medium: cellSize = new Vector2(40, 40); break;
-    //    //    case MapSizeEnum.Large: cellSize = new Vector2(30, 30); break;
-    //    //}
-
-    //    //GridLayoutGroup glg = mapDicePrefab.GetComponent<GridLayoutGroup>();
-    //    //glg.cellSize = cellSize;
-
-    //    Vector2 scaleValue = Vector2.zero;
-
-    //    switch (InGameDataManager.Instance.mapSizeEnum)
-    //    {
-    //        case MapSizeEnum.Small: scaleValue = Vector2.one; break;
-    //        case MapSizeEnum.Medium: scaleValue = Vector2.one * 0.7f; break;
-    //        case MapSizeEnum.Large: scaleValue = Vector2.one * 0.6f ; break;
-    //    }
-
-    //    //GridLayoutGroup glg = mapDicePrefab.GetComponent<GridLayoutGroup>();
-    //    mapDicePrefab.transform.localScale = scaleValue;
-
-
-    //    for (int i = 0; i < InGameDataManager.Instance.areaDataList.Count; i++)
-    //    {
-    //        MapDice mapDice = Instantiate(mapDicePrefab, mapDicePrefab.transform.parent);
-
-    //        mapDice.gameObject.SetActive(true);
-    //        mapDice.SetDice(0);
-
-    //        mapDiceList.Add(mapDice);
-    //    }
-    //}
 
     List<int> GetReseultDiceCount(int dice)
     {
@@ -181,6 +123,13 @@ public class MapController : MonoBehaviour
         for (int i = 0; i < hexagonList.Count; i++)
         {
             hexagonList[i].DrawLineOnClear();
+        }
+
+        //맵 초기화 안되어있다면
+        if (DataManager.Instance.areaDataList.Count == 0)
+        {
+            DataManager.Instance.InitMapData();
+            DataManager.Instance.CreateMap();
         }
 
         //인접 데이터 설정
@@ -303,7 +252,6 @@ public class MapController : MonoBehaviour
             case MapSizeEnum.Large: scaleValue = Vector2.one * 0.6f; break;
         }
 
-        //GridLayoutGroup glg = mapDicePrefab.GetComponent<GridLayoutGroup>();
         mapDicePrefab.transform.localScale = scaleValue;
 
         MapDice mapDice = Instantiate(mapDicePrefab, mapDicePrefab.transform.parent);
@@ -312,36 +260,6 @@ public class MapController : MonoBehaviour
         mapDice.SetDice(0);
 
         return mapDice;
-
-        //for (int i = 0; i < InGameDataManager.Instance.areaDataList.Count; i++)
-        //{
-        //    MapDice mapDice = Instantiate(mapDicePrefab, mapDicePrefab.transform.parent);
-
-        //    mapDice.gameObject.SetActive(true);
-        //    mapDice.SetDice(0);
-
-        //    mapDiceList.Add(mapDice);
-        //}
-    }
-
-    private void SetArea(int index)
-    {
-        //Debug.LogWarning(index);
-        //Debug.LogWarning(InGameDataManager.Instance.GetCelData(index));
-
-        //Debug.LogWarning(InGameDataManager.Instance.GetAreaDataForCel(index));
-
-        hexagonList[index].SetArea(DataManager.Instance.GetCelData(index));
-
-        if (DataManager.Instance.GetAreaDataForCel(index) != null)
-        {
-            hexagonList[index].SetPlayer(DataManager.Instance.GetAreaDataForCel(index).player);
-        }
-
-        //Debug.LogWarning(InGameDataManager.Instance.GetAreaDataForCel(index).player);
-
-        
-        
     }
 
     void SetAroundLine(Vector2 posIndex, int i)
@@ -450,11 +368,6 @@ public class MapController : MonoBehaviour
         }
         else
         {
-            //if (areaData.player == currentPlayerEnum)
-            //{
-            //    return;
-            //}
-
             //선택이 안되어있다면
             if (choisIndex == -1)
             {
@@ -481,8 +394,6 @@ public class MapController : MonoBehaviour
 
     void AttackOn(AreaData myData, AreaData enemyData)
     {
-        //inGameBottomController.SetStatus(2);
-
         attackEventOn = true;
 
         int myDice = myData.dice;
@@ -493,8 +404,6 @@ public class MapController : MonoBehaviour
 
         DiceWarData myDiceWarData = new DiceWarData(myData.player, myDiceResult);
         DiceWarData enemyDiceWarData = new DiceWarData(enemyData.player, enemyDiceResult);
-
-        //yield return inGameBottomController.diceWarUIController.AttackOn(myDiceWarData, enemyDiceWarData);
 
         //점령에 성공하였다면
         if (myDiceWarData.diceSum > enemyDiceWarData.diceSum)
@@ -522,8 +431,6 @@ public class MapController : MonoBehaviour
 
             ServerManager.Instance.AttackRequestOn(request);
         }
-
-        //yield return null;
     }
 
     void SelectOn(AreaData areaData)
@@ -534,7 +441,6 @@ public class MapController : MonoBehaviour
         if (DataManager.Instance.isMultiOn && DataManager.Instance.IsMyTurn() == false)
         {
             AreaTradeCheck(areaData);
-            //selectAreaOn(areaData);
         }
     }
 
@@ -547,16 +453,6 @@ public class MapController : MonoBehaviour
                                                         NonePlayPanel.InGameButtonStatus.Buy;   //다른 사람 땅을 선택했을때
 
         inGameBottomController.nonePlayPanel.SetAreaData(areaData , btnStatus);
-        //if (areaData.player == currentPlayerEnum)
-        //{
-        //    inGameBottomController.nonePlayPanel.SetActiveBtn(NonePlayPanel.InGameButtonStatus.Sell);
-        //    Debug.LogWarning("내 땅");
-        //}
-        //else
-        //{
-            
-        //    Debug.LogWarning("남의 땅");
-        //}
     }
 
     public void DeSelectOn(AreaData areaData)
@@ -567,7 +463,6 @@ public class MapController : MonoBehaviour
         if (DataManager.Instance.isMultiOn && DataManager.Instance.IsMyTurn() == false)
         {
             inGameBottomController.nonePlayPanel.SetNoneBtn();
-            //selectAreaOn(areaData);
         }
     }
 
@@ -586,8 +481,6 @@ public class MapController : MonoBehaviour
 
         PlayerEnum currentPlayerEnum = DataManager.Instance.playerData.playerEnum;
 
-        //StartCoroutine();
-
         List<AreaData> areaDataList = DiceAddOn(currentPlayerEnum);
 
         turnOffOn();
@@ -604,7 +497,6 @@ public class MapController : MonoBehaviour
         if (playerIcon == null)
         {
             return null;
-            //yield break;
         }
 
         //최대 15개 까지만 회복 가능하도록
@@ -632,8 +524,6 @@ public class MapController : MonoBehaviour
                 {
                     connectedCount--;
                     areaDataList[i].DiceAddOn();
-
-                    //yield return new WaitForSeconds(0.1f);
                 }
             }
 
@@ -648,10 +538,6 @@ public class MapController : MonoBehaviour
         diceAddEventOn = false;
 
         return areaDataList;
-
-        //turnOffOn();
-
-        //yield return null;
     }
 
     public void AIAttackOn(PlayerEnum playerEnum)
@@ -726,7 +612,6 @@ public class MapController : MonoBehaviour
     {
         DataManager.Instance.ReStartOn();
         playerIconController.SetPlayerIcon();
-        //inGameBottomController.diceWarUIController.DiceClear();
         inGameBottomController.SetStatus(1);
     }
 }

@@ -46,7 +46,12 @@ public class MapController : MonoBehaviour
     }
     private void PlayerClickOn(PlayerIcon PlayerIcon)
     {
-        if (PlayerIcon.playerEnum == InGameDataManager.Instance.playerData.playerEnum)
+        if (DataManager.Instance.isMultiOn == false)
+        {
+            return;
+        }
+
+        if (PlayerIcon.playerEnum == DataManager.Instance.playerData.playerEnum)
         {
             inGameBottomController.nonePlayPanel.SetActiveBtn(NonePlayPanel.InGameButtonStatus.None);
         }
@@ -67,8 +72,8 @@ public class MapController : MonoBehaviour
 
     public void CreateMapInit()
     {
-        InGameDataManager.Instance.SetMapSizeValue();
-        join = InGameDataManager.Instance.GetJoinData();
+        DataManager.Instance.SetMapSizeValue();
+        join = DataManager.Instance.GetJoinData();
         SetHexagonPanel();
         CreateHexagon();
         //CreateHexagonLine();
@@ -80,15 +85,15 @@ public class MapController : MonoBehaviour
     {
         //InGameDataManager.Instance.SetMapSize();
 
-        hexagonPanel.anchoredPosition3D = InGameDataManager.Instance.GetHexagonPanelPos();
+        hexagonPanel.anchoredPosition3D = DataManager.Instance.GetHexagonPanelPos();
     }
 
     void CreateHexagon()
     {
         RectTransform rectTransform = hexagonObjPrefab.transform as RectTransform;
-        rectTransform.sizeDelta = InGameDataManager.Instance.GetHexagonSizeDelta();
+        rectTransform.sizeDelta = DataManager.Instance.GetHexagonSizeDelta();
 
-        for (int i = 0; i < InGameDataManager.Instance.GetCelMax(); i++)
+        for (int i = 0; i < DataManager.Instance.GetCelMax(); i++)
         {
             Hexagon hexagon = Instantiate(hexagonObjPrefab, hexagonObjPrefab.transform.parent);
 
@@ -170,7 +175,7 @@ public class MapController : MonoBehaviour
 
     public void CreateMap()
     {
-        InGameDataManager.Instance.gameStart.SetValueAndForceNotify(false);
+        DataManager.Instance.gameStart.SetValueAndForceNotify(false);
 
         // 셀 초기화
         for (int i = 0; i < hexagonList.Count; i++)
@@ -179,20 +184,20 @@ public class MapController : MonoBehaviour
         }
 
         //인접 데이터 설정
-        foreach (var areaData in InGameDataManager.Instance.areaDataList)
+        foreach (var areaData in DataManager.Instance.areaDataList)
         {
             areaData.SetAdj(join);
         }
 
         List<Vector2> readyData = new List<Vector2>();
 
-        for (int i = 0; i < InGameDataManager.Instance.GetCelMax(); i++)
+        for (int i = 0; i < DataManager.Instance.GetCelMax(); i++)
         {
             Hexagon hexagon = hexagonList[i];
 
             //SetArea(i);
 
-            AreaData areaData = InGameDataManager.Instance.GetAreaDataForCel(i);
+            AreaData areaData = DataManager.Instance.GetAreaDataForCel(i);
 
             if (areaData == null)
             {
@@ -208,10 +213,10 @@ public class MapController : MonoBehaviour
 
             areaData.AddHexagon(hexagon);
 
-            Vector2 posIndex = InGameDataManager.Instance.GetPos(i);
+            Vector2 posIndex = DataManager.Instance.GetPos(i);
 
             if (posIndex.x == 0 || posIndex.y == 0 ||
-                posIndex.x == InGameDataManager.Instance.GetMapSizeValue().x - 1 || posIndex.y == InGameDataManager.Instance.GetMapSizeValue().y - 1)
+                posIndex.x == DataManager.Instance.GetMapSizeValue().x - 1 || posIndex.y == DataManager.Instance.GetMapSizeValue().y - 1)
             {
                 SetAroundLine(posIndex, i);
             }
@@ -222,7 +227,7 @@ public class MapController : MonoBehaviour
                 int pos = join[i].dir[z];
                 if (pos < 0) continue;
 
-                if (InGameDataManager.Instance.GetAreaDataForCel(i) != InGameDataManager.Instance.GetAreaDataForCel(pos) &&
+                if (DataManager.Instance.GetAreaDataForCel(i) != DataManager.Instance.GetAreaDataForCel(pos) &&
                     readyData.Contains(new Vector2(i, pos)) == false &&
                     readyData.Contains(new Vector2(pos, i)) == false)
                 {
@@ -239,7 +244,7 @@ public class MapController : MonoBehaviour
     {
         MapDiceInit();
 
-        var areaDataList = InGameDataManager.Instance.areaDataList;
+        var areaDataList = DataManager.Instance.areaDataList;
 
         //주사위 설정
         for (int i = 0; i < areaDataList.Count; i++)
@@ -256,9 +261,9 @@ public class MapController : MonoBehaviour
 
         playerIconController.SetPlayerIcon();
 
-        InGameDataManager.Instance.BackUpOn();
+        DataManager.Instance.BackUpOn();
 
-        if (InGameDataManager.Instance.isMultiOn == false && InGameDataManager.Instance.mapSelectionOn)
+        if (DataManager.Instance.isMultiOn == false && DataManager.Instance.mapSelectionOn)
         {
             inGameBottomController.SetStatus(0);
         }
@@ -270,7 +275,7 @@ public class MapController : MonoBehaviour
 
     void MapDiceInit()
     {
-        var areaDataList = InGameDataManager.Instance.areaDataList;
+        var areaDataList = DataManager.Instance.areaDataList;
 
         foreach (var mapDice in mapDiceList)
         {
@@ -291,7 +296,7 @@ public class MapController : MonoBehaviour
     {
         Vector2 scaleValue = Vector2.zero;
 
-        switch (InGameDataManager.Instance.mapSizeEnum)
+        switch (DataManager.Instance.mapSizeEnum)
         {
             case MapSizeEnum.Small: scaleValue = Vector2.one; break;
             case MapSizeEnum.Medium: scaleValue = Vector2.one * 0.7f; break;
@@ -326,11 +331,11 @@ public class MapController : MonoBehaviour
 
         //Debug.LogWarning(InGameDataManager.Instance.GetAreaDataForCel(index));
 
-        hexagonList[index].SetArea(InGameDataManager.Instance.GetCelData(index));
+        hexagonList[index].SetArea(DataManager.Instance.GetCelData(index));
 
-        if (InGameDataManager.Instance.GetAreaDataForCel(index) != null)
+        if (DataManager.Instance.GetAreaDataForCel(index) != null)
         {
-            hexagonList[index].SetPlayer(InGameDataManager.Instance.GetAreaDataForCel(index).player);
+            hexagonList[index].SetPlayer(DataManager.Instance.GetAreaDataForCel(index).player);
         }
 
         //Debug.LogWarning(InGameDataManager.Instance.GetAreaDataForCel(index).player);
@@ -347,7 +352,7 @@ public class MapController : MonoBehaviour
             hexagonList[i].DrawLineOn(3);
         }
 
-        if (posIndex.y == (int)InGameDataManager.Instance.GetMapSizeValue().y - 1)
+        if (posIndex.y == (int)DataManager.Instance.GetMapSizeValue().y - 1)
         {
             hexagonList[i].DrawLineOn(0);
             hexagonList[i].DrawLineOn(1);
@@ -368,7 +373,7 @@ public class MapController : MonoBehaviour
             }
         }
 
-        if (posIndex.x == InGameDataManager.Instance.GetMapSizeValue().x - 1)
+        if (posIndex.x == DataManager.Instance.GetMapSizeValue().x - 1)
         {
             List<int> checkList = new List<int>() { 0, 2, 4 };
 
@@ -386,23 +391,23 @@ public class MapController : MonoBehaviour
 
     public void HexagonClickOn(int index)
     {
-        if (attackEventOn || InGameDataManager.Instance.gameStart.Value == false)
+        if (attackEventOn || DataManager.Instance.gameStart.Value == false)
         {
             return;
         }
 
-        AreaData areaData = InGameDataManager.Instance.GetAreaDataForCel(index);
+        AreaData areaData = DataManager.Instance.GetAreaDataForCel(index);
 
-        PlayerEnum currentPlayerEnum = InGameDataManager.Instance.playerData.playerEnum;
+        PlayerEnum currentPlayerEnum = DataManager.Instance.playerData.playerEnum;
 
-        bool isMyTurn = InGameDataManager.Instance.IsMyTurn();
+        bool isMyTurn = DataManager.Instance.IsMyTurn();
 
         if (isMyTurn)
         {
             //선택이 안되어있다면
             if (choisIndex == -1)
             {
-                if (areaData.choisOn == false && areaData.dice > 1 && areaData.player == InGameDataManager.Instance.playerData.playerEnum)
+                if (areaData.choisOn == false && areaData.dice > 1 && areaData.player == DataManager.Instance.playerData.playerEnum)
                 {
                     SelectOn(areaData);
                 }
@@ -410,7 +415,7 @@ public class MapController : MonoBehaviour
             //선택이 되어있다면
             else
             {
-                AreaData beforeAreaData = InGameDataManager.Instance.GetAreaData(choisIndex);
+                AreaData beforeAreaData = DataManager.Instance.GetAreaData(choisIndex);
 
                 //재선택 했을때
                 if (areaData.id == choisIndex)
@@ -434,7 +439,7 @@ public class MapController : MonoBehaviour
                     }
 
                     //동맹이었을 경우
-                    if (InGameDataManager.Instance.IsAlliance(areaData.player))
+                    if (DataManager.Instance.IsAlliance(areaData.player))
                     {
                         return;
                     }
@@ -458,7 +463,7 @@ public class MapController : MonoBehaviour
             //선택이 되어있다면
             else
             {
-                AreaData beforeAreaData = InGameDataManager.Instance.GetAreaData(choisIndex);
+                AreaData beforeAreaData = DataManager.Instance.GetAreaData(choisIndex);
 
                 //재선택 했을때
                 if (areaData.id == choisIndex)
@@ -507,7 +512,7 @@ public class MapController : MonoBehaviour
 
         attackEventOn = false;
 
-        if (InGameDataManager.Instance.isMultiOn)
+        if (DataManager.Instance.isMultiOn)
         {
             AttackRequest request = new AttackRequest()
             {
@@ -526,7 +531,7 @@ public class MapController : MonoBehaviour
         choisIndex = areaData.id;
         areaData.ChoisEventOn(true);
 
-        if (InGameDataManager.Instance.isMultiOn && InGameDataManager.Instance.IsMyTurn() == false)
+        if (DataManager.Instance.isMultiOn && DataManager.Instance.IsMyTurn() == false)
         {
             AreaTradeCheck(areaData);
             //selectAreaOn(areaData);
@@ -535,7 +540,7 @@ public class MapController : MonoBehaviour
 
     public void AreaTradeCheck(AreaData areaData)
     {
-        PlayerEnum currentPlayerEnum = InGameDataManager.Instance.playerData.playerEnum;
+        PlayerEnum currentPlayerEnum = DataManager.Instance.playerData.playerEnum;
 
         NonePlayPanel.InGameButtonStatus btnStatus = areaData.player == currentPlayerEnum ?
                                                         NonePlayPanel.InGameButtonStatus.Sell : //내 땅을 선택했을때
@@ -559,7 +564,7 @@ public class MapController : MonoBehaviour
         choisIndex = -1;
         areaData.ChoisEventOn(false);
 
-        if (InGameDataManager.Instance.isMultiOn && InGameDataManager.Instance.IsMyTurn() == false)
+        if (DataManager.Instance.isMultiOn && DataManager.Instance.IsMyTurn() == false)
         {
             inGameBottomController.nonePlayPanel.SetNoneBtn();
             //selectAreaOn(areaData);
@@ -568,18 +573,18 @@ public class MapController : MonoBehaviour
 
     public List<AreaData> EndTurnBtnClickOn()
     {
-        if (diceAddEventOn || InGameDataManager.Instance.gameStart.Value == false)
+        if (diceAddEventOn || DataManager.Instance.gameStart.Value == false)
         {
             return null;
         }
 
         if (choisIndex != -1)
         {
-            AreaData beforeAreaData = InGameDataManager.Instance.GetAreaData(choisIndex);
+            AreaData beforeAreaData = DataManager.Instance.GetAreaData(choisIndex);
             DeSelectOn(beforeAreaData);
         }
 
-        PlayerEnum currentPlayerEnum = InGameDataManager.Instance.playerData.playerEnum;
+        PlayerEnum currentPlayerEnum = DataManager.Instance.playerData.playerEnum;
 
         //StartCoroutine();
 
@@ -605,7 +610,7 @@ public class MapController : MonoBehaviour
         //최대 15개 까지만 회복 가능하도록
         int connectedCount = Mathf.Min(playerIcon.connectedCount, 15);
 
-        List<AreaData> areaDataList = InGameDataManager.Instance.areaDataList.Where(data => data.player == playerEnum).ToList();
+        List<AreaData> areaDataList = DataManager.Instance.areaDataList.Where(data => data.player == playerEnum).ToList();
 
         while (true)
         {
@@ -623,7 +628,7 @@ public class MapController : MonoBehaviour
 
                 int addOn = Random.Range(0, 2);
 
-                if (addOn == 1 && areaDataList[i].dice < InGameDataManager.Instance.diceMaxCount)
+                if (addOn == 1 && areaDataList[i].dice < DataManager.Instance.diceMaxCount)
                 {
                     connectedCount--;
                     areaDataList[i].DiceAddOn();
@@ -632,7 +637,7 @@ public class MapController : MonoBehaviour
                 }
             }
 
-            bool allMax = areaDataList.All(data => data.dice == InGameDataManager.Instance.diceMaxCount);
+            bool allMax = areaDataList.All(data => data.dice == DataManager.Instance.diceMaxCount);
 
             if (allMax)
             {
@@ -651,9 +656,9 @@ public class MapController : MonoBehaviour
 
     public void AIAttackOn(PlayerEnum playerEnum)
     {
-        List<AreaData> areaList = InGameDataManager.Instance.areaDataList.Where(data => data.player == playerEnum).ToList();
+        List<AreaData> areaList = DataManager.Instance.areaDataList.Where(data => data.player == playerEnum).ToList();
 
-        int diceMaxCount = InGameDataManager.Instance.diceMaxCount;
+        int diceMaxCount = DataManager.Instance.diceMaxCount;
         List<AreaData> attackAreaList = areaList.Where(data => data.dice > diceMaxCount-2).ToList();
 
         bool attackRandomOn = Random.Range(0, 2) == 0;
@@ -676,11 +681,11 @@ public class MapController : MonoBehaviour
                         continue;
                     }
 
-                    AreaData checkAreaData = InGameDataManager.Instance.GetAreaData(targetArea);
+                    AreaData checkAreaData = DataManager.Instance.GetAreaData(targetArea);
                     if (checkAreaData.player != playerEnum &&
                         checkAreaData.dice > 0 &&
                         attackArea.dice >= checkAreaData.dice &&
-                        InGameDataManager.Instance.IsAllAlliance(new List<PlayerEnum>() { attackArea.player, checkAreaData.player }) == false)
+                        DataManager.Instance.IsAllAlliance(new List<PlayerEnum>() { attackArea.player, checkAreaData.player }) == false)
                     {
                         AttackOn(attackArea, checkAreaData);
 
@@ -693,7 +698,7 @@ public class MapController : MonoBehaviour
             
         }
 
-        if (InGameDataManager.Instance.gameStart.Value == true)
+        if (DataManager.Instance.gameStart.Value == true)
         {
             
         }
@@ -711,15 +716,15 @@ public class MapController : MonoBehaviour
 
     public void NewGameOn()
     {
-        InGameDataManager.Instance.InitMapData();
-        InGameDataManager.Instance.CreateMap();
+        DataManager.Instance.InitMapData();
+        DataManager.Instance.CreateMap();
 
         CreateMap();
     }
 
     public void ReStartOn()
     {
-        InGameDataManager.Instance.ReStartOn();
+        DataManager.Instance.ReStartOn();
         playerIconController.SetPlayerIcon();
         //inGameBottomController.diceWarUIController.DiceClear();
         inGameBottomController.SetStatus(1);

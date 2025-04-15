@@ -56,7 +56,7 @@ public class PlayerToggleIcon : MonoBehaviour
     {
         this.playerEnum = playerEnum;
 
-        int colorIndex = InGameDataManager.Instance.GetPlayerColorIndex(playerEnum);
+        int colorIndex = DataManager.Instance.GetPlayerColorIndex(playerEnum);
 
         bgImage.sprite = bgSpriteList[colorIndex];
         fgImage.sprite = fgSpriteList[colorIndex];

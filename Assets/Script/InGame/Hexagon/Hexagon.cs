@@ -61,7 +61,7 @@ public class Hexagon : HexagonBase
 
             if (index != -1 )
             {
-                int dirData = InGameDataManager.Instance.GetCelData(index);
+                int dirData = DataManager.Instance.GetCelData(index);
 
                 if (dirData != area)
                 {
@@ -100,7 +100,7 @@ public class Hexagon : HexagonBase
         }
         else
         {
-            color = InGameDataManager.Instance.GetPlayerColor(playerEnum);
+            color = DataManager.Instance.GetPlayerColor(playerEnum);
         }
 
         centerImage.color = color;

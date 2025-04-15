@@ -37,9 +37,9 @@ public class LandTradePopup : MonoBehaviour
 
     void CreatePlayerToggleIcon()
     {
-        PlayerEnum myPlayerEnum = InGameDataManager.Instance.playerData.playerEnum;
+        PlayerEnum myPlayerEnum = DataManager.Instance.playerData.playerEnum;
 
-        for (int i = 0; i < InGameDataManager.Instance.num_player; i++)
+        for (int i = 0; i < DataManager.Instance.num_player; i++)
         {
             PlayerEnum currentPlayerEnum = (PlayerEnum)i;
 
@@ -229,7 +229,7 @@ public class LandTradePopup : MonoBehaviour
             return;
         }
 
-        PlayerEnum fromPlayerEnum = InGameDataManager.Instance.playerData.playerEnum;
+        PlayerEnum fromPlayerEnum = DataManager.Instance.playerData.playerEnum;
         PlayerEnum toPlayerEnum = selectPlayer.playerEnum;
 
         LandTradeRequest request = new LandTradeRequest()

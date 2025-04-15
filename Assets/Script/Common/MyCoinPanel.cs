@@ -15,13 +15,13 @@ public class MyCoinPanel : MonoBehaviour
 
     void SetEvent()
     {
-        InGameDataManager.Instance.myCoin.Subscribe(coin => SetCoin());
+        DataManager.Instance.myCoin.Subscribe(coin => SetCoin());
         SetCoin();
     }
 
     void SetCoin()
     {
-        myCoinText.text = InGameDataManager.Instance.myCoin.Value.ToString();
+        myCoinText.text = DataManager.Instance.myCoin.Value.ToString();
     }
 
 

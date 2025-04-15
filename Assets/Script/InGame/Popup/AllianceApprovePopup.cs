@@ -21,9 +21,9 @@ public class AllianceApprovePopup : MonoBehaviour
     }
     void CreatePlayerToggleIcon()
     {
-        PlayerEnum myPlayerEnum = InGameDataManager.Instance.playerData.playerEnum;
+        PlayerEnum myPlayerEnum = DataManager.Instance.playerData.playerEnum;
 
-        for (int i = 0; i < InGameDataManager.Instance.num_player; i++)
+        for (int i = 0; i < DataManager.Instance.num_player; i++)
         {
             PlayerToggleIcon playerToggleIcon = Instantiate(playerToggleIconPrefab, playerToggleIconParant);
             playerToggleIcon.gameObject.SetActive(true);
@@ -47,7 +47,7 @@ public class AllianceApprovePopup : MonoBehaviour
     {
         this.allianceRequest = allianceRequest;
 
-        PlayerEnum myPlayerEnum = InGameDataManager.Instance.playerData.playerEnum;
+        PlayerEnum myPlayerEnum = DataManager.Instance.playerData.playerEnum;
 
         foreach (var playerToggleIcon in playerToggleIconList)
         {
@@ -68,7 +68,7 @@ public class AllianceApprovePopup : MonoBehaviour
     {
         PlayerToggleIcon currentSelectPlayer = playerToggleIconList[selectIndex];
 
-        PlayerEnum myPlayerEnum = InGameDataManager.Instance.playerData.playerEnum;
+        PlayerEnum myPlayerEnum = DataManager.Instance.playerData.playerEnum;
 
         if (currentSelectPlayer.playerEnum == myPlayerEnum)
         {
@@ -104,7 +104,7 @@ public class AllianceApprovePopup : MonoBehaviour
 
     void DataRequestOn(bool approveOn)
     {
-        PlayerEnum playerEnum = InGameDataManager.Instance.playerData.playerEnum;
+        PlayerEnum playerEnum = DataManager.Instance.playerData.playerEnum;
 
         AllianceApproveRequest request = new AllianceApproveRequest()
         {

@@ -7,7 +7,7 @@ using Unity.VisualScripting;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
-public class InGameDataManager : MonoSingleton<InGameDataManager>
+public class DataManager : MonoSingleton<DataManager>
 {
     public string loginId = string.Empty;
     public bool isMultiOn = false;
@@ -16,21 +16,11 @@ public class InGameDataManager : MonoSingleton<InGameDataManager>
     public AILevel aiLevel = AILevel.Easy;
     public int num_player = 3;//총 플레이어의 수 (기본 값 : 3)
     public int off_line_num_player = 2;//AI 수 (기본 값 : 2)
-    //public int num_X = 20; // 가로 육각형 타일의 개수 (기본값 : 20)
-    //public int num_Y = 15; // 세로 육각형 타일의 개수 (기본값 : 15)
     public int num_area = 10;//총 영토의 수 (기본값 : 10)
     public int diceMaxCount = 6;//영토의 주사위 최대 갯수
 
     public Vector2 mapSizeValue = new Vector2(20, 15);
-    //public int cel_max;
-    //public int[] num;// 지역번호 (area serial number)
-    //public int[] rcel;// 인접 셀(adjacent cell)
-    //public int[] next_f;// 침투시 사용하는 주변 셀(peripheral cell to use for penetration)
-    //public int[] chk;
-    //public int[] cel;
-    //public Join[] join;//인접 셀을 포함한 배열(arrangement with adjacent cells)
     
-    //public List<AreaData> areaDataList = new List<AreaData>(); //인접 셀을 포함한 배열(arrangement with adjacent cells)
     public List<AreaData> backUpAreaDataList = new List<AreaData>();
 
     public PlayerData playerData = new PlayerData();
@@ -54,9 +44,7 @@ public class InGameDataManager : MonoSingleton<InGameDataManager>
 
     private List<AllianceData> allianceDataList = new List<AllianceData>();
 
-    //private MapCreater mapCreater;
     public List<AreaData> areaDataList = new List<AreaData>();
-    //public Join[] join;
     public MapCreateRequestOn testData;
 
     public override void Init()
@@ -185,11 +173,6 @@ public class InGameDataManager : MonoSingleton<InGameDataManager>
         areaDataList = mapCreater.CreateMap();
         areaDataList = areaDataList.Where(data => data.player !=   PlayerEnum.Player_None && data.cel.Count  > 0).ToList();
 
-        //foreach (var areaData in areaDataList)
-        //{
-        //    //areaData.SetAdj(mapCreater.join);
-        //}
-
         playerDataList = new List<PlayerData>();
 
         foreach (var item in playerColorIndexDic)
@@ -203,21 +186,6 @@ public class InGameDataManager : MonoSingleton<InGameDataManager>
         {
             playerDataList[i].isAI = i > onLineCnt;
         }
-
-        //PlayerData playerData = new PlayerData();
-
-        //MapCreateRequestOn test = new MapCreateRequestOn();
-        //test.playerDataList = playerDataList;
-        //test.area = areaDataList;
-        
-
-        //string jsonData = JsonUtility.ToJson(test);
-
-        //Debug.LogWarning(jsonData);
-        //Byte[] sendData = System.Text.Encoding.UTF8.GetBytes(jsonData);
-
-        //Debug.LogWarning(sendData.Length);
-
 
         if (choosePositionOn)
         {
@@ -399,8 +367,6 @@ public class InGameDataManager : MonoSingleton<InGameDataManager>
 
     public Vector2 GetPos(int index)
     {
-        //Vector2 mapSizeValue = mapSizeValue;
-
         //x 위치
         int ox = index % (int)mapSizeValue.x;
         //y 위치
@@ -484,8 +450,6 @@ public class InGameDataManager : MonoSingleton<InGameDataManager>
 
     public void ReStartOn()
     {
-        //List <AreaData> testList = mapCreater.GetAreaDataList();
-
         areaDataList.Clear();
 
         for (int i = 0; i < backUpAreaDataList.Count; i++)
@@ -574,8 +538,6 @@ public class InGameDataManager : MonoSingleton<InGameDataManager>
 
     public bool IsAllAlliance(List<PlayerEnum> checkPlayerEnumList)
     {
-        //Debug.LogWarning(playerEnum);
-
         bool isAllAlliance = true;
 
         foreach (PlayerEnum playerEnum in checkPlayerEnumList)
@@ -586,11 +548,7 @@ public class InGameDataManager : MonoSingleton<InGameDataManager>
             }
         }
 
-        //playerEnumList.
-
         return isAllAlliance;
-
-        //return allianceDataList.Any(data => data.playerEnum == playerEnum);
     }
 
     public List<AllianceData> GetAllAlliance(PlayerEnum playerEnum)
@@ -626,6 +584,7 @@ public class InGameDataManager : MonoSingleton<InGameDataManager>
         }
     }
 }
+
 [System.Serializable]
 public class Join
 {
@@ -639,37 +598,6 @@ public class Join
         }
     }
 }
-
-[System.Serializable]
-public enum AILevel
-{
-    Easy = 0,
-    Normal = 1,
-    Hard = 2,
-}
-
-[System.Serializable]
-public enum MapSizeEnum
-{
-    Small = 0,
-    Medium = 1,
-    Large = 2,
-}
-
-[System.Serializable]
-public enum PlayerEnum
-{
-    Player_None = -1,
-    Player_0 = 0,
-    Player_1 = 1,
-    Player_2 = 2,
-    Player_3 = 3,
-    Player_4 = 4,
-    Player_5 = 5,
-    Player_6 = 6,
-    Player_7 = 7,
-}
-
 
 [System.Serializable]
 public class PlayerData
@@ -702,475 +630,6 @@ public class AllianceData
         this.playerEnum = playerEnum;
         this.coinCount = coinCount;
     }
-}
-
-[System.Serializable]
-public class MapCreater
-{
-    public int num_player = 3;//총 플레이어의 수 (기본 값 : 3)
-    public int off_line_num_player = 2;//총 플레이어의 수 (기본 값 : 3)
-    public Vector2 mapSizeValue = new Vector2(20, 15); // 가로 세로 육각형 타일의 개수 ( 기본 값 x = 20 , y = 15)
-
-    //public int num_X = 20; // 가로 육각형 타일의 개수 (기본값 : 20)
-    //public int num_Y = 15; // 세로 육각형 타일의 개수 (기본값 : 15)
-    public int num_area = 10;//총 영토의 수 (기본값 : 10)
-    public int diceMaxCount = 6;//영토의 주사위 최대 갯수
-
-    private int cel_max;
-    public int[] num;// 지역번호 (area serial number)
-    public int[] rcel;// 인접 셀(adjacent cell)
-    public int[] next_f;// 침투시 사용하는 주변 셀(peripheral cell to use for penetration)
-    //private int[] chk;
-    public int[] cel;
-    public Join[] join;//인접 셀을 포함한 배열(arrangement with adjacent cells)
-
-    public List<HexagonData> hexagonDataList = new List<HexagonData>();
-
-    public List<AreaData> areaDataList = new List<AreaData>(); //인접 셀을 포함한 배열(arrangement with adjacent cells)
-
-    public void InitMapData(Vector2 mapSizeValue ,int num_player)
-    {
-        this.num_player = num_player;
-
-        this.mapSizeValue = mapSizeValue;
-
-        ////int num_X = 20;
-        ////int num_Y = 15;
-
-        //switch (mapSizeEnum)
-        //{
-        //    case MapSizeEnum.Small: mapSizeValue.x = 20; mapSizeValue.y = 15; break;
-        //    case MapSizeEnum.Medium: mapSizeValue.x = 30; mapSizeValue.y = 23; break;
-        //    case MapSizeEnum.Large: mapSizeValue.x = 40; mapSizeValue.y = 30; break;
-        //}
-
-
-        this.cel_max = (int)this.mapSizeValue.x * (int)this.mapSizeValue.y;
-
-        cel = new int[this.cel_max];
-
-        //인접 셀을 포함한 배열(arrangement with adjacent cells)
-        join = new Join[this.cel_max];
-
-        for (int i = 0; i < this.cel_max; i++)
-        {
-            this.join[i] = new Join();
-            for (int j = 0; j < 6; j++)
-            {
-                this.join[i].dir[j] = this.NextCel(i, j);
-            }
-        }
-
-        // 지역 데이터 (area data)
-        num_area = 100;//최대 영역 수 (maximum number of areas)
-        //areaDataList = new List<AreaData>();
-
-        //for (int i = 0; i < num_area; i++)
-        //{
-        //    this.areaDataList.Add(new AreaData(i));
-        //}
-
-        // 맵을 만들 때 사용 (used for map creation)
-        num = new int[this.cel_max];// 지역번호 (area serial number)
-
-        for (int i = 0; i < this.cel_max; i++)
-        {
-            this.num[i] = i;
-        }
-
-        rcel = new int[this.cel_max];// 인접 셀(adjacent cell)
-        next_f = new int[this.cel_max];// 침투시 사용하는 주변 셀(peripheral cell to use for penetration)
-        //this.chk = new int[this.num_area];        // 영역 그리기 선용 (for area drawing lines)
-
-        // 일련 번호 셔플
-        for (int i = 0; i < cel_max; i++)
-        {
-            int r = Random.Range(0, cel_max);
-            int tmp = num[i];
-            num[i] = num[r];
-            num[r] = tmp;
-
-            //Debug.LogWarning(i + " , "+num[i]);
-        }
-
-        //for (int i = 0; i < num_area; i++)
-        //{
-        //    areaDataList[i].SetDice(0);
-        //}
-
-        // 셀 초기화
-        for (int i = 0; i < cel_max; i++)
-        {
-            cel[i] = 0;
-            rcel[i] = 0; // 인접 셀
-        }
-
-        //SetPlayerColor();
-    }
-
-    public Join[] GetJoin()
-    {
-        return join;
-    }
-    public int[] GetCell()
-    {
-        return cel;
-    }
-
-    public List<AreaData> GetAreaDataList()
-    {
-        return areaDataList;
-    }
-
-    public void SetMapSize(MapSizeEnum mapSizeEnum)
-    {
-        
-    }
-
-    /// <summary>
-    /// 메서드 옆의 셀 번호를 반환합니다 (return the cell number to the next method)
-    /// </summary>
-    /// <param name="opos"></param>
-    /// <param name="dir"></param>
-    /// <returns></returns>
-    public int NextCel(int opos, int dir)
-    {
-        //x인덱스
-        int ox = opos % (int)this.mapSizeValue.x;
-        //int oy = Mathf.FloorToInt((float)opos / this.XMAX);
-        //y인덱스
-        int oy = opos / (int)this.mapSizeValue.x;
-        int f = (oy % 2) * -1; // 짝수면 0 , 홀수면 -1
-        int ax = 0;
-        int ay = 0;
-
-        switch (dir)
-        {
-            case 0: ax = f + 1; ay = +1; break;  // 오른쪽 상단 (upper right)
-            case 1: ax = f; ay = +1; break;      // 왼쪽 상단 (upper left)
-            case 2: ax = f + 1; ay = -1; break;  // 오른쪽 하단 (bottom right)
-            case 3: ax = f; ay = -1; break;  // 왼쪽 하단 (bottom left)
-            case 4: ax = 1; ay = +0; break;  // 오른쪽 (right)
-            case 5: ax = -1; ay = +0; break;  // 왼쪽 (left)
-        }
-
-        int x = ox + ax;
-        int y = oy + ay;
-
-        if (x < 0 || y < 0 || x >= this.mapSizeValue.x || y >= this.mapSizeValue.y) return -1;
-
-        return y * (int)this.mapSizeValue.x + x;
-    }
-
-    
-
-    public List<AreaData> CreateMap()
-    {
-        int c, an;
-        an = 1; // 지역 번호
-
-        //cel = InGameDataManager.Instance.testData.mapCreater.cel;
-        //rcel = InGameDataManager.Instance.testData.mapCreater.rcel;
-
-        SetCel();
-
-        //List<AreaData> tempAreaDataList = new List<AreaData>();
-        areaDataList = new List<AreaData>();
-
-        // 영역 데이터 초기화
-        for (int i = 0; i < num_area; i++)
-        {
-            AreaData areaData = new AreaData(i);
-
-            areaData.dice = Random.Range(1, 5);
-
-            areaDataList.Add(areaData);
-
-            //areaDataList[i] = new AreaData(i);
-        }
-
-        // 면적
-        for (int i = 0; i < cel_max; i++)
-        {
-            an = cel[i];
-            if (an > 0) 
-            {
-                areaDataList[an].AddCel(i);
-
-                //AddCel
-            } //areaDataList[an].size++;
-        }
-
-        // 면적 10 이하의 영역을 지우기
-        for (int i = 1; i < num_area; i++)
-        {
-            if (areaDataList[i].cel.Count <= 10) areaDataList[i].ClearCel();
-        }
-
-        for (int i = 0; i < cel_max; i++)
-        {
-            an = cel[i];
-            if (areaDataList[an].cel.Count == 0)
-            {
-                cel[i] = 0;
-            }
-        }
-
-        ////인접 데이터 생성
-        //foreach (AreaData areaData in areaDataList)
-        //{
-
-        //}
-
-        //c = 0;
-        //int x, y, len;
-        //for (int i = 0; i < mapSizeValue.y; i++)
-        //{
-        //    for (int j = 0; j < mapSizeValue.y; j++)
-        //    {
-        //        an = cel[c];
-        //        if (an > 0)
-        //        {
-        //            //// 중심지로부터의 거리(경계선 근처는 가능한 한 피한다)
-        //            //x = Mathf.Abs(areaDataList[an].cx - j);
-        //            //y = Mathf.Abs(areaDataList[an].cy - i);
-        //            //len = x + y;
-        //            int f = 0;
-        //            for (int k = 0; k < 6; k++)
-        //            {
-        //                int pos = join[c].dir[k];
-        //                if (pos > 0)
-        //                {
-        //                    int an2 = cel[pos];
-        //                    if (an2 != an)
-        //                    {
-        //                        //f = 1;
-        //                        // 이어서 인접 데이터도 작성
-        //                        areaDataList[an].GetJoin()[an2] = 1;
-        //                        areaDataList[an].SetConnectedPieceList();
-        //                    }
-        //                }
-        //            }
-        //            //if (f > 0) len += 4;
-        //            //// 거리가 가까운 것을 중심지로 한다
-        //            //if (len < areaDataList[an].len_min)
-        //            //{
-        //            //    areaDataList[an].len_min = len;
-        //            //    //areaDataList[an].cpos = i * num_X + j;
-        //            //}
-        //        }
-        //        c++;
-        //    }
-        //}
-
-        // 지역 속군을 결정
-        for (int i = 0; i < num_area; i++) areaDataList[i].PlayerChangeOn(PlayerEnum.Player_None);
-        int arm = 0; // 속군
-        int[] alist = new int[num_area]; // 지역 목록
-        while (true)
-        {
-            c = 0;
-            for (int i = 1; i < num_area; i++)
-            {
-                if (areaDataList[i].cel.Count == 0) continue;
-                if ((int)areaDataList[i].player >= 0) continue;
-                alist[c] = i;
-                c++;
-            }
-            if (c == 0) break;
-            an = alist[Random.Range(0, c)];
-            areaDataList[an].player = (PlayerEnum)arm;
-
-            arm++; if (arm >= num_player) arm = 0;
-        }
-
-
-        //for (int i = 0; i < num_area; i++)
-        //{
-        //    HexagonData hexagonData = new HexagonData();
-
-        //    hexagonData.areaIndex = cel[i];
-        //    hexagonData.playerEnum = PlayerEnum.Player_None;
-
-        //    hexagonDataList.Add(hexagonData);
-        //}
-        
-
-        return areaDataList;
-        //areaDataList = tempAreaDataList;
-        //areaDataList = tempAreaDataList.Where(data => data.size > 0).ToList();
-
-        //foreach (var item in areaDataList)
-        //{
-        //    Debug.LogWarning($" {item.areaIndex} , {item.size}");
-            
-        //}
-
-        // 영역 그리기 선 데이터 작성
-        //for (int i = 0; i < this.num_area; i++) this.chk[i] = 0;
-        //for (int i = 0; i < this.cel_max; i++)
-        //{
-        //    var area = this.cel[i];
-        //    if (area == 0) continue;
-        //    if (this.chk[area] > 0) continue;
-        //    for (int k = 0; k < 6; k++)
-        //    {
-        //        if (this.chk[area] > 0) break;
-        //        var n = this.join[i].dir[k];
-        //        if (n >= 0)
-        //        {
-        //            if (this.cel[n] != area)
-        //            {
-        //                //this.set_area_line(i, k);
-        //                this.chk[area] = 1;
-        //            }
-        //        }
-        //    }
-        //}
-
-        //if (choosePositionOn)
-        //{
-        //    SetTurnPosition(turnPosition);
-        //}
-    }
-
-    void SetCel()
-    {
-        int an = 1;
-
-        int ranValue = Random.Range(0, cel_max);
-
-        rcel[ranValue] = 1; // 첫 번째 셀
-
-        while (true)
-        {
-            // 침투 개시 셀 결정
-            int pos = -1;
-            int min = 9999;
-            for (int i = 0; i < cel_max; i++)
-            {
-                if (cel[i] > 0) continue;
-                if (num[i] > min) continue;
-                if (rcel[i] == 0) continue;
-                min = num[i];
-                pos = i;
-            }
-
-            if (min == 9999) break;
-
-            // 침투 개시
-            int ret = Percolate(pos, 8, an);
-
-            if (ret == 0) break;
-            an++;
-            if (an >= num_area) break;
-        }
-
-        // 바다에서 면적 1의 셀을 없애기
-        for (int i = 0; i < cel_max; i++)
-        {
-            if (cel[i] > 0) continue;
-            int pos;
-            int f = 0;
-            int a = 0;
-            for (int k = 0; k < 6; k++)
-            {
-                pos = join[i].dir[k];
-                if (pos < 0) continue;
-                if (cel[pos] == 0) f = 1; else a = cel[pos];
-            }
-            if (f == 0) cel[i] = a;
-        }
-    }
-
-    public int Percolate(int pt, int cmax, int an)
-    {
-        if (cmax < 3) cmax = 3;
-
-        int i, j, k;
-        int opos = pt; // 시작 셀
-
-        // 인접 플래그
-        for (i = 0; i < cel_max; i++) next_f[i] = 0;
-
-        int c = 0; // 셀 수
-        while (true)
-        {
-            cel[opos] = an;
-
-            c++;
-            // 주변 셀
-            for (i = 0; i < 6; i++)
-            {
-                int pos = join[opos].dir[i];
-                if (pos < 0) continue;
-                next_f[pos] = 1;
-            }
-            // 주변 셀에서 최소 번호를 다음 셀로 설정
-            int min = 9999;
-            for (i = 0; i < cel_max; i++)
-            {
-                if (next_f[i] == 0) continue; // 인접하지 않음
-                if (cel[i] > 0) continue; // 이미 지역화
-                if (num[i] > min) continue; // 최소 주문 번호가 아님
-                min = num[i];
-                opos = i;
-            }
-
-            if (min == 9999) break;
-            if (c >= cmax) break; // 주어진 면적을 초과
-        }
-
-        // 인접 셀 추가
-        for (i = 0; i < cel_max; i++)
-        {
-            if (next_f[i] == 0) continue;
-            if (cel[i] > 0) continue; // 이미 지역화
-            cel[i] = an;
-
-            c++;
-            // 또한, 인접 셀을 다음 영역의 후보로한다.
-            for (k = 0; k < 6; k++)
-            {
-                int pos = join[i].dir[k];
-                if (pos < 0) continue;
-                rcel[pos] = 1;
-            }
-        }
-
-        return c;
-    }
-
-    //public void set_area_line(int old_cel, int old_dir)
-    //{
-    //    var c = old_cel;
-    //    var d = old_dir;
-    //    var area = this.cel[c]; // 지역 번호
-
-    //    var cnt = 0;
-    //    this.areaDataList[area].line_cel[cnt] = c;
-    //    this.areaDataList[area].line_dir[cnt] = d;
-    //    cnt++;
-    //    for (var i = 0; i < 100; i++)
-    //    {
-    //        d++; if (d >= 6) d = 0; // 방향 추가
-    //        var n = this.join[c].dir[d];
-    //        if (n >= 0)
-    //        {
-    //            if (this.cel[n] == area)
-    //            {
-    //                // 이웃이 같은 영역이면 셀 이동, 방향 마이너스 2
-    //                c = n;
-    //                d -= 2; if (d < 0) d += 6;
-    //            }
-    //        }
-
-    //        this.areaDataList[area].line_cel[cnt] = c;
-    //        this.areaDataList[area].line_dir[cnt] = d;
-    //        cnt++;
-    //        if (c == old_cel && d == old_dir) break;
-    //    }
-    //}
 }
 
 public class HexagonData

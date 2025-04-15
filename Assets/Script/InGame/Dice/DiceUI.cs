@@ -23,7 +23,7 @@ public class DiceUI : MonoBehaviour
 
     public void SetPlayer(PlayerEnum playerEnum)
     {
-        bgImage.color = InGameDataManager.Instance.GetPlayerColor(playerEnum);
+        bgImage.color = DataManager.Instance.GetPlayerColor(playerEnum);
     }
 
     public void SetDice(int diceStatus)

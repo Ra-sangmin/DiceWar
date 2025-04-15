@@ -56,7 +56,7 @@ public class PlayerDataPanel : MonoBehaviour
 
     void SetPlayerData()
     {
-        List<AllianceData> allianceDataList = InGameDataManager.Instance.GetAllAlliance(selectPlayerIcon.playerEnum);
+        List<AllianceData> allianceDataList = DataManager.Instance.GetAllAlliance(selectPlayerIcon.playerEnum);
 
         foreach (var playerToggleIcon in playerToggleIconList)
         {

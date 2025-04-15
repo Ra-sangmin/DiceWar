@@ -24,9 +24,9 @@ public class AlliancePopup : MonoBehaviour
     }
     void CreatePlayerToggleIcon()
     {
-        PlayerEnum myPlayerEnum = InGameDataManager.Instance.playerData.playerEnum;
+        PlayerEnum myPlayerEnum = DataManager.Instance.playerData.playerEnum;
 
-        for (int i = 0; i < InGameDataManager.Instance.num_player; i++)
+        for (int i = 0; i < DataManager.Instance.num_player; i++)
         {
             PlayerToggleIcon playerToggleIcon = Instantiate(playerToggleIconPrefab, playerToggleIconParant);
             playerToggleIcon.gameObject.SetActive(true);
@@ -45,7 +45,7 @@ public class AlliancePopup : MonoBehaviour
 
     public void SetData() 
     {
-        PlayerEnum myPlayerEnum = InGameDataManager.Instance.playerData.playerEnum;
+        PlayerEnum myPlayerEnum = DataManager.Instance.playerData.playerEnum;
 
         foreach (var playerToggleIcon in playerToggleIconList)
         {
@@ -57,7 +57,7 @@ public class AlliancePopup : MonoBehaviour
     {
         PlayerToggleIcon currentSelectPlayer = playerToggleIconList[selectIndex];
 
-        PlayerEnum myPlayerEnum = InGameDataManager.Instance.playerData.playerEnum;
+        PlayerEnum myPlayerEnum = DataManager.Instance.playerData.playerEnum;
 
         if (currentSelectPlayer.playerEnum == myPlayerEnum)
         {
@@ -110,7 +110,7 @@ public class AlliancePopup : MonoBehaviour
 
         AllianceData orderData = new AllianceData()
         {
-            playerEnum = InGameDataManager.Instance.playerData.playerEnum,
+            playerEnum = DataManager.Instance.playerData.playerEnum,
             coinCount = 5
         };
 

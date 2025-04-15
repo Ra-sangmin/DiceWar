@@ -42,13 +42,13 @@ public class BuyCoinPopup : MonoBehaviour
     {
         int addCoin = index == 0 ? 10 : 30;
 
-        InGameDataManager.Instance.AddCoin(addCoin);
+        DataManager.Instance.AddCoin(addCoin);
     }
 
     public void WatchAdsOn()
     {
         int addCoin = 10;
 
-        InGameDataManager.Instance.AddCoin(addCoin);
+        DataManager.Instance.AddCoin(addCoin);
     }
 }

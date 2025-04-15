@@ -29,7 +29,7 @@ public class HexagonBase : MonoBehaviour
     public void SetPos(int index)
     {
         this.index = index;
-        this.pos = InGameDataManager.Instance.GetPos(index);
+        this.pos = DataManager.Instance.GetPos(index);
 
         Vector2 sizeDelta = rectTransform.sizeDelta;
 

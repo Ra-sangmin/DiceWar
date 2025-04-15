@@ -38,7 +38,7 @@ public class NonePlayPanel : MonoBehaviour
     {
         selectAreaData = null;
 
-        if (InGameDataManager.Instance.IsAlliance(InGameDataManager.Instance.playerData.playerEnum))
+        if (DataManager.Instance.IsAlliance(DataManager.Instance.playerData.playerEnum))
         {
             SetActiveBtn(InGameButtonStatus.Betray);
         }
@@ -89,8 +89,8 @@ public class NonePlayPanel : MonoBehaviour
 
     public void SetData()
     {
-        singlePanel.gameObject.SetActive(InGameDataManager.Instance.isMultiOn == false);
-        multiPanel.gameObject.SetActive(InGameDataManager.Instance.isMultiOn);
+        singlePanel.gameObject.SetActive(DataManager.Instance.isMultiOn == false);
+        multiPanel.gameObject.SetActive(DataManager.Instance.isMultiOn);
     }
 
     //public void SetCountIcon(int countIndex)
@@ -140,9 +140,9 @@ public class NonePlayPanel : MonoBehaviour
     {
         List<AllianceData> allianceDataList = allianceResultRequest.allianceDataList;
 
-        InGameDataManager.Instance.SetAllianceList(allianceDataList);
+        DataManager.Instance.SetAllianceList(allianceDataList);
 
-        if (allianceResultRequest.orderData.playerEnum == InGameDataManager.Instance.playerData.playerEnum)
+        if (allianceResultRequest.orderData.playerEnum == DataManager.Instance.playerData.playerEnum)
         {
             SkillUseOn();
         }
@@ -174,12 +174,12 @@ public class NonePlayPanel : MonoBehaviour
     /// <returns></returns>
     private bool SkillAlreadyUseCheck()
     {
-        return InGameDataManager.Instance.playerData.skillCardCount <= 0;
+        return DataManager.Instance.playerData.skillCardCount <= 0;
     }
 
     public void SkillUseOn()
     {
-        InGameDataManager.Instance.playerData.skillCardCount--;
+        DataManager.Instance.playerData.skillCardCount--;
         skillCard.SetCountIcon();
     }
 }

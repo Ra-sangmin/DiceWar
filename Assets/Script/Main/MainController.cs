@@ -53,7 +53,7 @@ public class MainController : MonoBehaviour
 
         PlayerColorChangeOn(0);
 
-        InGameDataManager.Instance.myCoin.Subscribe(coin => SetCoin());
+        DataManager.Instance.myCoin.Subscribe(coin => SetCoin());
         SetCoin();
     }
 
@@ -86,14 +86,14 @@ public class MainController : MonoBehaviour
             case 2: aiLevel = AILevel.Hard; break;
         }
 
-        InGameDataManager.Instance.SetAILevelEnum(aiLevel);
+        DataManager.Instance.SetAILevelEnum(aiLevel);
     }
 
     private void PlayersCountToggleChangeOn(int index)
     {
         int playerMaxCnt = index + 2;
-        InGameDataManager.Instance.SetPlayerMaxCnt(playerMaxCnt);
-        SetTurnPosition(InGameDataManager.Instance.turnPosition);
+        DataManager.Instance.SetPlayerMaxCnt(playerMaxCnt);
+        SetTurnPosition(DataManager.Instance.turnPosition);
     }
 
     private void MapSizeToggleChangeOn(int index)
@@ -107,7 +107,7 @@ public class MainController : MonoBehaviour
             case 2: mapSizeEnum = MapSizeEnum.Large; break;
         }
 
-        InGameDataManager.Instance.SetMapSizeEnum(mapSizeEnum);
+        DataManager.Instance.SetMapSizeEnum(mapSizeEnum);
 
         SetPlayerSelectToggle();
     }
@@ -116,7 +116,7 @@ public class MainController : MonoBehaviour
     {
         int activeCount = 2;
 
-        MapSizeEnum mapSizeEnum = InGameDataManager.Instance.mapSizeEnum;
+        MapSizeEnum mapSizeEnum = DataManager.Instance.mapSizeEnum;
 
         switch (mapSizeEnum)
         {
@@ -131,7 +131,7 @@ public class MainController : MonoBehaviour
             playersCountToggleList[i].interactable = interactableOn;
         }
 
-        int playerMaxCnt = InGameDataManager.Instance.num_player;
+        int playerMaxCnt = DataManager.Instance.num_player;
 
         playerMaxCnt -= 2;
 
@@ -158,18 +158,18 @@ public class MainController : MonoBehaviour
 
     private void SetTurnPositionText(int turnPosition)
     {
-        InGameDataManager.Instance.SetTurnPosition(turnPosition);
+        DataManager.Instance.SetTurnPosition(turnPosition);
         turnPositionCountText.text = (turnPosition + 1).ToString();
     }
     
 
     void ChoosePositionToggleOn(bool isOn)
     {
-        InGameDataManager.Instance.choosePositionOn = isOn;
+        DataManager.Instance.choosePositionOn = isOn;
 
         if (isOn == false)
         {
-            InGameDataManager.Instance.SetTurnPosition(-1);
+            DataManager.Instance.SetTurnPosition(-1);
         }
         
 
@@ -178,12 +178,12 @@ public class MainController : MonoBehaviour
 
     void MapSelectionToggle(bool isOn)
     {
-        InGameDataManager.Instance.mapSelectionOn = isOn;
+        DataManager.Instance.mapSelectionOn = isOn;
     }
 
     void DiceCompensationToggle(bool isOn)
     {
-        InGameDataManager.Instance.diceCompensationOn = isOn;
+        DataManager.Instance.diceCompensationOn = isOn;
     }
 
     public void ResetToDefaultBtnClickOn() 
@@ -195,7 +195,7 @@ public class MainController : MonoBehaviour
 
     public void TurnCountAddBtnClickOn(bool addOn)
     {
-        int turnPosition = InGameDataManager.Instance.turnPosition;
+        int turnPosition = DataManager.Instance.turnPosition;
 
         if (addOn) 
         {
@@ -211,7 +211,7 @@ public class MainController : MonoBehaviour
 
     private void SetTurnPosition(int turnCount) 
     {
-        turnCount = math.clamp(turnCount, 0, InGameDataManager.Instance.num_player - 1);
+        turnCount = math.clamp(turnCount, 0, DataManager.Instance.num_player - 1);
 
         SetTurnPositionText(turnCount);
     }
@@ -231,7 +231,7 @@ public class MainController : MonoBehaviour
 
     void LoginCheck()
     {
-        if (InGameDataManager.Instance.loginId == string.Empty) 
+        if (DataManager.Instance.loginId == string.Empty) 
         {
             StepChangeOn(0);
         }
@@ -261,7 +261,7 @@ public class MainController : MonoBehaviour
         {
             ToggleInit();
 
-            ChoosePositionToggleOn(InGameDataManager.Instance.choosePositionOn);
+            ChoosePositionToggleOn(DataManager.Instance.choosePositionOn);
         }
     }
 
@@ -279,7 +279,7 @@ public class MainController : MonoBehaviour
 
     public void ColorChangeClickOn()
     {
-        int index = InGameDataManager.Instance.playerData.colorIndex;
+        int index = DataManager.Instance.playerData.colorIndex;
 
         index = index + 1;
 
@@ -294,19 +294,19 @@ public class MainController : MonoBehaviour
 
     public void PlayerColorChangeOn(int index)
     {
-        playerColorImage.color = InGameDataManager.Instance.SetCurrentPlayerColor(index);
+        playerColorImage.color = DataManager.Instance.SetCurrentPlayerColor(index);
     }
 
     public void SettingPopupOn()
     {
-        choosePositionToggle.isOn = InGameDataManager.Instance.choosePositionOn;
-        mapSelectionToggle.isOn = InGameDataManager.Instance.mapSelectionOn;
-        diceCompensationToggle.isOn = InGameDataManager.Instance.diceCompensationOn;
+        choosePositionToggle.isOn = DataManager.Instance.choosePositionOn;
+        mapSelectionToggle.isOn = DataManager.Instance.mapSelectionOn;
+        diceCompensationToggle.isOn = DataManager.Instance.diceCompensationOn;
     }
 
     void SetCoin()
     {
-        myCoinText.text = InGameDataManager.Instance.myCoin.Value.ToString();
+        myCoinText.text = DataManager.Instance.myCoin.Value.ToString();
     }
 
     public void PlayBtnClickOn()
@@ -316,7 +316,7 @@ public class MainController : MonoBehaviour
 
     public void LoginClickOn()
     {
-        InGameDataManager.Instance.loginId = "loginClear";
+        DataManager.Instance.loginId = "loginClear";
         StepChangeOn(1);
     }
 

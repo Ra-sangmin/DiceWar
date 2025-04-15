@@ -137,8 +137,8 @@ public class ServerManager : MonoSingleton<ServerManager>
         MapCreateRequestOn mapCreateRequestOn = new MapCreateRequestOn()
         {
             roomDataIndex = roomDataIndex,
-            playerDataList = InGameDataManager.Instance.playerDataList,
-            area = InGameDataManager.Instance.areaDataList,
+            playerDataList = DataManager.Instance.playerDataList,
+            area = DataManager.Instance.areaDataList,
             //cel = mapCreater;//.GetCell(),
             //mapCreater = mapCreater,
         };

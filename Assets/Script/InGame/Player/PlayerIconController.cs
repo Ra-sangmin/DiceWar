@@ -38,7 +38,7 @@ public class PlayerIconController : MonoBehaviour
             playerIcon.gameObject.SetActive(false);
         }
 
-        int numPlayer = InGameDataManager.Instance.num_player;
+        int numPlayer = DataManager.Instance.num_player;
 
         if (playerIconList.Count < numPlayer)
         {
@@ -67,7 +67,7 @@ public class PlayerIconController : MonoBehaviour
             SetBundleKey(checkList[i]);
         }
 
-        PlayerEnum myPlayerEnum = InGameDataManager.Instance.playerData.playerEnum;
+        PlayerEnum myPlayerEnum = DataManager.Instance.playerData.playerEnum;
 
         //남은 인원 체크
         var resultList = GetActiveList();
@@ -83,7 +83,7 @@ public class PlayerIconController : MonoBehaviour
         //남은 인원수가 1명이라면
         if (resultList.Count == 1)
         {
-            if (InGameDataManager.Instance.playerData.playerEnum == resultList[0].playerEnum)
+            if (DataManager.Instance.playerData.playerEnum == resultList[0].playerEnum)
             {
                 gameWinOn();
             }
@@ -97,7 +97,7 @@ public class PlayerIconController : MonoBehaviour
         else
         {
             var playerEnumList = resultList.Select(data => data.playerEnum).ToList();
-            if (InGameDataManager.Instance.IsAllAlliance(playerEnumList))
+            if (DataManager.Instance.IsAllAlliance(playerEnumList))
             {
                 gameWinOn();
                 //gameEndOn(InGameDataManager.Instance.playerData.playerEnum);
@@ -116,7 +116,7 @@ public class PlayerIconController : MonoBehaviour
         PlayerEnum checkEnum = checkPlayerIcon.playerEnum;
 
         //최대로 연결된 영토 숫자
-        int maxCount = InGameDataManager.Instance.SetBundleKey(checkEnum);
+        int maxCount = DataManager.Instance.SetBundleKey(checkEnum);
 
         if (maxCount <= 0)
         {

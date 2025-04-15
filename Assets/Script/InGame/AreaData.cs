@@ -91,7 +91,7 @@ public class AreaData
             {
                 int pos = join[cel].dir[z];
 
-                int currentAreaData = InGameDataManager.Instance.GetCelData(pos);
+                int currentAreaData = DataManager.Instance.GetCelData(pos);
 
                 if (currentAreaData != -1 && currentAreaData != id && adj.Contains(currentAreaData) == false)
                 {
@@ -183,7 +183,7 @@ public class AreaData
         float checkValue = 9999;
 
         var newCheckList = checkList.Where( data => data.pos.x > 0 && 
-                                            data.pos.x < InGameDataManager.Instance.GetMapSizeValue().x && 
+                                            data.pos.x < DataManager.Instance.GetMapSizeValue().x && 
                                             data.pos.y > 0).ToList();
 
         if (newCheckList.Count == 0)

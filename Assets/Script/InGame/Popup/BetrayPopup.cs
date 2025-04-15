@@ -26,7 +26,7 @@ public class BetrayPopup : MonoBehaviour
 
     public void BetrayBtnClickOn()
     {
-        PlayerEnum playerEnum = InGameDataManager.Instance.playerData.playerEnum;
+        PlayerEnum playerEnum = DataManager.Instance.playerData.playerEnum;
 
         AllianceBetrayRequest request = new AllianceBetrayRequest()
         {

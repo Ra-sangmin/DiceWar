@@ -34,7 +34,7 @@ public class PlayerIcon : MonoBehaviour
 
     public void SetIconColor() 
     {
-        int index = InGameDataManager.Instance.GetPlayerColorIndex(playerEnum);
+        int index = DataManager.Instance.GetPlayerColorIndex(playerEnum);
 
         iconImage.sprite = spriteiconList[index];
     }

@@ -107,7 +107,7 @@ public class PlaySetPopup : MonoBehaviour
             case 2: aiLevel = AILevel.Hard; break;
         }
 
-        InGameDataManager.Instance.SetAILevelEnum(aiLevel);
+        DataManager.Instance.SetAILevelEnum(aiLevel);
     }
 
     private void MapSizeToggleChangeOn(int index)
@@ -121,7 +121,7 @@ public class PlaySetPopup : MonoBehaviour
             case 2: mapSizeEnum = MapSizeEnum.Large; break;
         }
 
-        InGameDataManager.Instance.SetMapSizeEnum(mapSizeEnum);
+        DataManager.Instance.SetMapSizeEnum(mapSizeEnum);
 
         SetPlayerSelectToggle();
     }
@@ -130,7 +130,7 @@ public class PlaySetPopup : MonoBehaviour
     {
         int activeCount = 2;
 
-        MapSizeEnum mapSizeEnum = InGameDataManager.Instance.mapSizeEnum;
+        MapSizeEnum mapSizeEnum = DataManager.Instance.mapSizeEnum;
 
         switch (mapSizeEnum)
         {
@@ -151,7 +151,7 @@ public class PlaySetPopup : MonoBehaviour
             }
         }
 
-        int playerMaxCnt = InGameDataManager.Instance.num_player;
+        int playerMaxCnt = DataManager.Instance.num_player;
 
         playerMaxCnt -= 2;
 
@@ -163,7 +163,7 @@ public class PlaySetPopup : MonoBehaviour
 
         if (multiOn)
         {
-            int offLineCnt = InGameDataManager.Instance.off_line_num_player - 3;
+            int offLineCnt = DataManager.Instance.off_line_num_player - 3;
 
             if (offLineCnt >= activeCount - 1)
             {
@@ -175,27 +175,27 @@ public class PlaySetPopup : MonoBehaviour
     private void PlayersCountToggleChangeOn(int index)
     {
         int playerMaxCnt = index + 2;
-        InGameDataManager.Instance.SetPlayerMaxCnt(playerMaxCnt);
-        SetTurnPosition(InGameDataManager.Instance.turnPosition);
+        DataManager.Instance.SetPlayerMaxCnt(playerMaxCnt);
+        SetTurnPosition(DataManager.Instance.turnPosition);
     }
 
     private void OfflineUsersToggleChangeOn(int index)
     {
         int playerMaxCnt = index + 1;
-        InGameDataManager.Instance.SetOffLinePlayerCnt(playerMaxCnt);
+        DataManager.Instance.SetOffLinePlayerCnt(playerMaxCnt);
         //SetTurnPosition(InGameDataManager.Instance.turnPosition);
     }
 
     private void SetTurnPosition(int turnCount)
     {
-        turnCount = math.clamp(turnCount, 0, InGameDataManager.Instance.num_player - 1);
+        turnCount = math.clamp(turnCount, 0, DataManager.Instance.num_player - 1);
 
         SetTurnPositionText(turnCount);
     }
 
     private void SetTurnPositionText(int turnPosition)
     {
-        InGameDataManager.Instance.SetTurnPosition(turnPosition);
+        DataManager.Instance.SetTurnPosition(turnPosition);
         //turnPositionCountText.text = (turnPosition + 1).ToString();
     }
 
@@ -223,14 +223,14 @@ public class PlaySetPopup : MonoBehaviour
         playerImage.sprite = playerSpriteList[playerColorIndex];
         playerImage.SetNativeSize();
 
-        InGameDataManager.Instance.SetCurrentPlayerColor(playerColorIndex);
+        DataManager.Instance.SetCurrentPlayerColor(playerColorIndex);
     }
 
     public void PlayBtnClickOn()
     {
         loadingOn = true;
 
-        InGameDataManager.Instance.isMultiOn = multiOn;
+        DataManager.Instance.isMultiOn = multiOn;
 
         loadingPopup.gameObject.SetActive(true);
         loadingPopup.SetData(multiOn);

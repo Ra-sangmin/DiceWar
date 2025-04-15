@@ -53,7 +53,7 @@ public class LoadingPopup : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        if (InGameDataManager.Instance.isMultiOn)
+        if (DataManager.Instance.isMultiOn)
         {
             ServerManager.Instance.receiveDataOn += ReceiveDataOn;
         }
@@ -61,7 +61,7 @@ public class LoadingPopup : MonoBehaviour
     }
     private void OnDestroy()
     {
-        if (InGameDataManager.Instance.isMultiOn)
+        if (DataManager.Instance.isMultiOn)
         {
             ServerManager.Instance.receiveDataOn -= ReceiveDataOn;
         }
@@ -86,11 +86,11 @@ public class LoadingPopup : MonoBehaviour
                 if (isReadyOn == false) 
                 {
                     isReadyOn = true;
-                    InGameDataManager.Instance.SetTurnPosition((int)gameReadyRequest.playerEnum);   
+                    DataManager.Instance.SetTurnPosition((int)gameReadyRequest.playerEnum);   
                 }
 
-                int maxCnt = InGameDataManager.Instance.num_player;
-                int userCnt = maxCnt - InGameDataManager.Instance.off_line_num_player;
+                int maxCnt = DataManager.Instance.num_player;
+                int userCnt = maxCnt - DataManager.Instance.off_line_num_player;
 
                 //Debug.LogWarning(maxCnt)
 
@@ -121,9 +121,9 @@ public class LoadingPopup : MonoBehaviour
 
                 MapCreateRequestOn mapCreateRequestOn = (MapCreateRequestOn)baseRequest;
 
-                InGameDataManager.Instance.SetMapSizeValue();
-                InGameDataManager.Instance.areaDataList = mapCreateRequestOn.area;
-                InGameDataManager.Instance.SetPlayerColor(mapCreateRequestOn.playerDataList);
+                DataManager.Instance.SetMapSizeValue();
+                DataManager.Instance.areaDataList = mapCreateRequestOn.area;
+                DataManager.Instance.SetPlayerColor(mapCreateRequestOn.playerDataList);
 
                 GameSceneLoadOn();
 
@@ -214,8 +214,8 @@ public class LoadingPopup : MonoBehaviour
     {
         SetTitle("Finding Players...");
 
-        int maxCnt = InGameDataManager.Instance.num_player;
-        int userCnt = maxCnt-InGameDataManager.Instance.off_line_num_player;
+        int maxCnt = DataManager.Instance.num_player;
+        int userCnt = maxCnt-DataManager.Instance.off_line_num_player;
 
         ServerManager.Instance.GameReadyRequestOn(maxCnt, userCnt);
 
@@ -276,13 +276,13 @@ public class LoadingPopup : MonoBehaviour
 
         SetTitle("Loading..");
 
-        if (InGameDataManager.Instance.isMultiOn)
+        if (DataManager.Instance.isMultiOn)
         {
             //오너 플레이어 라면 맵 생성 진행 ( 1명이 맵을 생성후 배포 한다 )
-            if (InGameDataManager.Instance.playerData.playerEnum == PlayerEnum.Player_0)
+            if (DataManager.Instance.playerData.playerEnum == PlayerEnum.Player_0)
             {
-                InGameDataManager.Instance.InitMapData();
-                InGameDataManager.Instance.CreateMap();
+                DataManager.Instance.InitMapData();
+                DataManager.Instance.CreateMap();
 
                 ServerManager.Instance.MapCreateRequestOn();
             }
@@ -294,8 +294,8 @@ public class LoadingPopup : MonoBehaviour
             //var testData = JsonUtility.FromJson<MapCreater>(test.text);
             //InGameDataManager.Instance.mapCreater = testData;
 
-            InGameDataManager.Instance.InitMapData();
-            InGameDataManager.Instance.CreateMap();
+            DataManager.Instance.InitMapData();
+            DataManager.Instance.CreateMap();
 
             //string jsonStr = JsonUtility.ToJson(InGameDataManager.Instance.mapCreater);
             //Debug.LogWarning(jsonStr);
@@ -334,8 +334,8 @@ public class LoadingPopup : MonoBehaviour
 
     private void SaveJson() 
     {
-        InGameDataManager.Instance.InitMapData();
-        InGameDataManager.Instance.CreateMap();
+        DataManager.Instance.InitMapData();
+        DataManager.Instance.CreateMap();
 
         //string jsonStr = JsonUtility.ToJson(InGameDataManager.Instance.mapCreater);
 

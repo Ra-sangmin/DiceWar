@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 [System.Serializable]
@@ -7,6 +8,7 @@ public class MapCreater
     public int num_player = 3;//총 플레이어의 수 (기본 값 : 3)
     public int off_line_num_player = 2;//총 플레이어의 수 (기본 값 : 3)
     public Vector2 mapSizeValue = new Vector2(20, 15); // 가로 세로 육각형 타일의 개수 ( 기본 값 x = 20 , y = 15)
+    private MapSizeEnum mapSizeEnum = MapSizeEnum.Small;
     public int num_area = 10;//총 영토의 수 (기본값 : 10)
     public int diceMaxCount = 6;//영토의 주사위 최대 갯수
 
@@ -21,12 +23,12 @@ public class MapCreater
 
     public List<AreaData> areaDataList = new List<AreaData>(); //인접 셀을 포함한 배열(arrangement with adjacent cells)
 
-    public void InitMapData(Vector2 mapSizeValue, int num_player)
+    public Vector2 InitMapData(MapSizeEnum mapSizeEnum, int num_player)
     {
+        this.mapSizeEnum = mapSizeEnum;
         this.num_player = num_player;
 
-        this.mapSizeValue = mapSizeValue;
-
+        SetMapSizeValue();
 
         this.cel_max = (int)this.mapSizeValue.x * (int)this.mapSizeValue.y;
 
@@ -74,6 +76,18 @@ public class MapCreater
         {
             cel[i] = 0;
             rcel[i] = 0; // 인접 셀
+        }
+
+        return mapSizeValue;
+    }
+
+    public void SetMapSizeValue()
+    {
+        switch (mapSizeEnum)
+        {
+            case MapSizeEnum.Small: mapSizeValue.x = 20; mapSizeValue.y = 15; break;
+            case MapSizeEnum.Medium: mapSizeValue.x = 30; mapSizeValue.y = 23; break;
+            case MapSizeEnum.Large: mapSizeValue.x = 40; mapSizeValue.y = 30; break;
         }
     }
 
@@ -153,6 +167,30 @@ public class MapCreater
         {
             if (areaDataList[i].cel.Count <= 10) 
             {
+                if (areaDataList[i].cel.Count > 0)
+                {
+                    //주변 영역으로 흡수
+                    foreach (var celIndex in areaDataList[i].cel)
+                    {
+                        int pos = 0;
+
+                        for (int k = 0; k < 6; k++)
+                        {
+                            pos = join[celIndex].dir[k];
+                            if (pos < 0) continue;
+
+                            int areaIndex = cel[pos];
+
+                            if (areaIndex != 0 && areaIndex != i)
+                            {
+                                cel[celIndex] = areaIndex;
+                                areaDataList[areaIndex].AddCel(celIndex);
+                                break;
+                            }
+                        }
+                    }
+                }
+
                 areaDataList[i].ClearCel();
             } 
         }
@@ -166,8 +204,12 @@ public class MapCreater
             }
         }
 
-        // 지역 속군을 결정
         for (int i = 0; i < num_area; i++) areaDataList[i].PlayerChangeOn(PlayerEnum.Player_None);
+
+        //랜덤하게 영토 삭제
+        DeleteArea();
+
+        // 지역 속군을 결정
         int arm = 0; // 속군
         int[] alist = new int[num_area]; // 지역 목록
         while (true)
@@ -188,6 +230,162 @@ public class MapCreater
         }
 
         return areaDataList;
+    }
+
+    void DeleteArea() 
+    {
+        // 랜덤하게 영역 지우기
+        var resultAreaData = areaDataList.Where(data => data.cel.Count > 0).ToList();
+
+        int maxCount = 0;
+
+        switch (mapSizeEnum)
+        {
+            case MapSizeEnum.Small: maxCount = 2; break;
+            case MapSizeEnum.Medium: maxCount = 4; break;
+            case MapSizeEnum.Large: maxCount = 6; break;
+        }
+
+        List<int> deleteIndex = new List<int>();
+
+        while (true)
+        {
+            int ranIndex = Random.Range(0, resultAreaData.Count);
+
+            if (deleteIndex.Contains(ranIndex))
+            {
+                continue;
+            }
+
+            int _areaIndex = resultAreaData[ranIndex].id;
+
+            if (DeleteCheck(_areaIndex))
+            {
+                deleteIndex.Add(ranIndex);
+
+                maxCount--;
+            }
+
+            if (maxCount <= 0)
+            {
+                break;
+            }
+        }
+
+        //Bundle 데이터 초기화
+        foreach (var areaData in areaDataList)
+        {
+            areaData.bundleKey = string.Empty;
+        }
+    }
+
+    bool DeleteCheck(int areaIndex)
+    {
+        bool deleteOn = false;
+
+        var backUpCel = areaDataList[areaIndex].cel.ToList().ToArray();
+
+        areaDataList[areaIndex].ClearCel();
+
+        //인접 데이터 설정
+        foreach (var areaData in areaDataList)
+        {
+            SetAdj(areaData);
+        }
+
+        int maxCount = SetBundleKey();
+
+        var resultAreaData = areaDataList.Where(data => data.cel.Count > 0).ToList();
+
+        if (maxCount == resultAreaData.Count)
+        {
+            deleteOn = true; 
+        }
+        else
+        {
+            foreach (var cel in backUpCel)
+            {
+                areaDataList[areaIndex].AddCel(cel);
+            }
+        }
+
+        return deleteOn;
+    }
+
+    public void SetAdj(AreaData areaData)
+    {
+        List<int> adj = new List<int>();
+
+        foreach (int cel in areaData.cel)
+        {
+            for (int z = 0; z < 6; z++)
+            {
+                int pos = join[cel].dir[z];
+
+                int currentAreaData = GetCelData(pos);
+
+                if (currentAreaData != -1 && currentAreaData != areaData.id && adj.Contains(currentAreaData) == false)
+                {
+                    adj.Add(currentAreaData);
+                }
+            }
+        }
+
+        areaData.SetAdj(adj);
+    }
+
+    public int GetCelData(int celIndex)
+    {
+        int resultData = -1;
+
+        var areaData = areaDataList.Where(data => data.IsHaveCelData(celIndex)).FirstOrDefault();
+
+        if (areaData != null)
+        {
+            resultData = areaData.id;
+        }
+
+        return resultData;
+    }
+
+    public int SetBundleKey(PlayerEnum checkEnum = PlayerEnum.Player_None)
+    {
+        foreach (AreaData areaData in areaDataList.Where(data => data.player == checkEnum).ToList())
+        {
+            areaData.bundleKey = string.Empty;
+        }
+
+        int maxCount = 0;
+        int index = 0;
+
+        while (true)
+        {
+            var checkList = areaDataList.Where(data => data.player == checkEnum && data.bundleKey == string.Empty).ToList();
+
+            if (checkList.Count == 0)
+            {
+                break;
+            }
+
+            int count = SetBundleKey(checkEnum, index, checkList[0]);
+
+            maxCount = Mathf.Max(maxCount, count);
+
+            index++;
+        }
+
+        return maxCount;
+    }
+
+    public int SetBundleKey(PlayerEnum checkEnum, int index, AreaData areaData)
+    {
+        string bundleKey = string.Format("PlayerNone_{0}", index);
+
+        areaData.SetBundleKey(areaDataList, checkEnum, bundleKey);
+
+        var sameBundleKeyPieceList = areaDataList.Where(data => !string.IsNullOrEmpty(data.bundleKey) && data.bundleKey.Equals(bundleKey)).ToList();
+
+        return sameBundleKeyPieceList.Count;
     }
 
     void SetCel()

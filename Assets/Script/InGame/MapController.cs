@@ -72,7 +72,13 @@ public class MapController : MonoBehaviour
 
     public void CreateMapInit()
     {
-        DataManager.Instance.SetMapSizeValue();
+        //맵 초기화가 안되어있다면
+        if (DataManager.Instance.areaDataList.Count == 0)
+        {
+            DataManager.Instance.InitMapData();
+            DataManager.Instance.CreateMap();
+        }
+
         join = DataManager.Instance.GetJoinData();
         SetHexagonPanel();
         CreateHexagon();
@@ -123,19 +129,6 @@ public class MapController : MonoBehaviour
         for (int i = 0; i < hexagonList.Count; i++)
         {
             hexagonList[i].DrawLineOnClear();
-        }
-
-        //맵 초기화 안되어있다면
-        if (DataManager.Instance.areaDataList.Count == 0)
-        {
-            DataManager.Instance.InitMapData();
-            DataManager.Instance.CreateMap();
-        }
-
-        //인접 데이터 설정
-        foreach (var areaData in DataManager.Instance.areaDataList)
-        {
-            areaData.SetAdj(join);
         }
 
         List<Vector2> readyData = new List<Vector2>();

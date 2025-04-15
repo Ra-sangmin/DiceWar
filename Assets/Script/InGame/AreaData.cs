@@ -53,24 +53,9 @@ public class AreaData
         return cel.Contains(celIndex);
     }
 
-    public void SetAdj(Join[] join)
+    public void SetAdj(List<int> adj)
     {
-        adj = new List<int>();
-
-        foreach (int cel in cel) 
-        {
-            for (int z = 0; z < 6; z++)
-            {
-                int pos = join[cel].dir[z];
-
-                int currentAreaData = DataManager.Instance.GetCelData(pos);
-
-                if (currentAreaData != -1 && currentAreaData != id && adj.Contains(currentAreaData) == false)
-                {
-                    adj.Add(currentAreaData);
-                }
-            }
-        }
+        this.adj = adj;
     }
 
     public List<int> GetAdj()

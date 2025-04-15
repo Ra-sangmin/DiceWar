@@ -64,19 +64,7 @@ public class DataManager : MonoSingleton<DataManager>
     }
     public void InitMapData()
     {
-        SetMapSizeValue();
-
         SetPlayerColor();
-    }
-
-    public void SetMapSizeValue()
-    {
-        switch (mapSizeEnum)
-        {
-            case MapSizeEnum.Small: mapSizeValue.x = 20; mapSizeValue.y = 15; break;
-            case MapSizeEnum.Medium: mapSizeValue.x = 30; mapSizeValue.y = 23; break;
-            case MapSizeEnum.Large: mapSizeValue.x = 40; mapSizeValue.y = 30; break;
-        }
     }
 
     void SetPlayerColor() 
@@ -168,7 +156,7 @@ public class DataManager : MonoSingleton<DataManager>
     public void CreateMap()
     {
         MapCreater mapCreater = new MapCreater();
-        mapCreater.InitMapData(mapSizeValue, num_player);
+        mapSizeValue = mapCreater.InitMapData(mapSizeEnum, num_player);
 
         areaDataList = mapCreater.CreateMap();
         areaDataList = areaDataList.Where(data => data.player !=   PlayerEnum.Player_None && data.cel.Count  > 0).ToList();

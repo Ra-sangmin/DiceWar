@@ -121,7 +121,7 @@ public class LoadingPopup : MonoBehaviour
 
                 MapCreateRequestOn mapCreateRequestOn = (MapCreateRequestOn)baseRequest;
 
-                DataManager.Instance.SetMapSizeValue();
+                //DataManager.Instance.SetMapSizeValue();
                 DataManager.Instance.areaDataList = mapCreateRequestOn.area;
                 DataManager.Instance.SetPlayerColor(mapCreateRequestOn.playerDataList);
 

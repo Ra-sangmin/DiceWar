@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class OptionPopup : MonoBehaviour
 {
+    private InGameController inGameController;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -16,6 +18,11 @@ public class OptionPopup : MonoBehaviour
         
     }
 
+    public void DataInit(InGameController inGameController)
+    {
+        this.inGameController = inGameController;
+    }
+
     public void SettingPopupOn()
     {
         //PopupManager.Instance.se;
@@ -23,12 +30,13 @@ public class OptionPopup : MonoBehaviour
 
     public void RestartBtnClickOn()
     {
-        FindFirstObjectByType<InGameController>().ReStartOn();
+        inGameController.ReStartOn();
+        gameObject.SetActive(false);
     }
 
     public void GoMainBtnClickOn()
     {
-        FindFirstObjectByType<InGameController>().GoMainOn();
+        inGameController.GoMainOn();
     }
 
     public void TutorialBtnClickOn()

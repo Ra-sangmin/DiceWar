@@ -15,7 +15,9 @@ public class MyCoinPanel : MonoBehaviour
 
     void SetEvent()
     {
-        DataManager.Instance.myCoin.Subscribe(coin => SetCoin());
+        DataManager.Instance.myCoin.
+            Subscribe(coin => SetCoin())
+            .AddTo(gameObject);
         SetCoin();
     }
 

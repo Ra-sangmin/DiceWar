@@ -83,12 +83,14 @@ public class MapCreater
 
     public void SetMapSizeValue()
     {
-        switch (mapSizeEnum)
-        {
-            case MapSizeEnum.Small: mapSizeValue.x = 20; mapSizeValue.y = 15; break;
-            case MapSizeEnum.Medium: mapSizeValue.x = 30; mapSizeValue.y = 23; break;
-            case MapSizeEnum.Large: mapSizeValue.x = 40; mapSizeValue.y = 30; break;
-        }
+        mapSizeValue = DataManager.Instance.GetMapSize();
+
+        //switch (mapSizeEnum)
+        //{
+        //    case MapSizeEnum.Small: mapSizeValue.x = 20; mapSizeValue.y = 15; break;
+        //    case MapSizeEnum.Medium: mapSizeValue.x = 30; mapSizeValue.y = 23; break;
+        //    case MapSizeEnum.Large: mapSizeValue.x = 40; mapSizeValue.y = 30; break;
+        //}
     }
 
     public List<AreaData> GetAreaDataList()
@@ -237,14 +239,16 @@ public class MapCreater
         // 랜덤하게 영역 지우기
         var resultAreaData = areaDataList.Where(data => data.cel.Count > 0).ToList();
 
-        int maxCount = 0;
+        int maxCount = DataManager.Instance.DeleteAreaCount();
 
-        switch (mapSizeEnum)
-        {
-            case MapSizeEnum.Small: maxCount = 2; break;
-            case MapSizeEnum.Medium: maxCount = 4; break;
-            case MapSizeEnum.Large: maxCount = 6; break;
-        }
+        //switch (mapSizeEnum)
+        //{
+        //    case MapSizeEnum.Small: maxCount = 3; break;
+        //    case MapSizeEnum.Medium: maxCount = 8; break;
+        //    case MapSizeEnum.Large: maxCount = 14; break;
+        //}
+
+        maxCount = Mathf.Min(maxCount, resultAreaData.Count-1);
 
         List<int> deleteIndex = new List<int>();
 

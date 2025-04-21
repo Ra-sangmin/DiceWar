@@ -36,6 +36,7 @@ public class AreaData
         this.player = areaData.player;
         this.adj = areaData.adj;
         this.hexagonList = areaData.hexagonList;
+        this.cel = areaData.cel;
     }
 
     public void AddCel(int cel)

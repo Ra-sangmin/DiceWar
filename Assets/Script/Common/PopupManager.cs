@@ -13,8 +13,8 @@ public class PopupManager : MonoSingleton<PopupManager>
     private ToastPopup timeOverPopup;
     private OptionPopup optionPopup;
     private TutorialPopup tutorialPopup;
-    private VictoryPopup victoryPopup;
-    private DefeatPopup defeatPopup;
+    //private VictoryPopup victoryPopup;
+    //private DefeatPopup defeatPopup;
 
     public override void Init() 
 	{
@@ -76,11 +76,12 @@ public class PopupManager : MonoSingleton<PopupManager>
         }
     }
 
-    public void OptionPopupOn()
+    public void OptionPopupOn(InGameController inGameController)
     {
         if (optionPopup == null)
         {
             optionPopup = Instantiate(Resources.Load<OptionPopup>("Popup/InGame/OptionPopup"), parantTranform);
+            optionPopup.DataInit(inGameController);
         }
 
         if (optionPopup != null)
@@ -103,20 +104,19 @@ public class PopupManager : MonoSingleton<PopupManager>
         }
     }
 
-    public void GameResultPopupOn(bool win)
+    public void GameResultPopupOn(InGameController inGameController ,  bool win)
     {
-        if (win)
-        {
-            victoryPopup = Instantiate(Resources.Load<VictoryPopup>("Popup/InGame/VictoryPopup"), parantTranform);
+        GameResultPopup gameResultPopup = Instantiate(Resources.Load<GameResultPopup>("Popup/InGame/GameResultPopup"), parantTranform);
+        gameResultPopup.DataInit(inGameController, win);
 
-            victoryPopup.gameObject.SetActive(true);
-        }
-        else
-        {
-            defeatPopup = Instantiate(Resources.Load<DefeatPopup>("Popup/InGame/DefeatPopup"), parantTranform);
-
-            defeatPopup.gameObject.SetActive(true);
-        }
+        //if (win)
+        //{
+        //    VictoryPopup victoryPopup = Instantiate(Resources.Load<VictoryPopup>("Popup/InGame/VictoryPopup"), parantTranform);
+        //}
+        //else
+        //{
+        //    DefeatPopup defeatPopup = Instantiate(Resources.Load<DefeatPopup>("Popup/InGame/DefeatPopup"), parantTranform);
+        //}
     }
 
     public LandTradePopup LandTradePopupOn()

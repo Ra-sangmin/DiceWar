@@ -13,6 +13,7 @@ public class DataManager : MonoSingleton<DataManager>
     public bool isMultiOn = false;
     // 셀 데이터 (cell data)
     public MapSizeEnum mapSizeEnum = MapSizeEnum.Small;
+    Dictionary<MapSizeEnum, MapData> mapDataDic = new Dictionary<MapSizeEnum, MapData>();
     public AILevel aiLevel = AILevel.Easy;
     public int num_player = 3;//총 플레이어의 수 (기본 값 : 3)
     public int off_line_num_player = 2;//AI 수 (기본 값 : 2)
@@ -39,7 +40,7 @@ public class DataManager : MonoSingleton<DataManager>
     public ReactiveProperty<bool> gameStart = new ReactiveProperty<bool>(false);
 
     public ReactiveProperty<int> myCoin = new ReactiveProperty<int>(0);
-
+    private string myCoinKey = "myCoinKey";
     public bool playOn = false;
 
     private List<AllianceData> allianceDataList = new List<AllianceData>();
@@ -61,7 +62,27 @@ public class DataManager : MonoSingleton<DataManager>
             { PlayerEnum.Player_5, 5},
             { PlayerEnum.Player_6, 6},
         };
+
+        MapDataInit();
+        CoinDataInit();
     }
+
+    void MapDataInit() 
+    {
+        mapDataDic = new Dictionary<MapSizeEnum, MapData>
+        {
+            { MapSizeEnum.Small, new MapData(MapSizeEnum.Small, new Vector2(20,15),new Vector2(-630,-360),new Vector2(65,70),new Vector2(70,70) , 3, 2)},
+            { MapSizeEnum.Medium, new MapData(MapSizeEnum.Medium, new Vector2(30,23),new Vector2(-700,-400),new Vector2(50,50),new Vector2(50,50), 8, 4)},
+            { MapSizeEnum.Large, new MapData(MapSizeEnum.Large, new Vector2(40,30),new Vector2(-750,-425),new Vector2(40,40),new Vector2(40,40), 14, 5)},
+        };
+    }
+
+    void CoinDataInit() 
+    {
+        int coinCount = PlayerPrefs.GetInt(myCoinKey, 0); 
+        myCoin.Value = coinCount;
+    }
+
     public void InitMapData()
     {
         SetPlayerColor();
@@ -388,47 +409,78 @@ public class DataManager : MonoSingleton<DataManager>
         this.playerData.colorIndex = currentPlayerColorIndex;
         return GetPlayerColor(currentPlayerColorIndex);
     }
+    public int ActivePlayerCount()
+    {
+        return mapDataDic[mapSizeEnum].activePlayerCount;
+    }
+
+    public int DeleteAreaCount()
+    {
+        return mapDataDic[mapSizeEnum].deleteCount;
+    }
+
+    public Vector2 GetMapSize()
+    {
+        //Vector2 pos = Vector2.zero;
+
+        //switch (mapSizeEnum)
+        //{
+        //    case MapSizeEnum.Small: pos = new Vector2(-630, -360); break;
+        //    case MapSizeEnum.Medium: pos = new Vector2(-700, -400); break;
+        //    case MapSizeEnum.Large: pos = new Vector2(-750, -425); break;
+        //}
+
+        //return pos;
+
+        return mapDataDic[mapSizeEnum].mapSizeValue;
+    }
 
     public Vector2 GetHexagonPanelPos()
     {
-        Vector2 pos = Vector2.zero;
+        //Vector2 pos = Vector2.zero;
 
-        switch (mapSizeEnum)
-        {
-            case MapSizeEnum.Small: pos = new Vector2(200, 235); break;
-            case MapSizeEnum.Medium: pos = new Vector2(150, 190); break;
-            case MapSizeEnum.Large: pos = new Vector2(65, 170); break;
-        }
+        //switch (mapSizeEnum)
+        //{
+        //    case MapSizeEnum.Small: pos = new Vector2(-630, -360); break;
+        //    case MapSizeEnum.Medium: pos = new Vector2(-700, -400); break;
+        //    case MapSizeEnum.Large: pos = new Vector2(-750, -425); break;
+        //}
 
-        return pos;
+        //return pos;
+
+        return mapDataDic[mapSizeEnum].panelPos;
     }
 
     public Vector2 GetHexagonSizeDelta()
     {
-        Vector2 sizeDelta = Vector2.zero;
+        //Vector2 sizeDelta = Vector2.zero;
 
-        switch (mapSizeEnum)
-        {
-            case MapSizeEnum.Small: sizeDelta = new Vector2(65, 70); break;
-            case MapSizeEnum.Medium: sizeDelta = new Vector2(50, 50); break;
-            case MapSizeEnum.Large: sizeDelta = new Vector2(40, 40); break;
-        }
+        //switch (mapSizeEnum)
+        //{
+        //    case MapSizeEnum.Small: sizeDelta = new Vector2(65, 70); break;
+        //    case MapSizeEnum.Medium: sizeDelta = new Vector2(50, 50); break;
+        //    case MapSizeEnum.Large: sizeDelta = new Vector2(40, 40); break;
+        //}
 
-        return sizeDelta;
+        //return sizeDelta;
+
+        return mapDataDic[mapSizeEnum].hexagonSize;
     }
 
     public Vector2 GetHexagonLineSizeDelta()
     {
-        Vector2 sizeDelta = Vector2.zero;
+        //Vector2 sizeDelta = Vector2.zero;
 
-        switch (mapSizeEnum)
-        {
-            case MapSizeEnum.Small: sizeDelta = new Vector2(70, 70); break;
-            case MapSizeEnum.Medium: sizeDelta = new Vector2(50, 50); break;
-            case MapSizeEnum.Large: sizeDelta = new Vector2(40, 40); break;
-        }
+        //switch (mapSizeEnum)
+        //{
+        //    case MapSizeEnum.Small: sizeDelta = new Vector2(70, 70); break;
+        //    case MapSizeEnum.Medium: sizeDelta = new Vector2(50, 50); break;
+        //    case MapSizeEnum.Large: sizeDelta = new Vector2(40, 40); break;
+        //}
 
-        return sizeDelta;
+        //return sizeDelta;
+
+        return mapDataDic[mapSizeEnum].hexagonLineSize;
     }
 
     public Color GetPlayerColor()
@@ -469,6 +521,9 @@ public class DataManager : MonoSingleton<DataManager>
     public void AddCoin(int addCoin)
     {
         myCoin.Value += addCoin;
+
+        PlayerPrefs.SetInt(myCoinKey, myCoin.Value);
+        PlayerPrefs.Save();
     }
 
     public void TurnOffOn()
@@ -624,4 +679,27 @@ public class HexagonData
 {
     public int areaIndex = 0;
     public PlayerEnum playerEnum = PlayerEnum.Player_None;
+}
+
+public class MapData
+{
+    public MapSizeEnum mapSizeEnum;
+    public Vector2 mapSizeValue;
+    public Vector2 panelPos;
+    public Vector2 hexagonSize;
+    public Vector2 hexagonLineSize;
+    public int deleteCount;
+    public int activePlayerCount;
+
+    public MapData() { }
+    public MapData(MapSizeEnum mapSizeEnum , Vector2 mapSizeValue, Vector2 panelPos, Vector2 hexagonSize, Vector2 hexagonLineSize , int deleteCount, int activeCount) 
+    {
+        this.mapSizeEnum = mapSizeEnum;
+        this.mapSizeValue = mapSizeValue;
+        this.panelPos = panelPos;
+        this.hexagonSize = hexagonSize;
+        this.hexagonLineSize = hexagonLineSize;
+        this.deleteCount = deleteCount;
+        this.activePlayerCount = activeCount;
+    }
 }

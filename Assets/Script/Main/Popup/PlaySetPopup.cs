@@ -128,16 +128,16 @@ public class PlaySetPopup : MonoBehaviour
 
     void SetPlayerSelectToggle()
     {
-        int activeCount = 2;
+        int activeCount = DataManager.Instance.ActivePlayerCount();
 
-        MapSizeEnum mapSizeEnum = DataManager.Instance.mapSizeEnum;
+        //MapSizeEnum mapSizeEnum = DataManager.Instance.mapSizeEnum;
 
-        switch (mapSizeEnum)
-        {
-            case MapSizeEnum.Small: activeCount = 2; break;
-            case MapSizeEnum.Medium: activeCount = 4; break;
-            case MapSizeEnum.Large: activeCount = 5; break;
-        }
+        //switch (mapSizeEnum)
+        //{
+        //    case MapSizeEnum.Small: activeCount = 2; break;
+        //    case MapSizeEnum.Medium: activeCount = 4; break;
+        //    case MapSizeEnum.Large: activeCount = 5; break;
+        //}
 
         for (int i = 0; i < playersCountToggleList.Count; i++)
         {

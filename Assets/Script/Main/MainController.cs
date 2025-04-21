@@ -53,7 +53,9 @@ public class MainController : MonoBehaviour
 
         PlayerColorChangeOn(0);
 
-        DataManager.Instance.myCoin.Subscribe(coin => SetCoin());
+        DataManager.Instance.myCoin.
+            Subscribe(coin => SetCoin()).
+            AddTo(gameObject);
         SetCoin();
     }
 
@@ -114,16 +116,16 @@ public class MainController : MonoBehaviour
 
     void SetPlayerSelectToggle() 
     {
-        int activeCount = 2;
+        int activeCount = DataManager.Instance.ActivePlayerCount();
 
-        MapSizeEnum mapSizeEnum = DataManager.Instance.mapSizeEnum;
+        //MapSizeEnum mapSizeEnum = DataManager.Instance.mapSizeEnum;
 
-        switch (mapSizeEnum)
-        {
-            case MapSizeEnum.Small: activeCount = 2; break;
-            case MapSizeEnum.Medium: activeCount = 4; break;
-            case MapSizeEnum.Large: activeCount = 5; break;
-        }
+        //switch (mapSizeEnum)
+        //{
+        //    case MapSizeEnum.Small: activeCount = 2; break;
+        //    case MapSizeEnum.Medium: activeCount = 4; break;
+        //    case MapSizeEnum.Large: activeCount = 5; break;
+        //}
 
         for (int i = 0; i < playersCountToggleList.Count; i++)
         {

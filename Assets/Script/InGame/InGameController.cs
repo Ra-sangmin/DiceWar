@@ -295,7 +295,7 @@ public class InGameController : MonoBehaviour
     {
         DataManager.Instance.gameStart.SetValueAndForceNotify(false);
         //bool win = playerEnum == InGameDataManager.Instance.playerData.playerEnum;
-        PopupManager.Instance.GameResultPopupOn(win);
+        PopupManager.Instance.GameResultPopupOn(this,win);
     }
 
     public void GameStartOn()
@@ -473,6 +473,6 @@ public class InGameController : MonoBehaviour
 
     public void OptionPopupOnOn()
     {
-        PopupManager.Instance.OptionPopupOn();
+        PopupManager.Instance.OptionPopupOn(this);
     }
 }

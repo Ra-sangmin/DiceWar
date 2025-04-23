@@ -48,6 +48,8 @@ public class DataManager : MonoSingleton<DataManager>
     public List<AreaData> areaDataList = new List<AreaData>();
     public MapCreateRequestOn testData;
 
+    public int stashCount = 0;
+
     public override void Init()
     {
         base.Init();
@@ -516,6 +518,15 @@ public class DataManager : MonoSingleton<DataManager>
         {
             playerData.playerEnum = (PlayerEnum)turnPosition;
         }
+    }
+
+    public int AddStashCount(int diceCount)
+    {
+        stashCount += diceCount;
+
+        stashCount = Mathf.Clamp(stashCount, 0 , 15);
+
+        return stashCount;
     }
 
     public void AddCoin(int addCoin)

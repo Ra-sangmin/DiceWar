@@ -492,6 +492,8 @@ public class MapController : MonoBehaviour
             return null;
         }
 
+        bool isMyTurn = DataManager.Instance.IsMyTurn();
+
         //최대 15개 까지만 회복 가능하도록
         int connectedCount = Mathf.Min(playerIcon.connectedCount, 15);
 
@@ -499,33 +501,43 @@ public class MapController : MonoBehaviour
 
         while (true)
         {
-            if (connectedCount <= 0)
-            {
-                break;
-            }
+            bool allMax = false;
 
-            for (int i = 0; i < areaDataList.Count; i++)
+            foreach (AreaData areaData in areaDataList)
             {
-                if (connectedCount <= 0)
+                allMax = areaDataList.All(data => data.dice == DataManager.Instance.diceMaxCount);
+
+                if (allMax)
                 {
                     break;
                 }
 
-                int addOn = Random.Range(0, 2);
-
-                if (addOn == 1 && areaDataList[i].dice < DataManager.Instance.diceMaxCount)
+                //주사위가 Max가 아니라면
+                if (areaData.dice < DataManager.Instance.diceMaxCount)
                 {
-                    connectedCount--;
-                    areaDataList[i].DiceAddOn();
+                    //주사위 추가
+                    areaData.DiceAddOn();
+
+                    if (isMyTurn && DataManager.Instance.stashCount > 0)
+                    {    
+                        DataManager.Instance.AddStashCount(-1);
+                    }
+                    else if (connectedCount > 0)
+                    {
+                        connectedCount--;
+                    }
                 }
             }
 
-            bool allMax = areaDataList.All(data => data.dice == DataManager.Instance.diceMaxCount);
-
-            if (allMax)
+            if (allMax || connectedCount <= 0)
             {
                 break;
             }
+        }
+
+        if (isMyTurn)
+        {
+            inGameBottomController.nonePlayPanel.SetStashText(connectedCount);
         }
 
         diceAddEventOn = false;

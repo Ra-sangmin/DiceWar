@@ -8,6 +8,7 @@ public class NonePlayPanel : MonoBehaviour
     [SerializeField] RectTransform singlePanel;
     [SerializeField] RectTransform multiPanel;
     [SerializeField] SkillCard skillCard;
+    [SerializeField] Text stashText;
 
     [SerializeField] List<Button> btnList = new List<Button>();
 
@@ -26,6 +27,7 @@ public class NonePlayPanel : MonoBehaviour
     void Start()
     {
         SetNoneBtn();
+        SetStashText(0);
     }
 
     public void SetAreaData(AreaData areaData , InGameButtonStatus inGameButtonStatus)
@@ -181,5 +183,20 @@ public class NonePlayPanel : MonoBehaviour
     {
         DataManager.Instance.playerData.skillCardCount--;
         skillCard.SetCountIcon();
+    }
+
+    public void SetStashText(int diceCount)
+    {
+        int stashCount = DataManager.Instance.AddStashCount(diceCount);
+
+        if (stashCount <= 0)
+        {
+            stashText.gameObject.SetActive(false);
+        }
+        else
+        {
+            stashText.gameObject.SetActive(true);
+            stashText.text = $"stash : {stashCount}";
+        }
     }
 }

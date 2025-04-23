@@ -31,9 +31,9 @@ public class MainController : MonoBehaviour
 
     [SerializeField] Text myCoinText;
 
-    private int step = 0;
+    [SerializeField] LoadingPopup loadingPopup;
 
-    public string testJson;
+    private int step = 0;
 
     private void Awake()
     {
@@ -277,6 +277,29 @@ public class MainController : MonoBehaviour
     public void SinglePlayBtnClickOn()
     {
         StepChangeOn(1);
+    }
+
+    public void MultiPlayBtnClickOn()
+    {
+        StartCoroutine(MultyPlayOn());
+    }
+    IEnumerator MultyPlayOn()
+    {
+        ServerManager.Instance.Init();
+
+        yield return new WaitForEndOfFrame();
+
+        DataManager.Instance.SetAILevelEnum(AILevel.Easy);
+        DataManager.Instance.SetMapSizeEnum(MapSizeEnum.Large);
+        DataManager.Instance.SetPlayerMaxCnt(3);
+        DataManager.Instance.SetTurnPosition(0);
+        DataManager.Instance.SetOffLinePlayerCnt(0);
+        DataManager.Instance.isMultiOn = true;
+
+        yield return new WaitForEndOfFrame();
+
+        loadingPopup.gameObject.SetActive(true);
+        loadingPopup.SetData(true);
     }
 
     public void ColorChangeClickOn()

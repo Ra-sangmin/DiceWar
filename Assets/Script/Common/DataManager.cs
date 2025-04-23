@@ -20,7 +20,7 @@ public class DataManager : MonoSingleton<DataManager>
     public int num_area = 10;//총 영토의 수 (기본값 : 10)
     public int diceMaxCount = 6;//영토의 주사위 최대 갯수
 
-    public Vector2 mapSizeValue = new Vector2(20, 15);
+    //public Vector2 mapSizeValue = new Vector2(20, 15);
     
     public List<AreaData> backUpAreaDataList = new List<AreaData>();
 
@@ -119,7 +119,7 @@ public class DataManager : MonoSingleton<DataManager>
 
     public int GetCelMax() 
     {
-        return (int)mapSizeValue.x * (int)mapSizeValue.y;
+        return (int)GetMapSize().x * (int)GetMapSize().y;
     }
 
     public Join[] GetJoinData()
@@ -179,7 +179,7 @@ public class DataManager : MonoSingleton<DataManager>
     public void CreateMap()
     {
         MapCreater mapCreater = new MapCreater();
-        mapSizeValue = mapCreater.InitMapData(mapSizeEnum, num_player);
+        mapCreater.InitMapData(mapSizeEnum, num_player);
 
         areaDataList = mapCreater.CreateMap();
         areaDataList = areaDataList.Where(data => data.player !=   PlayerEnum.Player_None && data.cel.Count  > 0).ToList();
@@ -206,7 +206,7 @@ public class DataManager : MonoSingleton<DataManager>
 
     public Vector2 GetMapSizeValue() 
     {
-        return mapSizeValue;
+        return GetMapSize();
     }
 
     public void BackUpOn()
@@ -379,9 +379,9 @@ public class DataManager : MonoSingleton<DataManager>
     public Vector2 GetPos(int index)
     {
         //x 위치
-        int ox = index % (int)mapSizeValue.x;
+        int ox = index % (int)GetMapSize().x;
         //y 위치
-        int oy = index / (int)mapSizeValue.x;
+        int oy = index / (int)GetMapSize().x;
 
         return new Vector2(ox, oy);
     }

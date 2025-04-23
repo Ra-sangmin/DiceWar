@@ -5374,17 +5374,17 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 982708299}
-        m_TargetAssemblyTypeName: UnityEngine.GameObject, UnityEngine
-        m_MethodName: SetActive
-        m_Mode: 6
+      - m_Target: {fileID: 510542094}
+        m_TargetAssemblyTypeName: MainController, Assembly-CSharp
+        m_MethodName: MultiPlayBtnClickOn
+        m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
           m_IntArgument: 0
           m_FloatArgument: 0
           m_StringArgument: 
-          m_BoolArgument: 1
+          m_BoolArgument: 0
         m_CallState: 2
 --- !u!1 &322340310
 GameObject:
@@ -7380,7 +7380,7 @@ MonoBehaviour:
   turnPositionCountPanel: {fileID: 1578819700}
   turnPositionCountText: {fileID: 1267878263}
   myCoinText: {fileID: 70474527}
-  testJson: '{"requestProtocal":3,"roomDataIndex":0,"areaDataList":[{"areaIndex":1,"dice":4,"player":0,"celList":[158,159,177,178,179,198,199,217,218,219,237,238,239,256,257,258,259,276,277,278,279,296,297,298]},{"areaIndex":2,"dice":1,"player":1,"celList":[116,117,135,136,137,156,157,175,176,195,196,197,214,215,216,234,235,236,254,255]},{"areaIndex":3,"dice":4,"player":0,"celList":[39,57,58,59,77,78,79,96,97,98,99,118,119,138,139]},{"areaIndex":4,"dice":3,"player":1,"celList":[15,16,17,32,33,34,35,36,37,38,51,52,53,54,55,56,72,73,74,75,76,93,94]},{"areaIndex":5,"dice":3,"player":0,"celList":[251,252,253,271,272,273,274,275,291,292,293,294,295]},{"areaIndex":6,"dice":4,"player":0,"celList":[189,190,208,209,210,229,230,231,247,248,249,250,267,268,269,270,286,287,288,289,290]},{"areaIndex":7,"dice":1,"player":0,"celList":[95,113,114,115,133,134,153,154,155,172,173,174,192,193,194,211,212,213,232,233]},{"areaIndex":8,"dice":2,"player":1,"celList":[163,164,165,166,167,168,183,184,185,186,187,188,203,204,205,206,207,223,224,225,227,228,243,244]},{"areaIndex":9,"dice":4,"player":1,"celList":[140,141,160,161,162,180,181,182,200,201,202,220,221,222,241,242,262,263,264,282,283]},{"areaIndex":10,"dice":3,"player":0,"celList":[49,50,69,70,71,89,90,91,109,110,111,112,128,129,130,131,132,149,150,151,152,169,170,171]},{"areaIndex":11,"dice":3,"player":0,"celList":[27,28,46,47,48,66,67,68,85,86,87,88,105,106,107,108,125,126,127,146,147]},{"areaIndex":13,"dice":2,"player":1,"celList":[4,5,6,7,22,23,24,25,26,41,42,43,44,45,62,63,64,65,82,83]},{"areaIndex":15,"dice":1,"player":1,"celList":[84,101,102,103,104,120,121,122,123,124,142,143,144,145]},{"areaIndex":19,"dice":3,"player":1,"celList":[0,1,2,3,20,21,40,60,61,80,81,100]}]}'
+  loadingPopup: {fileID: 1223924175}
 --- !u!1 &516525321
 GameObject:
   m_ObjectHideFlags: 0

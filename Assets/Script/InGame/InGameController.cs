@@ -365,7 +365,7 @@ public class InGameController : MonoBehaviour
 
         if (DataManager.Instance.isMultiOn)
         {
-            timer.SetTimerOn(myTurn);
+            //timer.SetTimerOn(myTurn);
         }
         
 

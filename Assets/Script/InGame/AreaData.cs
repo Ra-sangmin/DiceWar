@@ -14,7 +14,7 @@ public class AreaData
     public PlayerEnum player = PlayerEnum.Player_None;
     public bool choisOn { get; set; }
 
-    private List<int> adj = new List<int>();
+    public List<int> adj = new List<int>();
     private List<Hexagon> hexagonList = new List<Hexagon>();
 
     public List<int> cel = new List<int>();

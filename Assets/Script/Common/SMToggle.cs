@@ -74,6 +74,9 @@ public class SMToggle : MonoBehaviour
 
     public void ToggleOn()
     {
+        if (toggleValue.Value)
+            return;
+        
         toggleValue.Value = !toggleValue.Value;
     }
 

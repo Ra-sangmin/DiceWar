@@ -65,7 +65,7 @@ public class ServerManager : MonoSingleton<ServerManager>
         {
             _socket.BeginSend(sendData, 0, sendData.Length, SocketFlags.None, new AsyncCallback(SendComplete), null);
 
-            await Task.Delay(1000);
+            await Task.Delay(5000);
 
             //_socket.Send(sendData);
         }

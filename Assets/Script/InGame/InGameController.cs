@@ -15,14 +15,12 @@ public class InGameController : MonoBehaviour
     [SerializeField] PopupController popupController;
     [SerializeField] Button endTurnBtn;
     [SerializeField] Timer timer;
-    //[SerializeField] Slider timer;
-    //private int currentTurnIndex = 0;
-    //private float turnDelay = 0;
-    //private bool playOn = false;
 
     private AllianceRequest allianceRequestData;
 
     private List<AllianceApproveRequest> allianceApproveRequestList = new List<AllianceApproveRequest>();
+
+    private bool endTurnBtnClickOn = false;
 
     private void Awake()
     {
@@ -314,6 +312,7 @@ public class InGameController : MonoBehaviour
     public void TurnOffOn()
     {
         DataManager.Instance.TurnOffOn();
+        mapController.playerIconController.SetIconTurnEffect();
     }
 
     public void SelectAreaOn(AreaData areaData)
@@ -387,16 +386,15 @@ public class InGameController : MonoBehaviour
             }
         }
         SetEndTurnBtn();
+
+        mapController.playerIconController.SetIconTurnEffect();
     }
 
     private async UniTask AIPlayOn()
     {
-        //yield return mapController.AIAttackOn((PlayerEnum)InGameDataManager.Instance.currentTurnIndex);
-
-
         PlayerEnum currentPlayer = (PlayerEnum)DataManager.Instance.currentTurnIndex;
 
-        mapController.AIAttackOn(currentPlayer);
+        await mapController.AIAttackOn(currentPlayer);
 
         List<AreaData> areaDataList = mapController.DiceAddOn(currentPlayer);
 
@@ -431,6 +429,18 @@ public class InGameController : MonoBehaviour
 
     public void EndTurnBtnClickOn()
     {
+        EndTurnEventOn().Forget();
+    }
+
+    async UniTask EndTurnEventOn()
+    {
+        if (endTurnBtnClickOn)
+        {
+            return;
+        }
+
+        endTurnBtnClickOn = true;
+
         timer.SetTimerOn(false);
         List<AreaData> areaDataList = mapController.EndTurnBtnClickOn();
 
@@ -445,6 +455,12 @@ public class InGameController : MonoBehaviour
 
             ServerManager.Instance.TurnRequestOn(turnRequest);
         }
+
+        SetEndTurnBtn();
+
+        await Task.Delay(1000);
+
+        endTurnBtnClickOn = false;
     }
 
     public void NewGameOn()

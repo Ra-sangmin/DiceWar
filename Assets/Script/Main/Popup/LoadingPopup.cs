@@ -86,7 +86,7 @@ public class LoadingPopup : MonoBehaviour
                 if (isReadyOn == false) 
                 {
                     isReadyOn = true;
-                    DataManager.Instance.SetTurnPosition((int)gameReadyRequest.playerEnum);   
+                    DataManager.Instance.SetTurnPosition((int)gameReadyRequest.playerEnum);
                 }
 
                 int maxCnt = DataManager.Instance.num_player;

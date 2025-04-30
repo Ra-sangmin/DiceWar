@@ -1,6 +1,9 @@
-﻿using System.Collections;
+﻿using Cysharp.Threading.Tasks;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
+using TreeEditor;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
@@ -16,10 +19,8 @@ public class MapController : MonoBehaviour
     [SerializeField] PlayerDataPanel playerDataPanel;
 
     private List<Hexagon> hexagonList = new List<Hexagon>(); //인접 셀을 포함한 배열(arrangement with adjacent cells)
-    //private List<HexagonLine> hexagonLineList = new List<HexagonLine>();
     private List<MapDice> mapDiceList = new List<MapDice>();
 
-    
     private bool diceAddEventOn = false;
     private bool attackEventOn = false;
 
@@ -208,6 +209,8 @@ public class MapController : MonoBehaviour
         if (DataManager.Instance.isMultiOn == false && DataManager.Instance.mapSelectionOn)
         {
             inGameBottomController.SetStatus(0);
+            playerIconController.SetMyEffect();
+
         }
         else
         {
@@ -300,7 +303,7 @@ public class MapController : MonoBehaviour
         }
     }
 
-    public void HexagonClickOn(int index)
+    public async void HexagonClickOn(int index)
     {
         if (attackEventOn || DataManager.Instance.gameStart.Value == false)
         {
@@ -355,7 +358,7 @@ public class MapController : MonoBehaviour
                         return;
                     }
 
-                    AttackOn(beforeAreaData, areaData);
+                    await AttackOn(beforeAreaData, areaData);
                 }
             }
         }
@@ -385,7 +388,7 @@ public class MapController : MonoBehaviour
         }
     }
 
-    void AttackOn(AreaData myData, AreaData enemyData)
+    async UniTask AttackOn(AreaData myData, AreaData enemyData)
     {
         attackEventOn = true;
 
@@ -397,6 +400,11 @@ public class MapController : MonoBehaviour
 
         DiceWarData myDiceWarData = new DiceWarData(myData.player, myDiceResult);
         DiceWarData enemyDiceWarData = new DiceWarData(enemyData.player, enemyDiceResult);
+
+        myData.ChoisEventOn(true);
+        enemyData.ChoisEventOn(true);
+
+        await Task.Delay(300);
 
         //점령에 성공하였다면
         if (myDiceWarData.diceSum > enemyDiceWarData.diceSum)
@@ -411,6 +419,9 @@ public class MapController : MonoBehaviour
         myData.SetDice(1);
 
         DeSelectOn(myData);
+        enemyData.ChoisEventOn(false);
+
+        await Task.Delay(300);
 
         attackEventOn = false;
 
@@ -545,12 +556,14 @@ public class MapController : MonoBehaviour
         return areaDataList;
     }
 
-    public void AIAttackOn(PlayerEnum playerEnum)
+    public async UniTask AIAttackOn(PlayerEnum playerEnum)
     {
         List<AreaData> areaList = DataManager.Instance.areaDataList.Where(data => data.player == playerEnum).ToList();
 
         int diceMaxCount = DataManager.Instance.diceMaxCount;
         List<AreaData> attackAreaList = areaList.Where(data => data.dice > diceMaxCount-2).ToList();
+
+        await Task.Delay(1000);
 
         bool attackRandomOn = Random.Range(0, 2) == 0;
 
@@ -578,7 +591,7 @@ public class MapController : MonoBehaviour
                         attackArea.dice >= checkAreaData.dice &&
                         DataManager.Instance.IsAllAlliance(new List<PlayerEnum>() { attackArea.player, checkAreaData.player }) == false)
                     {
-                        AttackOn(attackArea, checkAreaData);
+                        await AttackOn(attackArea, checkAreaData);
 
                         attackOn = true;
 

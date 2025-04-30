@@ -58,6 +58,26 @@ public class PlayerIconController : MonoBehaviour
         }
     }
 
+    public void SetMyEffect()
+    {
+        PlayerEnum myPlayerEnum = DataManager.Instance.playerData.playerEnum;
+
+        PlayerIcon myPlayerIcon = playerIconList.FirstOrDefault(data => data.playerEnum == myPlayerEnum);
+
+        if (myPlayerIcon != null)
+        {
+            myPlayerIcon.SetMyTurnEffect(true);
+        }
+    }
+
+    public void SetIconTurnEffect() 
+    {
+        for (int i = 0; i < playerIconList.Count; i++)
+        {
+            playerIconList[i].SetMyTurnEffect();
+        }
+    }
+
     public void SetBundleKeyuAll()
     {
         var checkList = GetActiveList();
@@ -135,6 +155,6 @@ public class PlayerIconController : MonoBehaviour
 
     public PlayerIcon GetPlayerIcon(PlayerEnum playerEnum)
     {
-        return playerIconList.FirstOrDefault(data => data.playerEnum == playerEnum);
+        return GetActiveList().FirstOrDefault(data => data.playerEnum == playerEnum);
     }
 }

@@ -20,7 +20,7 @@ public class PlaySetPopup : MonoBehaviour
     [SerializeField] List<SMToggle> aIToggleList = new List<SMToggle>();
     [SerializeField] List<SMToggle> mapSizeToggleList = new List<SMToggle>();
     [SerializeField] List<SMToggle> playersCountToggleList = new List<SMToggle>();
-    [SerializeField] List<SMToggle> offlineUsersToggleList = new List<SMToggle>();
+    //[SerializeField] List<SMToggle> offlineUsersToggleList = new List<SMToggle>();
     [SerializeField] LoadingPopup loadingPopup;
 
     private bool loadingOn;
@@ -38,25 +38,25 @@ public class PlaySetPopup : MonoBehaviour
         SetToggleEvent(mapSizeToggleList, MapSizeToggleChangeOn);
         SetToggleEvent(playersCountToggleList, PlayersCountToggleChangeOn);
 
-        for (int i = 0; i < offlineUsersToggleList.Count; i++)
-        {
-            int index = i;
+        //for (int i = 0; i < offlineUsersToggleList.Count; i++)
+        //{
+        //    int index = i;
 
-            offlineUsersToggleList[i].toggleValue.Subscribe(isOn =>
-            {
-                if (isOn)
-                {
-                    OfflineUsersToggleChangeOn(index);
-                }
-                else
-                {
-                    if (offlineUsersToggleList.All(data => data.toggleValue.Value == false))
-                    {
-                        OfflineUsersToggleChangeOn(-1);
-                    }
-                }
-            }).AddTo(gameObject);
-        }
+        //    offlineUsersToggleList[i].toggleValue.Subscribe(isOn =>
+        //    {
+        //        if (isOn)
+        //        {
+        //            OfflineUsersToggleChangeOn(index);
+        //        }
+        //        else
+        //        {
+        //            if (offlineUsersToggleList.All(data => data.toggleValue.Value == false))
+        //            {
+        //                OfflineUsersToggleChangeOn(-1);
+        //            }
+        //        }
+        //    }).AddTo(gameObject);
+        //}
 
         //SetToggleEvent(offlineUsersToggleList, OfflineUsersToggleChangeOn);
 
@@ -144,11 +144,11 @@ public class PlaySetPopup : MonoBehaviour
             bool interactableOn = i <= activeCount;
             playersCountToggleList[i].interactable.SetValueAndForceNotify(interactableOn);
 
-            if (multiOn)
-            {
-                bool interactableOn2 = i <= activeCount - 1;
-                offlineUsersToggleList[i].interactable.SetValueAndForceNotify(interactableOn2);
-            }
+            //if (multiOn)
+            //{
+            //    bool interactableOn2 = i <= activeCount - 1;
+            //    offlineUsersToggleList[i].interactable.SetValueAndForceNotify(interactableOn2);
+            //}
         }
 
         int playerMaxCnt = DataManager.Instance.num_player;
@@ -163,12 +163,20 @@ public class PlaySetPopup : MonoBehaviour
 
         if (multiOn)
         {
-            int offLineCnt = DataManager.Instance.off_line_num_player - 3;
+            //int offLineCnt = DataManager.Instance.off_line_num_player - 3;
 
-            if (offLineCnt >= activeCount - 1)
+            //if (offLineCnt >= activeCount - 1)
+            //{
+            //    offlineUsersToggleList[activeCount - 1].toggleValue.SetValueAndForceNotify(true);
+            //}
+
+            for (int i = 0; i < playersCountToggleList.Count; i++)
             {
-                offlineUsersToggleList[activeCount - 1].toggleValue.SetValueAndForceNotify(true);
+                bool interactableOn = i == 1;
+                playersCountToggleList[i].interactable.SetValueAndForceNotify(interactableOn);
             }
+
+            playersCountToggleList[1].toggleValue.SetValueAndForceNotify(true);
         }
     }
 
@@ -179,12 +187,12 @@ public class PlaySetPopup : MonoBehaviour
         SetTurnPosition(DataManager.Instance.turnPosition);
     }
 
-    private void OfflineUsersToggleChangeOn(int index)
-    {
-        int playerMaxCnt = index + 1;
-        DataManager.Instance.SetOffLinePlayerCnt(playerMaxCnt);
-        //SetTurnPosition(InGameDataManager.Instance.turnPosition);
-    }
+    //private void OfflineUsersToggleChangeOn(int index)
+    //{
+    //    int playerMaxCnt = index + 1;
+    //    DataManager.Instance.SetOffLinePlayerCnt(playerMaxCnt);
+    //    //SetTurnPosition(InGameDataManager.Instance.turnPosition);
+    //}
 
     private void SetTurnPosition(int turnCount)
     {

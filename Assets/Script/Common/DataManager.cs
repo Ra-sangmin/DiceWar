@@ -16,7 +16,7 @@ public class DataManager : MonoSingleton<DataManager>
     Dictionary<MapSizeEnum, MapData> mapDataDic = new Dictionary<MapSizeEnum, MapData>();
     public AILevel aiLevel = AILevel.Easy;
     public int num_player = 3;//총 플레이어의 수 (기본 값 : 3)
-    public int off_line_num_player = 2;//AI 수 (기본 값 : 2)
+    public int off_line_num_player = 0;//AI 수 (기본 값 : 2)
     public int num_area = 10;//총 영토의 수 (기본값 : 10)
     public int diceMaxCount = 6;//영토의 주사위 최대 갯수
 
@@ -371,7 +371,7 @@ public class DataManager : MonoSingleton<DataManager>
         string bundleKey = GetConnectedIndex(checkEnum, index);
         areaData.SetBundleKey(areaDataList, checkEnum, bundleKey);
 
-        var sameBundleKeyPieceList = areaDataList.Where(data => !string.IsNullOrEmpty(data.bundleKey) && data.bundleKey.Equals(bundleKey)).ToList();
+        var sameBundleKeyPieceList = areaDataList.Where(data => data.player == checkEnum && !string.IsNullOrEmpty(data.bundleKey) && data.bundleKey.Equals(bundleKey)).ToList();
 
         return sameBundleKeyPieceList.Count;
     }

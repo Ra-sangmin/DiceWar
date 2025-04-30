@@ -8,6 +8,9 @@ public class PlayerIcon : MonoBehaviour
 {
     [SerializeField] Text connectedCountText;
     [SerializeField] Image iconImage;
+    [SerializeField] Image aroundBGImage;
+    [SerializeField] Image centerBGImage;
+    [SerializeField] Image selectIconImage;
     [SerializeField] List<Sprite> spriteiconList = new List<Sprite>();
 
     public PlayerEnum playerEnum = PlayerEnum.Player_None;
@@ -34,15 +37,27 @@ public class PlayerIcon : MonoBehaviour
 
     public void SetIconColor() 
     {
-        int index = DataManager.Instance.GetPlayerColorIndex(playerEnum);
+        int colorIndex = DataManager.Instance.GetPlayerColorIndex(playerEnum);
 
-        iconImage.sprite = spriteiconList[index];
+        Color color = DataManager.Instance.GetPlayerColor(colorIndex);
+
+        iconImage.sprite = spriteiconList[colorIndex];
+        aroundBGImage.color = color;
+        selectIconImage.color = color;
+
+        centerBGImage.color = new Color32(44, 48, 54, 255);
     }
 
     public void SetConnectedCount(int connectedCount)
     {
         this.connectedCount = connectedCount;
         connectedCountText.text = connectedCount.ToString();
+    }
+
+    public void SetMyTurnEffect(bool forceActiveOn = false)
+    {
+        bool activeOn = forceActiveOn || DataManager.Instance.currentTurnIndex == (int)playerEnum;
+        selectIconImage.gameObject.SetActive(activeOn);
     }
 
     public void BtnClickOn()

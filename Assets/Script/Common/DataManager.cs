@@ -33,6 +33,8 @@ public class DataManager : MonoSingleton<DataManager>
     //-1 = random , 0 ~ 6 selectPosition 
     public int turnPosition = -1;
 
+    public bool isOwner = false;
+
     public int currentTurnIndex = 0;
 
     private Dictionary<PlayerEnum,int> playerColorIndexDic = new Dictionary<PlayerEnum,int>();
@@ -49,6 +51,8 @@ public class DataManager : MonoSingleton<DataManager>
     public MapCreateRequestOn testData;
 
     public int stashCount = 0;
+
+    public int myTurnCount = 0;
 
     public override void Init()
     {
@@ -193,15 +197,19 @@ public class DataManager : MonoSingleton<DataManager>
 
         int onLineCnt = num_player - off_line_num_player -1;
 
+        //Debug.LogWarning($"num_player = {num_player} , off_line_num_player = {off_line_num_player} , onLineCnt = {onLineCnt}");
+
         for (int i = 0; i < playerDataList.Count; i++)
         {
             playerDataList[i].isAI = i > onLineCnt;
+
+            //Debug.LogWarning(playerDataList[i].isAI);
         }
 
-        if (choosePositionOn)
-        {
-            SetTurnPosition(turnPosition);
-        }
+        //if (choosePositionOn)
+        //{
+          //  SetTurnPosition(turnPosition);
+        //}
     }
 
     public Vector2 GetMapSizeValue() 
@@ -590,6 +598,11 @@ public class DataManager : MonoSingleton<DataManager>
         return allianceDataList.Any(data => data.playerEnum == playerEnum);
     }
 
+    public AllianceData GetMyAllianceData()
+    {
+        return allianceDataList.FirstOrDefault(data => data.playerEnum == playerData.playerEnum);
+    }
+
     public bool IsAllAlliance(List<PlayerEnum> checkPlayerEnumList)
     {
         bool isAllAlliance = true;
@@ -603,6 +616,22 @@ public class DataManager : MonoSingleton<DataManager>
         }
 
         return isAllAlliance;
+    }
+
+    /// <summary>
+    /// 넘겨받은 플레이어 정보가 본인과 동맹인지 확인
+    /// </summary>
+    /// <param name="checkPlayerEnum"></param>
+    /// <returns></returns>
+    public bool IsMyAllAlliance(PlayerEnum checkPlayerEnum)
+    {
+        List<PlayerEnum> checkPlayerEnumList = new List<PlayerEnum>() 
+        {
+            checkPlayerEnum,
+            playerData.playerEnum
+        };
+
+        return IsAllAlliance(checkPlayerEnumList);
     }
 
     public List<AllianceData> GetAllAlliance(PlayerEnum playerEnum)
@@ -621,7 +650,7 @@ public class DataManager : MonoSingleton<DataManager>
         return resultData;
     }
 
-    public void BetrayOn() 
+    public void AllianceClearOn() 
     {
         allianceDataList = new List<AllianceData>();
     }
@@ -636,6 +665,24 @@ public class DataManager : MonoSingleton<DataManager>
                 break;
             }
         }
+    }
+
+    public int MyTurnAddOn()
+    {
+        myTurnCount++;
+
+        return myTurnCount;
+    }
+
+    public void SkillCardCountAdd(int addCount = -1)
+    {
+        playerData.skillCardCount += addCount;
+    }
+
+    public void GameDataClearOn()
+    {
+        AllianceClearOn();
+        stashCount = 0;
     }
 }
 
@@ -656,14 +703,14 @@ public class Join
 [System.Serializable]
 public class PlayerData
 {
-    public PlayerEnum playerEnum = PlayerEnum.Player_1;
+    public PlayerEnum playerEnum = PlayerEnum.Player_0;
     public int colorIndex = 1;
-    public int skillCardCount = 3;
+    public int skillCardCount = 1;
     public bool isAI = false;
 
     public PlayerData() { }
 
-    public PlayerData(PlayerEnum playerEnum , int colorIndex , int skillCardCount = 3 , bool isAI = false)  
+    public PlayerData(PlayerEnum playerEnum , int colorIndex , int skillCardCount = 1, bool isAI = false)  
     {
         this.playerEnum = playerEnum;
         this.colorIndex = colorIndex;

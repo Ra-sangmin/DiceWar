@@ -3,7 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using TreeEditor;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
@@ -52,13 +51,22 @@ public class MapController : MonoBehaviour
             return;
         }
 
+        //내 아이콘을 클릭했다면
         if (PlayerIcon.playerEnum == DataManager.Instance.playerData.playerEnum)
         {
-            inGameBottomController.nonePlayPanel.SetActiveBtn(NonePlayPanel.InGameButtonStatus.None);
+            inGameBottomController.nonePlayPanel.SetNoneBtn();
         }
         else 
         {
-            inGameBottomController.nonePlayPanel.SetActiveBtn(NonePlayPanel.InGameButtonStatus.Ally);
+            //내가 동맹중인 상태라면
+            if (DataManager.Instance.IsAlliance(DataManager.Instance.playerData.playerEnum))
+            {
+                inGameBottomController.nonePlayPanel.SetActiveBtn(NonePlayPanel.InGameButtonStatus.Betray);
+            }
+            else
+            {
+                inGameBottomController.nonePlayPanel.SetActiveBtn(NonePlayPanel.InGameButtonStatus.Ally);
+            }
         }
 
         playerDataPanel.gameObject.SetActive(true);
@@ -353,7 +361,7 @@ public class MapController : MonoBehaviour
                     }
 
                     //동맹이었을 경우
-                    if (DataManager.Instance.IsAlliance(areaData.player))
+                    if (DataManager.Instance.IsMyAllAlliance(areaData.player))
                     {
                         return;
                     }
@@ -364,6 +372,12 @@ public class MapController : MonoBehaviour
         }
         else
         {
+            //싱글 플레이 게임이이라면
+            if (DataManager.Instance.isMultiOn == false)
+            {
+                return;
+            }
+
             //선택이 안되어있다면
             if (choisIndex == -1)
             {
@@ -388,7 +402,7 @@ public class MapController : MonoBehaviour
         }
     }
 
-    async UniTask AttackOn(AreaData myData, AreaData enemyData)
+    async UniTask AttackOn(AreaData myData, AreaData enemyData )
     {
         attackEventOn = true;
 
@@ -433,8 +447,28 @@ public class MapController : MonoBehaviour
                 toAreaData = enemyData,
             };
 
-            ServerManager.Instance.AttackRequestOn(request);
+            ServerManager.Instance.SendMessageOn(request);
         }
+    }
+
+    public async UniTask AttackReceiveDataOn(AttackRequest attackRequest)
+    {
+        AreaData fromAreaData = DataManager.Instance.GetAreaData(attackRequest.fromAreaData.id);
+        AreaData toAreaData = DataManager.Instance.GetAreaData(attackRequest.toAreaData.id);
+
+        fromAreaData.ChoisEventOn(true);
+        await Task.Delay(200);
+        toAreaData.ChoisEventOn(true);
+        await Task.Delay(200);
+
+        fromAreaData.ChoisEventOn(false);
+        await Task.Delay(200);
+        toAreaData.ChoisEventOn(false);
+
+        DataManager.Instance.SetAreaData(attackRequest.fromAreaData);
+        DataManager.Instance.SetAreaData(attackRequest.toAreaData);
+
+        playerIconController.SetBundleKeyuAll();
     }
 
     void SelectOn(AreaData areaData)
@@ -500,6 +534,8 @@ public class MapController : MonoBehaviour
 
         if (playerIcon == null)
         {
+            diceAddEventOn = false;
+
             return null;
         }
 

@@ -3687,6 +3687,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 528eb18747705e347b9662a1904d8309, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  playerToggleIcon: {fileID: 9123508536350958040}
 --- !u!114 &2163227684582156145
 MonoBehaviour:
   m_ObjectHideFlags: 0

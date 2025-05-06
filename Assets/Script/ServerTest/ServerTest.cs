@@ -132,7 +132,7 @@ public class ServerTest : MonoBehaviour
 
     public void GameStartClickOn()
     {
-        ServerManager.Instance.GameStartRequestOn();
+        ServerManager.Instance.SendMessageOn(new GameStartOn());
     }
 
     public void TurnEndBtnClickOn()

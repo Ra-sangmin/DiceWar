@@ -38,14 +38,27 @@ public class PlayerIcon : MonoBehaviour
     public void SetIconColor() 
     {
         int colorIndex = DataManager.Instance.GetPlayerColorIndex(playerEnum);
-
         Color color = DataManager.Instance.GetPlayerColor(colorIndex);
 
         iconImage.sprite = spriteiconList[colorIndex];
         aroundBGImage.color = color;
         selectIconImage.color = color;
 
-        centerBGImage.color = new Color32(44, 48, 54, 255);
+        SetCenterBGImage(PlayerEnum.Player_None);
+    }
+
+    void SetCenterBGImage(PlayerEnum playerEnum = PlayerEnum.Player_None)
+    {
+        int colorIndex = DataManager.Instance.GetPlayerColorIndex(playerEnum);
+
+        Color color = playerEnum == PlayerEnum.Player_None ? new Color32(44, 48, 54, 255) : DataManager.Instance.GetPlayerColor(colorIndex);
+
+        centerBGImage.color = color;
+    }
+
+    public void SetAllianceColor(PlayerEnum ordebPlayerEnum)
+    {
+        SetCenterBGImage(ordebPlayerEnum);
     }
 
     public void SetConnectedCount(int connectedCount)

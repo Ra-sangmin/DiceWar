@@ -9,6 +9,7 @@ using Unity.Mathematics;
 using UnityEngine.SceneManagement;
 using System;
 using System.Linq;
+using System.Reflection;
 
 public class PlaySetPopup : MonoBehaviour
 {
@@ -21,7 +22,7 @@ public class PlaySetPopup : MonoBehaviour
     [SerializeField] List<SMToggle> mapSizeToggleList = new List<SMToggle>();
     [SerializeField] List<SMToggle> playersCountToggleList = new List<SMToggle>();
     //[SerializeField] List<SMToggle> offlineUsersToggleList = new List<SMToggle>();
-    [SerializeField] LoadingPopup loadingPopup;
+    [SerializeField] LoadingController loadingPopup;
 
     private bool loadingOn;
 
@@ -63,6 +64,14 @@ public class PlaySetPopup : MonoBehaviour
 
     }
 
+    private void OnEnable()
+    {
+        if (multiOn)
+        {
+            MapSizeToggleChangeOn(0);
+        }
+    }
+
     private void SetToggleEvent(List<SMToggle> toggleList, UnityAction<int> toggleEventOn, int defaultIndex = 0)
     {
         for (int i = 0; i < toggleList.Count; i++)
@@ -78,7 +87,7 @@ public class PlaySetPopup : MonoBehaviour
             }).AddTo(gameObject);
         }
 
-        toggleEventOn(defaultIndex);
+        //toggleEventOn(defaultIndex);
     }
 
     // Start is called before the first frame update
@@ -163,6 +172,8 @@ public class PlaySetPopup : MonoBehaviour
 
         if (multiOn)
         {
+            int activeIndex = 1;
+
             //int offLineCnt = DataManager.Instance.off_line_num_player - 3;
 
             //if (offLineCnt >= activeCount - 1)
@@ -172,11 +183,11 @@ public class PlaySetPopup : MonoBehaviour
 
             for (int i = 0; i < playersCountToggleList.Count; i++)
             {
-                bool interactableOn = i == 1;
+                bool interactableOn = i == activeIndex;
                 playersCountToggleList[i].interactable.SetValueAndForceNotify(interactableOn);
             }
 
-            playersCountToggleList[1].toggleValue.SetValueAndForceNotify(true);
+            playersCountToggleList[activeIndex].toggleValue.SetValueAndForceNotify(true);
         }
     }
 
@@ -240,9 +251,6 @@ public class PlaySetPopup : MonoBehaviour
 
         DataManager.Instance.isMultiOn = multiOn;
 
-        loadingPopup.gameObject.SetActive(true);
-        loadingPopup.SetData(multiOn);
-
-        //SceneManager.LoadScene("Game");
+        SceneManager.LoadScene("Loading");
     }
 }

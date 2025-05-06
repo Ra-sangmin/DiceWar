@@ -19,6 +19,7 @@ public class AllianceApprovePopup : MonoBehaviour
     {
         CreatePlayerToggleIcon();
     }
+
     void CreatePlayerToggleIcon()
     {
         PlayerEnum myPlayerEnum = DataManager.Instance.playerData.playerEnum;
@@ -64,6 +65,7 @@ public class AllianceApprovePopup : MonoBehaviour
             }
         }
     }
+
     public void PlayerSelectOn(int selectIndex)
     {
         PlayerToggleIcon currentSelectPlayer = playerToggleIconList[selectIndex];
@@ -113,7 +115,7 @@ public class AllianceApprovePopup : MonoBehaviour
             approveOn = approveOn,
         };
         
-        ServerManager.Instance.AllianceApproveRequestOn(request);
+        ServerManager.Instance.SendMessageOn(request);
         gameObject.SetActive(false);
     }
 }

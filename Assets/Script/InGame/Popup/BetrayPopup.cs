@@ -2,11 +2,14 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.UI;
 
 public class BetrayPopup : MonoBehaviour
 {
-    public UnityAction BetrayClearOn = () => { };
+    [SerializeField] PlayerToggleIcon playerToggleIcon;
 
+    public UnityAction BetrayClearOn = () => { };
+    
     // Start is called before the first frame update
     void Start()
     {
@@ -21,19 +24,18 @@ public class BetrayPopup : MonoBehaviour
     
     public void SetData()
     {
-
+        playerToggleIcon.SetPlayerData(DataManager.Instance.playerData.playerEnum);
     }
+
 
     public void BetrayBtnClickOn()
     {
-        PlayerEnum playerEnum = DataManager.Instance.playerData.playerEnum;
-
         AllianceBetrayRequest request = new AllianceBetrayRequest()
         {
-            playerEnum = playerEnum,
+            playerEnum = DataManager.Instance.playerData.playerEnum,
         };
 
-        ServerManager.Instance.AllianceBetrayRequestOn(request);
+        ServerManager.Instance.SendMessageOn(request);
 
         //BetrayClearOn();
         gameObject.SetActive(false);

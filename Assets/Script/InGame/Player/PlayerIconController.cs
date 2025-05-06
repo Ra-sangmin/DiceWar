@@ -28,7 +28,6 @@ public class PlayerIconController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
     }
 
     public void SetPlayerIcon()
@@ -156,5 +155,30 @@ public class PlayerIconController : MonoBehaviour
     public PlayerIcon GetPlayerIcon(PlayerEnum playerEnum)
     {
         return GetActiveList().FirstOrDefault(data => data.playerEnum == playerEnum);
+    }
+
+    public void SetAlliancePlayerIcon(AllianceResultRequest allianceResultRequest)
+    {
+        PlayerEnum orderPlayer = allianceResultRequest.orderData.playerEnum;
+
+        foreach (var allianceData in allianceResultRequest.allianceDataList)
+        {
+            PlayerIcon playerIcon = GetActiveList().FirstOrDefault(data => data.playerEnum == allianceData.playerEnum);
+
+            if (playerIcon != null)
+            {
+                playerIcon.SetAllianceColor(orderPlayer);
+            }
+        }
+    }
+
+    public void SetBetrayPlayerIcon(PlayerEnum targetPlayerEnum)
+    {
+        PlayerIcon playerIcon = GetActiveList().FirstOrDefault(data => data.playerEnum == targetPlayerEnum);
+
+        if (playerIcon != null)
+        {
+            playerIcon.SetAllianceColor(PlayerEnum.Player_None);
+        }
     }
 }

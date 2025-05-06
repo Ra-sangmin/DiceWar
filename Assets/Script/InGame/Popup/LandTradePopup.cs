@@ -240,7 +240,7 @@ public class LandTradePopup : MonoBehaviour
             buyOn = buyOn,
         };
 
-        ServerManager.Instance.LandTradeRequestOn(request);
+        ServerManager.Instance.SendMessageOn(request);
         gameObject.SetActive(false);
     }
 

@@ -13,7 +13,7 @@ public class MainController : MonoBehaviour
 
     [SerializeField] Text myCoinText;
 
-    [SerializeField] LoadingPopup loadingPopup;
+    [SerializeField] LoadingController loadingPopup;
 
     private int step = 0;
 
@@ -88,7 +88,7 @@ public class MainController : MonoBehaviour
         yield return new WaitForEndOfFrame();
 
         loadingPopup.gameObject.SetActive(true);
-        loadingPopup.SetData(true);
+        //loadingPopup.SetData(true);
     }
 
     void SetCoin()

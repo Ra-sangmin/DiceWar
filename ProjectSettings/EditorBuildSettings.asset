@@ -9,12 +9,16 @@ EditorBuildSettings:
     path: Assets/Scenes/Main.unity
     guid: e43322f32b0f45b48a9ed3264177c764
   - enabled: 1
-    path: Assets/Scenes/serverTest.unity
-    guid: 5bfea88925477704f8645bf6dc0a39d9
+    path: Assets/Scenes/Loading.unity
+    guid: 35dfb3af3f5942c48aebee0123183fcd
   - enabled: 1
     path: Assets/Scenes/Game.unity
     guid: 2cda990e2423bbf4892e6590ba056729
   - enabled: 1
+    path: Assets/Scenes/serverTest.unity
+    guid: 5bfea88925477704f8645bf6dc0a39d9
+  - enabled: 1
     path: Assets/Scenes/Main_origin.unity
     guid: 01a3fe66df7adc946aaa09b9bac3e1c5
   m_configObjects: {}
+  m_UseUCBPForAssetBundles: 0

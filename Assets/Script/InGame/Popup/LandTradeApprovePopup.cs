@@ -52,7 +52,7 @@ public class LandTradeApprovePopup : MonoBehaviour
             approveOn = approveOn,
         };
 
-        ServerManager.Instance.LandTradeApproveRequestOn(request);
+        ServerManager.Instance.SendMessageOn(request);
         gameObject.SetActive(false);
     }
 }

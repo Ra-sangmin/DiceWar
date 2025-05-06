@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.Sockets;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Events;
-using UnityEngine.Experimental.AI;
 
 public class ServerManager : MonoSingleton<ServerManager>
 {
@@ -15,7 +15,7 @@ public class ServerManager : MonoSingleton<ServerManager>
 
     public UnityAction<BaseRequest> receiveDataOn = data => { };
 
-    public int roomDataIndex;
+    public int roomDataIndex = -1;
 
     void Start()
     {
@@ -115,21 +115,16 @@ public class ServerManager : MonoSingleton<ServerManager>
             maxPlayerCnt = maxPlayerCnt,
             userCnt = userCnt,
         };
-        string jsonStr = JsonUtility.ToJson(gameReadyRequest);
 
-        SendMessageOn(jsonStr);
+        SendMessageOn(gameReadyRequest);
     }
 
-
-    public void GameStartRequestOn()
+    public void GameOutRequestOn()
     {
-        GameStartOn gameStartOn = new GameStartOn()
+        if (roomDataIndex != -1)
         {
-            roomDataIndex = roomDataIndex,
-        };
-        string jsonStr = JsonUtility.ToJson(gameStartOn);
-
-        SendMessageOn(jsonStr);
+            SendMessageOn(new GameOutRequest());
+        }
     }
 
     public void MapCreateRequestOn()
@@ -139,77 +134,18 @@ public class ServerManager : MonoSingleton<ServerManager>
             roomDataIndex = roomDataIndex,
             playerDataList = DataManager.Instance.playerDataList,
             area = DataManager.Instance.areaDataList,
-            //cel = mapCreater;//.GetCell(),
-            //mapCreater = mapCreater,
         };
-        string jsonStr = JsonUtility.ToJson(mapCreateRequestOn);
 
-        SendMessageOn(jsonStr);
+        SendMessageOn(mapCreateRequestOn);
     }
 
-
-    public void TurnRequestOn(TurnRequest turnRequest) 
+    public void SendMessageOn(BaseRequest request)
     {
-        turnRequest.roomDataIndex = roomDataIndex;
-        string jsonStr = JsonUtility.ToJson(turnRequest);
+        request.roomDataIndex = roomDataIndex;
 
-        SendMessageOn(jsonStr);
-    }
+        string jsonStr = JsonUtility.ToJson(request);
 
-    public void AttackRequestOn(AttackRequest attackRequest)
-    {
-        attackRequest.roomDataIndex = roomDataIndex;
-        string jsonStr = JsonUtility.ToJson(attackRequest);
-
-        SendMessageOn(jsonStr);
-    }
-    
-
-    public void LandTradeRequestOn(LandTradeRequest landTradeRequest )
-    {
-        landTradeRequest.roomDataIndex = roomDataIndex;
-        string jsonStr = JsonUtility.ToJson(landTradeRequest);
-
-        SendMessageOn(jsonStr);
-    }
-
-    public void LandTradeApproveRequestOn(LandTradeApproveRequest landTradeApproveRequest)
-    {
-        landTradeApproveRequest.roomDataIndex = roomDataIndex;
-        string jsonStr = JsonUtility.ToJson(landTradeApproveRequest);
-
-        SendMessageOn(jsonStr);
-    }
-
-    public void AllianceRequestOn(AllianceRequest allianceRequest)
-    {
-        allianceRequest.roomDataIndex = roomDataIndex;
-        string jsonStr = JsonUtility.ToJson(allianceRequest);
-
-        SendMessageOn(jsonStr);
-    }
-
-    public void AllianceApproveRequestOn(AllianceApproveRequest allianceApproveRequest)
-    {
-        allianceApproveRequest.roomDataIndex = roomDataIndex;
-        string jsonStr = JsonUtility.ToJson(allianceApproveRequest);
-
-        SendMessageOn(jsonStr);
-    }
-
-    public void AllianceResultRequestOn(AllianceResultRequest allianceRequest)
-    {
-        allianceRequest.roomDataIndex = roomDataIndex;
-        string jsonStr = JsonUtility.ToJson(allianceRequest);
-
-        SendMessageOn(jsonStr);
-    }
-
-
-    public void AllianceBetrayRequestOn(AllianceBetrayRequest allianceBetrayRequest)
-    {
-        allianceBetrayRequest.roomDataIndex = roomDataIndex;
-        string jsonStr = JsonUtility.ToJson(allianceBetrayRequest);
+        //Debug.LogWarning(jsonStr);
 
         SendMessageOn(jsonStr);
     }
@@ -249,15 +185,15 @@ public class ServerManager : MonoSingleton<ServerManager>
 
     private void ReceiveComplete(IAsyncResult ar)
     {
-        // 메시지를 받는게 성공하면 콜백되는 함수 입니다.
-        try
+        if (null == _socket)
         {
-            if (null == _socket)
-            {
-                Debug.Log("socket is null");
-                return;
-            }
+            //Debug.Log("socket is null");
+            return;
+        }
 
+        // 메시지를 받는게 성공하면 콜백되는 함수 입니다.
+        //try
+        {
             int len = _socket.EndReceive(ar);
 
             if (len == 0)
@@ -284,11 +220,11 @@ public class ServerManager : MonoSingleton<ServerManager>
             }
         }
 
-        catch (Exception e)
-        {
-            Debug.LogError("Receive Exception: " + e.Message);
-            Shutdown();
-        }
+        //catch (Exception e)
+        //{
+        //    Debug.LogError("Receive Exception: " + e.Message);
+        //    //Shutdown();
+        //}
 
     }
 
@@ -297,8 +233,6 @@ public class ServerManager : MonoSingleton<ServerManager>
         BaseRequest baseRequest = null;
 
         RequestProtocal requestProtocal = JsonUtility.FromJson<BaseRequest>(jsonString).requestProtocal;
-
-        Debug.LogWarning(jsonString);
 
         switch (requestProtocal)
         {
@@ -311,6 +245,12 @@ public class ServerManager : MonoSingleton<ServerManager>
                 //Debug.LogWarning("playerEnum = "+gameReadyRequest.playerEnum);
 
                 baseRequest = gameReadyRequest;
+
+                break;
+
+            case RequestProtocal.GameOutOn:
+
+                baseRequest = JsonUtility.FromJson<GameOutRequest>(jsonString);
 
                 break;
 
@@ -441,6 +381,13 @@ public class ServerManager : MonoSingleton<ServerManager>
         }
 
     }
+
+    private void OnDestroy()
+    {
+        GameOutRequestOn();
+
+        Shutdown();
+    }
 }
 
 [System.Serializable]
@@ -457,10 +404,25 @@ public class GameReadyRequest : BaseRequest
     public int userCnt = 0;
     public int socketCnt = 0;
     public PlayerEnum playerEnum;
+    public bool isOwner = false;
 
     public GameReadyRequest()
     {
         base.requestProtocal = RequestProtocal.GameReady;
+    }
+}
+
+[System.Serializable]
+public class GameOutRequest : BaseRequest
+{
+    public PlayerEnum playerEnum; //게임 시작전에만 사용
+
+    public PlayerEnum outPlayerEnum = PlayerEnum.Player_None;
+    public bool isOwner = false;
+
+    public GameOutRequest()
+    {
+        base.requestProtocal = RequestProtocal.GameOutOn;
     }
 }
 
@@ -586,10 +548,20 @@ public class AllianceBetrayRequest : BaseRequest
     }
 }
 
+[System.Serializable]
+public class GameEndOnRequest : BaseRequest
+{
+    public GameEndOnRequest()
+    {
+        base.requestProtocal = RequestProtocal.GameEndOn;
+    }
+}
+
 public enum RequestProtocal
 {
     None = 0,
     GameReady,
+    GameOutOn,
     GameStartOn,
     MapCreateOn,
     TurnRequest,
@@ -600,6 +572,7 @@ public enum RequestProtocal
     AllianceApproveRequest,
     AllianceResultRequest,
     AllianceBetrayRequest,
+    GameEndOn,
 }
 
 [System.Serializable]

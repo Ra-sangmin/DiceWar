@@ -4,13 +4,11 @@ using System.Collections.Generic;
 using UniRx;
 using UnityEngine;
 using UnityEngine.UI;
-using UniRx;
 using UnityEngine.SceneManagement;
-using Unity.VisualScripting;
-using static UnityEngine.Mesh;
-using System.IO;
+using Cysharp.Threading.Tasks;
+using System.Threading.Tasks;
 
-public class LoadingPopup : MonoBehaviour
+public class LoadingController : MonoBehaviour
 {
     [SerializeField] Text titleText;
     [SerializeField] RectTransform timePanel;
@@ -30,17 +28,19 @@ public class LoadingPopup : MonoBehaviour
 
     bool isReadyOn = false;
 
+    private int joinUserCnt;
+
     //private GameReadyRequest gameReadyRequest;
 
     //private GameStartOn gameStartOn;
+
+    bool aIPlayOn = false;
 
     //private MapCreateRequestOn mapCreateRequestOn;
     private void Awake()
     {
         SetEvent();
         //SetData(true);
-
-        
     }
     void SetEvent()
     {
@@ -57,7 +57,8 @@ public class LoadingPopup : MonoBehaviour
         {
             ServerManager.Instance.receiveDataOn += ReceiveDataOn;
         }
-        
+
+        SetData();
     }
     private void OnDestroy()
     {
@@ -87,68 +88,57 @@ public class LoadingPopup : MonoBehaviour
                 {
                     isReadyOn = true;
                     DataManager.Instance.SetTurnPosition((int)gameReadyRequest.playerEnum);
+                    DataManager.Instance.isOwner = gameReadyRequest.isOwner;
+
                 }
 
                 int maxCnt = DataManager.Instance.num_player;
                 int userCnt = maxCnt - DataManager.Instance.off_line_num_player;
 
-                //Debug.LogWarning(maxCnt)
+                joinUserCnt = gameReadyRequest.socketCnt;
 
-                if (gameReadyRequest.socketCnt == userCnt)
+                Debug.LogWarning("joinUserCnt = " + joinUserCnt);
+
+                if (joinUserCnt == userCnt && DataManager.Instance.isOwner)
                 {
-                    ServerManager.Instance.GameStartRequestOn();
+                    ServerManager.Instance.SendMessageOn(new GameStartOn());
                 }
 
-                //Debug.LogWarning("GameReady = "+ gameReadyRequest.socketCnt +" , "+ userCnt);
+                break;
 
-                //Debug.LogWarning($"playerEnum = {turnRequest.playerEnum} ,  turn = {turnRequest.turnStartOn}");
+            case RequestProtocal.GameOutOn:
+
+                GameOutRequest resultData = (GameOutRequest)baseRequest;
+                DataManager.Instance.SetTurnPosition((int)resultData.playerEnum);
+                DataManager.Instance.isOwner = resultData.isOwner;
+
                 break;
 
             case RequestProtocal.GameStartOn:
-
-                //GameStartOn gameStartOn = (GameStartOn)baseRequest;
-                //MatchngComplatedOn();
 
                 Observable
                     .Timer(TimeSpan.FromSeconds(1))
                     .Subscribe(_ => LoadingClearOn())
                     .AddTo(this);
 
-                //Debug.LogWarning($"playerEnum = {landTradeRequest.fromPlayerEnum} ,  turn = {landTradeRequest.areaIndex} , buyOn = {landTradeRequest.buyOn}");
                 break;
 
             case RequestProtocal.MapCreateOn:
 
                 MapCreateRequestOn mapCreateRequestOn = (MapCreateRequestOn)baseRequest;
 
-                //DataManager.Instance.SetMapSizeValue();
                 DataManager.Instance.areaDataList = mapCreateRequestOn.area;
                 DataManager.Instance.SetPlayerColor(mapCreateRequestOn.playerDataList);
 
                 GameSceneLoadOn();
 
-                //Debug.LogWarning($"playerEnum = {landTradeRequest.fromPlayerEnum} ,  turn = {landTradeRequest.areaIndex} , buyOn = {landTradeRequest.buyOn}");
                 break;
-
-                //case RequestProtocal.LandTradeApproveRequest:
-                //    LandTradeApproveRequest LandTradeApproveRequest = (LandTradeApproveRequest)baseRequest;
-                //    break;
-
-                //case RequestProtocal.AllianceRequest:
-
-                //    AllianceRequest AllianceRequest = (AllianceRequest)baseRequest;
-                //    break;
-
-                //case RequestProtocal.AllianceApproveRequest:
-
-                //    AllianceApproveRequest AllianceApproveRequest = (AllianceApproveRequest)baseRequest;
-                //    break;
         }
     }
 
-    public void SetData(bool multyOn)
+    public void SetData()
     {
-        timePanel.gameObject.SetActive(multyOn);
+        timePanel.gameObject.SetActive(DataManager.Instance.isMultiOn);
 
         Observable
                 .Timer(TimeSpan.FromSeconds(1f))
@@ -156,10 +146,10 @@ public class LoadingPopup : MonoBehaviour
                 .Subscribe(_ => timeCheck())
                 .AddTo(this);
 
-        if (multyOn)
+        if (DataManager.Instance.isMultiOn)
         {
             delayTime = -1;
-            FindingPlayerOn();
+            FindingPlayerOn().Forget();
         }
         else
         {
@@ -179,25 +169,6 @@ public class LoadingPopup : MonoBehaviour
         }
     }
 
-    void ResetText()
-    {
-        string textValue = titleValue;
-
-        titleIndex++;
-
-        if (titleIndex > 4)
-        {
-            titleIndex = 0;
-        }
-
-        for (int i = 0; i < titleIndex; i++) 
-        {
-            textValue += ".";
-        }
-
-        titleText.text = textValue;
-    }
-
     private void ResetToggleIndex()
     {
         toggleIndex++;
@@ -210,21 +181,16 @@ public class LoadingPopup : MonoBehaviour
         toggleList[toggleIndex].isOn = true;
     }
 
-    public void FindingPlayerOn()
+    public async UniTask FindingPlayerOn()
     {
         SetTitle("Finding Players...");
 
         int maxCnt = DataManager.Instance.num_player;
         int userCnt = maxCnt-DataManager.Instance.off_line_num_player;
 
+        await Task.Delay(1000);
+
         ServerManager.Instance.GameReadyRequestOn(maxCnt, userCnt);
-
-        //timeCheck();
-
-        //Observable
-        //        .Timer(TimeSpan.FromSeconds(5f))
-        //        .Subscribe(_ => MatchngComplatedOn())
-        //        .AddTo(this);
     }
 
     void timeCheck()
@@ -238,16 +204,25 @@ public class LoadingPopup : MonoBehaviour
 
         timeText.text = timeStr;
 
-        //if (matchngComplatedOn == false && gameStartOn != null)
-        //{
-        //    //MatchngComplatedOn();
-        //}
+        //10초후 AI 플레이로 채우기
+        if (aIPlayOn == false && secValue > 10 )
+        {
+            SetAIPlayer();
+        }
+    }
 
-        //if (mapCreateRequestOn != null)
-        //{
-        //    GameSceneLoadOn();
-        //}
+    private void SetAIPlayer()
+    {
+        aIPlayOn = true;
 
+        int maxCnt = DataManager.Instance.num_player;
+        int offLineUserCount = maxCnt - joinUserCnt;
+
+        Debug.LogWarning(offLineUserCount);
+
+        DataManager.Instance.SetOffLinePlayerCnt(offLineUserCount);
+
+        LoadingClearOn();
     }
 
     public void MatchngComplatedOn()
@@ -279,7 +254,7 @@ public class LoadingPopup : MonoBehaviour
         if (DataManager.Instance.isMultiOn)
         {
             //오너 플레이어 라면 맵 생성 진행 ( 1명이 맵을 생성후 배포 한다 )
-            if (DataManager.Instance.playerData.playerEnum == PlayerEnum.Player_0)
+            if (DataManager.Instance.isOwner)
             {
                 DataManager.Instance.InitMapData();
                 DataManager.Instance.CreateMap();
@@ -289,74 +264,22 @@ public class LoadingPopup : MonoBehaviour
         }
         else 
         {
-            //var test = Resources.Load<TextAsset>("test");
-            ////Debug.LogWarning(test.text);
-            //var testData = JsonUtility.FromJson<MapCreater>(test.text);
-            //InGameDataManager.Instance.mapCreater = testData;
-
             DataManager.Instance.InitMapData();
             DataManager.Instance.CreateMap();
 
-            //string jsonStr = JsonUtility.ToJson(InGameDataManager.Instance.mapCreater);
-            //Debug.LogWarning(jsonStr);
-
-
-
-            //Debug.LogWarning(Application.dataPath);
-
-
-
-            //InGameDataManager.Instance.mapCreater = InGameDataManager.Instance.testData.mapCreater;
-
-
-
-            //LoadJson();
-            //SaveJson();
-
-
-            //InGameDataManager.Instance.testData.mapCreater;
             GameSceneLoadOn();
         }
-
-        
-
-        //Observable
-        //        .Timer(TimeSpan.FromSeconds(2f))
-        //        .Subscribe(_ => GameSceneLoadOn())
-        //        .AddTo(this);
-    }
-    private void LoadJson()
-    {
-        var test = Resources.Load<TextAsset>("test");
-        var testData = JsonUtility.FromJson<MapCreater>(test.text);
-        //InGameDataManager.Instance.mapCreater = testData;
-    }
-
-    private void SaveJson() 
-    {
-        DataManager.Instance.InitMapData();
-        DataManager.Instance.CreateMap();
-
-        //string jsonStr = JsonUtility.ToJson(InGameDataManager.Instance.mapCreater);
-
-        string testPath = $"{Application.dataPath}/Prefabs/Resources/test.txt";
-
-        StreamWriter sw = new StreamWriter(testPath);
-        //sw.Write(jsonStr);
-        sw.Flush();
-        sw.Close();
     }
 
     private void GameSceneLoadOn()
     {
-        //InGameDataManager.Instance.SetMapSize();
-        //InGameDataManager.Instance.InitMapData();
-        //InGameDataManager.Instance.CreateMap();
+        if (DataManager.Instance.isMultiOn)
+        {
+            DataManager.Instance.AddCoin(-3);
+        }
 
         SceneManager.LoadScene("Game");
     }
-
-    
 
     // Update is called once per frame
     void Update()

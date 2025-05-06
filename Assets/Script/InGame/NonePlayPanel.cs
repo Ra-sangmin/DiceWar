@@ -134,8 +134,6 @@ public class NonePlayPanel : MonoBehaviour
 
         AlliancePopup alliancePopup = PopupManager.Instance.AlliancePopupOn();
         alliancePopup.SetData();
-        //alliancePopup.AllianceClearOn = AllianceClearOn;
-        Debug.LogWarning("AllyBtnClickOn");
     }
 
     public void AllianceClearOn(AllianceResultRequest allianceResultRequest)
@@ -148,7 +146,6 @@ public class NonePlayPanel : MonoBehaviour
         {
             SkillUseOn();
         }
-        
 
         SetNoneBtn();
     }
@@ -179,9 +176,10 @@ public class NonePlayPanel : MonoBehaviour
         return DataManager.Instance.playerData.skillCardCount <= 0;
     }
 
-    public void SkillUseOn()
+    public void SkillUseOn(int addCount = -1)
     {
-        DataManager.Instance.playerData.skillCardCount--;
+        DataManager.Instance.SkillCardCountAdd(addCount);
+
         skillCard.SetCountIcon();
     }
 

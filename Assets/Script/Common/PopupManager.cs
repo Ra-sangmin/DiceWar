@@ -104,10 +104,10 @@ public class PopupManager : MonoSingleton<PopupManager>
         }
     }
 
-    public void GameResultPopupOn(InGameController inGameController ,  bool win)
+    public void GameResultPopupOn(InGameController inGameController ,  bool win , int coinCount)
     {
         GameResultPopup gameResultPopup = Instantiate(Resources.Load<GameResultPopup>("Popup/InGame/GameResultPopup"), parantTranform);
-        gameResultPopup.DataInit(inGameController, win);
+        gameResultPopup.DataInit(inGameController, win , coinCount);
 
         //if (win)
         //{

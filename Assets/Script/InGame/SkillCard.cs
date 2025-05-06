@@ -11,7 +11,6 @@ public class SkillCard : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        DataManager.Instance.playerData.skillCardCount = 3;
         SetCountIcon();
     }
 

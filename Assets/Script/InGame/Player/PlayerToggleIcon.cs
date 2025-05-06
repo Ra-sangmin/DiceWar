@@ -14,11 +14,6 @@ public class PlayerToggleIcon : MonoBehaviour
     [SerializeField] Sprite disableBgSprite;
     public CoinBox coinBox;
     
-    //[SerializeField] RectTransform tradeCoinPanel;
-    //[SerializeField] Image activeImage;
-    //[SerializeField] RectTransform addCoinPanel;
-    //[SerializeField] Text coinText;
-
     [SerializeField] Text playerDiscriptText;
 
     public PlayerEnum playerEnum;
@@ -33,24 +28,8 @@ public class PlayerToggleIcon : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        //if (Input.GetKeyDown(KeyCode.Alpha1))
-        //{
-        //    SetCoinBtnActiveOn(false);
-        //    //activeImage.gameObject.SetActive(false);
-        //    //Debug.LogWarning("d");
-        //}
-        //if (Input.GetKeyDown(KeyCode.Alpha2))
-        //{
-        //    SetCoinBtnActiveOn(true);
-        //    //activeImage.gameObject.SetActive(true);
-        //    //Debug.LogWarning("3");
-        //}
-    }
 
-    //public void SetCoinBtnActiveOn(bool activeOn)
-    //{
-    //    activeImage.gameObject.SetActive(activeOn);
-    //}
+    }
 
     public void SetPlayerData(PlayerEnum playerEnum) 
     {
@@ -74,21 +53,7 @@ public class PlayerToggleIcon : MonoBehaviour
         toggle.isOn = selectOn;
 
         coinBox.SelectOn(selectOn);
-
-        //tradeCoinPanel.transform.SetParent(playerToggleIcon.transform);
-        //tradeCoinPanel.transform.localPosition = new Vector2(0, -215);
-        //tradeCoinPanel.gameObject.SetActive(selectOn);
-
-        //coinCount = 5;
-        //coinText.text = coinCount.ToString();
-
-        //SetActiveAddCoinPanel(false);
     }
-
-    //public void SetActiveAddCoinPanel(bool activeOn)
-    //{
-    //    addCoinPanel.gameObject.SetActive(activeOn);
-    //}
 
     public void CoinCountChange(bool addOn)
     {

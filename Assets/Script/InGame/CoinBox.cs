@@ -9,7 +9,7 @@ public class CoinBox : MonoBehaviour
     [SerializeField] Image activeImage;
     [SerializeField] RectTransform addCoinPanel;
     [SerializeField] Text coinText;
-    public int coinCount = 5;
+    public int coinCount = 3;
 
     // Start is called before the first frame update
     void Start()
@@ -20,33 +20,26 @@ public class CoinBox : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        //if (Input.GetKeyDown(KeyCode.Alpha1))
-        //{
-        //    SetCoinBtnActiveOn(false);
-        //    //activeImage.gameObject.SetActive(false);
-        //    //Debug.LogWarning("d");
-        //}
-        //if (Input.GetKeyDown(KeyCode.Alpha2))
-        //{
-        //    SetCoinBtnActiveOn(true);
-        //    //activeImage.gameObject.SetActive(true);
-        //    //Debug.LogWarning("3");
-        //}
+
     }
 
-    public void SelectOn(bool selectOn)
+    public void SelectOn(bool selectOn , int coinCount = 3)
     {
         //toggle.isOn = selectOn;
 
+        this.coinCount = coinCount;
+
         tradeCoinPanel.gameObject.SetActive(selectOn);
 
-        coinCount = 5;
+        //coinCount = 3;
         coinText.text = coinCount.ToString();
 
         SetActiveAddCoinPanel(false);
     }
     public void SetActiveAddCoinPanel(bool activeOn)
     {
+        return;
+
         addCoinPanel.gameObject.SetActive(activeOn);
     }
 

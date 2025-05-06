@@ -51,6 +51,8 @@ public class AlliancePopup : MonoBehaviour
         {
             playerToggleIcon.SelectOn(playerToggleIcon.playerEnum == myPlayerEnum);
         }
+
+        SetCointCount();
     }
 
     public void PlayerSelectOn(int selectIndex)
@@ -66,7 +68,49 @@ public class AlliancePopup : MonoBehaviour
 
         currentSelectPlayer.ToggleOn();
 
+        SetCointCount();
+
         SetProposeBtn();
+    }
+
+    private void SetCointCount()
+    {
+        PlayerEnum myPlayerEnum = DataManager.Instance.playerData.playerEnum;
+
+        int numPlayerCount = DataManager.Instance.num_player;
+
+        int maxCoinCount = 3 * numPlayerCount;
+
+        int allianceCount = playerToggleIconList.Count(data => data.toggle.isOn);
+
+        float oneManCoinCount = maxCoinCount / (float)allianceCount;
+
+        //Debug.LogWarning($"maxCoinCount = {maxCoinCount} , allianceCount = {allianceCount} , oneManCoinCount = {oneManCoinCount}");
+
+        foreach (var playerToggleIcon in playerToggleIconList)
+        {
+            int tempCount = 0;
+
+            if (playerToggleIcon.toggle.isOn == false)
+            {
+                continue;
+            }
+
+            tempCount = Mathf.CeilToInt(oneManCoinCount);
+
+            tempCount = Mathf.Min(tempCount, maxCoinCount);
+
+            playerToggleIcon.coinBox.SetCoinCount(tempCount);
+
+            maxCoinCount -= tempCount;
+
+            if (maxCoinCount < 0)
+            {
+                maxCoinCount = 0;
+            }
+
+            //Debug.LogWarning($"tempCount = {tempCount} , maxCoinCount = {maxCoinCount} , PlayerEnum = {playerToggleIcon.playerEnum}");
+        }
     }
 
     // Start is called before the first frame update
@@ -98,11 +142,18 @@ public class AlliancePopup : MonoBehaviour
 
         List<AllianceData> allianceDataList = new List<AllianceData> ();
 
+        PlayerEnum myPlayerEnum = DataManager.Instance.playerData.playerEnum;
+        int myCoinCount = 0;
+
         foreach (var selectItem in selectList)
         {
-            Debug.LogWarning($"playerEnum = {selectItem.playerEnum} , coinCount = {selectItem.coinBox.coinCount}");
             AllianceData allianceData = new AllianceData(selectItem.playerEnum, selectItem.coinBox.coinCount);
             allianceDataList.Add(allianceData);
+
+            if (selectItem.playerEnum == myPlayerEnum) 
+            {
+                myCoinCount = selectItem.coinBox.coinCount;
+            }
         }
 
         AllianceRequestData allianceRequestData = new AllianceRequestData();
@@ -110,8 +161,8 @@ public class AlliancePopup : MonoBehaviour
 
         AllianceData orderData = new AllianceData()
         {
-            playerEnum = DataManager.Instance.playerData.playerEnum,
-            coinCount = 5
+            playerEnum = myPlayerEnum,
+            coinCount = myCoinCount
         };
 
         AllianceRequest request = new AllianceRequest()
@@ -129,7 +180,7 @@ public class AlliancePopup : MonoBehaviour
         //    }
         //};
 
-        ServerManager.Instance.AllianceRequestOn(request);
+        ServerManager.Instance.SendMessageOn(request);
         gameObject.SetActive(false);
 
         //AllianceRequestOn(allianceRequestData);

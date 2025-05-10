@@ -190,9 +190,18 @@ public class DataManager : MonoSingleton<DataManager>
 
         playerDataList = new List<PlayerData>();
 
+        int count = 0;
+
         foreach (var item in playerColorIndexDic)
         {
-            playerDataList.Add(new PlayerData(item.Key, item.Value));   
+            playerDataList.Add(new PlayerData(item.Key, item.Value));
+
+            count++;
+
+            if (count >= num_player)
+            {
+                break;
+            }
         }
 
         int onLineCnt = num_player - off_line_num_player -1;
@@ -253,7 +262,7 @@ public class DataManager : MonoSingleton<DataManager>
         return areadata;
     }
 
-    public void SetAreaData(AreaData _areaData)
+    public void SetAreaData(SendAreaData _areaData)
     {
         AreaData areaData = GetAreaData(_areaData.id);
 
@@ -566,6 +575,11 @@ public class DataManager : MonoSingleton<DataManager>
         return currentTurnIndex == (int)playerData.playerEnum;
     }
 
+    public PlayerData GetPlayerData(PlayerEnum playerEnum)
+    {
+        return playerDataList.FirstOrDefault(data => data.playerEnum == playerEnum);
+    }
+
     public bool IsAITurn()
     {
         bool isAiOn = false;
@@ -677,6 +691,8 @@ public class DataManager : MonoSingleton<DataManager>
     public void SkillCardCountAdd(int addCount = -1)
     {
         playerData.skillCardCount += addCount;
+
+        playerData.skillCardCount = Mathf.Clamp(playerData.skillCardCount,0, 3);
     }
 
     public void GameDataClearOn()

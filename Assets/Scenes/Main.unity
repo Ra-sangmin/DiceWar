@@ -5477,7 +5477,7 @@ MonoBehaviour:
   smToggleGroup: {fileID: 0}
   button: {fileID: 0}
   toggleValue:
-    value: 1
+    value: 0
   trueColor: {r: 0.16470589, g: 0.19607845, b: 0.20784315, a: 1}
   falseColor: {r: 0.5294118, g: 0.91372555, b: 0.9568628, a: 1}
   disableColor: {r: 0.47450984, g: 0.4901961, b: 0.5058824, a: 1}
@@ -13932,7 +13932,7 @@ MonoBehaviour:
   smToggleGroup: {fileID: 0}
   button: {fileID: 0}
   toggleValue:
-    value: 1
+    value: 0
   trueColor: {r: 0.16470589, g: 0.19607845, b: 0.20784315, a: 1}
   falseColor: {r: 0.5294118, g: 0.91372555, b: 0.9568628, a: 1}
   disableColor: {r: 0.47450984, g: 0.4901961, b: 0.5058824, a: 1}
@@ -17857,7 +17857,7 @@ MonoBehaviour:
   diceCompensationOn: 0
   turnPosition: -1
   isOwner: 0
-  currentTurnIndex: 2
+  currentTurnIndex: 0
   playerDataList: []
   gameStart:
     value: 0

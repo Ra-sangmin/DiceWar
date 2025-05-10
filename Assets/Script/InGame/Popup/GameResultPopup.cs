@@ -1,3 +1,5 @@
+using System;
+using UniRx;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -34,7 +36,11 @@ public class GameResultPopup : MonoBehaviour
 
         DataManager.Instance.GameDataClearOn();
 
-        ServerManager.Instance.SendMessageOn(new GameEndOnRequest());
+        Observable
+                .Timer(TimeSpan.FromSeconds(1f))
+                .Repeat()
+                .Subscribe(_ => ServerManager.Instance.GameOutRequestOn())
+                .AddTo(this);
     }
 
     public void GoMainBtnClickOn()

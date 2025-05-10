@@ -94,7 +94,7 @@ public class PlayerIconController : MonoBehaviour
         //내 땅이 모두 없어졌다면
         if (resultList.Any(data => data.playerEnum == myPlayerEnum) == false)
         {
-            Debug.LogWarning("내땅 없음");
+            //Debug.LogWarning("내땅 없음");
             gameLoseOn();
             return;
         }

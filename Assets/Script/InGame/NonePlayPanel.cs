@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using Cysharp.Threading.Tasks;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -6,11 +7,12 @@ using UnityEngine.UI;
 public class NonePlayPanel : MonoBehaviour
 {
     [SerializeField] RectTransform singlePanel;
+    [SerializeField] List<Text> textList = new List<Text>();
     [SerializeField] RectTransform multiPanel;
     [SerializeField] SkillCard skillCard;
     [SerializeField] Text stashText;
-
     [SerializeField] List<Button> btnList = new List<Button>();
+    [SerializeField] DiceWarUIController diceWarUIController;
 
     private AreaData selectAreaData;
 
@@ -93,6 +95,14 @@ public class NonePlayPanel : MonoBehaviour
     {
         singlePanel.gameObject.SetActive(DataManager.Instance.isMultiOn == false);
         multiPanel.gameObject.SetActive(DataManager.Instance.isMultiOn);
+
+        SetDiceWarUI();
+    }
+
+    void SetDiceWarUI() 
+    {
+        Transform parent = DataManager.Instance.isMultiOn ? multiPanel : singlePanel;
+        diceWarUIController.SetTransform(parent);
     }
 
     //public void SetCountIcon(int countIndex)
@@ -196,5 +206,15 @@ public class NonePlayPanel : MonoBehaviour
             stashText.gameObject.SetActive(true);
             stashText.text = $"stash : {stashCount}";
         }
+    }
+
+    public async UniTask AttackOn(DiceWarData myDiceWarData, DiceWarData enemyDiceWarData)
+    {
+        foreach (var text in textList)
+        {
+            text.gameObject.SetActive(false);
+        }
+
+        await diceWarUIController.AttackOn(myDiceWarData, enemyDiceWarData);
     }
 }

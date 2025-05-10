@@ -38,37 +38,13 @@ public class PlaySetPopup : MonoBehaviour
         SetToggleEvent(aIToggleList, AIToggleChangeOn);
         SetToggleEvent(mapSizeToggleList, MapSizeToggleChangeOn);
         SetToggleEvent(playersCountToggleList, PlayersCountToggleChangeOn);
-
-        //for (int i = 0; i < offlineUsersToggleList.Count; i++)
-        //{
-        //    int index = i;
-
-        //    offlineUsersToggleList[i].toggleValue.Subscribe(isOn =>
-        //    {
-        //        if (isOn)
-        //        {
-        //            OfflineUsersToggleChangeOn(index);
-        //        }
-        //        else
-        //        {
-        //            if (offlineUsersToggleList.All(data => data.toggleValue.Value == false))
-        //            {
-        //                OfflineUsersToggleChangeOn(-1);
-        //            }
-        //        }
-        //    }).AddTo(gameObject);
-        //}
-
-        //SetToggleEvent(offlineUsersToggleList, OfflineUsersToggleChangeOn);
-
-
     }
 
     private void OnEnable()
     {
         if (multiOn)
         {
-            MapSizeToggleChangeOn(0);
+            MapSizeToggleChangeOn(2);
         }
     }
 
@@ -93,11 +69,7 @@ public class PlaySetPopup : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        if (multiOn)
-        {
-            ServerManager.Instance.Init();
-        }
-
+        SetColorData();
     }
 
     // Update is called once per frame
@@ -174,13 +146,6 @@ public class PlaySetPopup : MonoBehaviour
         {
             int activeIndex = 1;
 
-            //int offLineCnt = DataManager.Instance.off_line_num_player - 3;
-
-            //if (offLineCnt >= activeCount - 1)
-            //{
-            //    offlineUsersToggleList[activeCount - 1].toggleValue.SetValueAndForceNotify(true);
-            //}
-
             for (int i = 0; i < playersCountToggleList.Count; i++)
             {
                 bool interactableOn = i == activeIndex;
@@ -239,6 +204,11 @@ public class PlaySetPopup : MonoBehaviour
             }
         }
 
+        SetColorData();
+    }
+
+    void SetColorData()
+    {
         playerImage.sprite = playerSpriteList[playerColorIndex];
         playerImage.SetNativeSize();
 

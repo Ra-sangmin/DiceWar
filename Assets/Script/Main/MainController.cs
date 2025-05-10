@@ -37,6 +37,8 @@ public class MainController : MonoBehaviour
         LoginCheck();
 
         PopupManager.Instance.SetCanvasParant(transform);
+
+        ServerManager.Instance.Init();
     }
 
     void LoginCheck()

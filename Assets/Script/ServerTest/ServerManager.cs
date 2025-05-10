@@ -1,21 +1,30 @@
-﻿using System;
+﻿using Cysharp.Threading.Tasks;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Sockets;
-using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Events;
 
 public class ServerManager : MonoSingleton<ServerManager>
 {
+    private TcpClient tcpClient;
+    private NetworkStream stream;
+
     private Socket _socket = null;
     byte[] _recvBuffer = new byte[10240];
 
+    private Queue<string> sendQueue = new Queue<string>();
+
     private Queue<BaseRequest> queue = new Queue<BaseRequest>();
+
+    private List<string> receiveList = new List<string>();
 
     public UnityAction<BaseRequest> receiveDataOn = data => { };
 
     public int roomDataIndex = -1;
+
+    private string beforeData = string.Empty;
 
     void Start()
     {
@@ -27,7 +36,7 @@ public class ServerManager : MonoSingleton<ServerManager>
         // tcp서버를 선언
         _socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 
-         string IP = "ec2-52-78-148-28.ap-northeast-2.compute.amazonaws.com";
+        string IP = "ec2-52-78-148-28.ap-northeast-2.compute.amazonaws.com";
         int PORT = 8000;
 
         // 서버 연결
@@ -48,9 +57,9 @@ public class ServerManager : MonoSingleton<ServerManager>
     }
 
     //이렇게 하면 서버에 접속 완료
-    async void SendMessageOn(string jsonUserString)
+    private void SendMessageOn(string jsonUserString)
     {
-        Debug.Log("Send : " + jsonUserString);
+        //Debug.Log("Send : " + jsonUserString);
 
         if(_socket == null)
         {
@@ -59,15 +68,11 @@ public class ServerManager : MonoSingleton<ServerManager>
 
         Byte[] sendData = System.Text.Encoding.UTF8.GetBytes(jsonUserString);
 
-        //Debug.LogWarning(sendData.Length);
-
         try
         {
-            _socket.BeginSend(sendData, 0, sendData.Length, SocketFlags.None, new AsyncCallback(SendComplete), null);
+            //_socket.BeginSend(sendData, 0, sendData.Length, SocketFlags.None, new AsyncCallback(SendComplete), null);
 
-            await Task.Delay(5000);
-
-            //_socket.Send(sendData);
+            _socket.Send(sendData, 0, sendData.Length, SocketFlags.None);
         }
 
         catch (Exception e)
@@ -76,7 +81,7 @@ public class ServerManager : MonoSingleton<ServerManager>
             Debug.LogError("send fail exception = " + e.Message);
 
             // 서버 퇴장
-            Shutdown();
+            //Shutdown();
         }
     }
 
@@ -100,10 +105,9 @@ public class ServerManager : MonoSingleton<ServerManager>
 
         catch (Exception e)
         {
-
             Debug.LogError("Send Exception: " + e.Message);
 
-            Shutdown();
+            //Shutdown();
         }
 
     }
@@ -114,6 +118,7 @@ public class ServerManager : MonoSingleton<ServerManager>
         {
             maxPlayerCnt = maxPlayerCnt,
             userCnt = userCnt,
+            mapSizeEnum = DataManager.Instance.mapSizeEnum
         };
 
         SendMessageOn(gameReadyRequest);
@@ -123,7 +128,14 @@ public class ServerManager : MonoSingleton<ServerManager>
     {
         if (roomDataIndex != -1)
         {
-            SendMessageOn(new GameOutRequest());
+            GameOutRequest gameOutRequest = new GameOutRequest()
+            {
+                outPlayerEnum = DataManager.Instance.playerData.playerEnum,
+            };
+
+            SendMessageOn(gameOutRequest);
+
+            roomDataIndex = -1;
         }
     }
 
@@ -145,15 +157,30 @@ public class ServerManager : MonoSingleton<ServerManager>
 
         string jsonStr = JsonUtility.ToJson(request);
 
-        //Debug.LogWarning(jsonStr);
+        //if (request.requestProtocal == RequestProtocal.GameOutOn)
+        //{
+        //    SendMessageOn(jsonStr);
+        //}
+        //else
+        {
+            sendQueue.Enqueue(jsonStr);
+        }
+    }
 
-        SendMessageOn(jsonStr);
+    void SendQueueListCheck()
+    {
+        if (sendQueue.Count != 0)
+        {
+            SendMessageOn(sendQueue.Dequeue());
+        }
     }
 
     private void Update()
     {
+        SendQueueListCheck();
         QueueListCheck();
         receiveMessage();
+        ReceiveListDataCheck();
     }
 
     void QueueListCheck()
@@ -166,7 +193,7 @@ public class ServerManager : MonoSingleton<ServerManager>
 
     void receiveMessage()
     {
-        if (_socket == null)
+        if (_socket == null || _socket.Available != 0)
             return;
         
         try
@@ -178,7 +205,7 @@ public class ServerManager : MonoSingleton<ServerManager>
         {
             //실패시 에러 메시지
             Debug.LogError("BeginException: " + e.Message);
-            Shutdown();
+            //Shutdown();
         }
     }
 
@@ -191,164 +218,149 @@ public class ServerManager : MonoSingleton<ServerManager>
             return;
         }
 
-        // 메시지를 받는게 성공하면 콜백되는 함수 입니다.
-        //try
-        {
-            int len = _socket.EndReceive(ar);
+        int len = _socket.EndReceive(ar);
 
-            if (len == 0)
+        if (len != 0)
+        {
+            byte[] cuttingBuffer = new byte[len];
+
+            for (int i = 0; i < len; i++)
             {
-                //Shutdown();
+                cuttingBuffer[i] = _recvBuffer[i];
+            }
+
+            string jsonString = System.Text.Encoding.UTF8.GetString(cuttingBuffer);
+
+            receiveList.Add(jsonString);
+
+            //출력이 끝나면 버퍼 초기화
+            System.Array.Clear(_recvBuffer, 0, _recvBuffer.Length);
+        }
+    }
+
+    void ReceiveListDataCheck()
+    {
+        if (receiveList.Count == 0)
+            return;
+
+        string checkJsonData = string.Empty;
+        BaseRequest baseRequest = null;
+
+        //Debug.LogWarning(receiveList.Count);
+
+        if (receiveList.Count == 1)
+        {
+            checkJsonData = receiveList[0];
+        }
+        else if (receiveList.Count == 2)
+        {
+            string firstStr = string.Empty;
+            string endStr = string.Empty;
+
+            if (receiveList[0].IndexOf("{\"requestProtocal\"") == 0)
+            {
+                firstStr = receiveList[0];
+                endStr = receiveList[1];
             }
             else
             {
-                byte[] cuttingBuffer = new byte[len];
-
-                for (int i = 0; i < len; i++)
-                {
-                    cuttingBuffer[i] = _recvBuffer[i];
-                }
-
-                string jsonString = System.Text.Encoding.UTF8.GetString(cuttingBuffer);
-
-                //Debug.LogWarning(jsonString);
-
-                ReceiveRequestDataOn(jsonString);
-
-                //출력이 끝나면 버퍼 초기화
-                System.Array.Clear(_recvBuffer, 0, _recvBuffer.Length);
+                firstStr = receiveList[1];
+                endStr = receiveList[0];
             }
+
+            checkJsonData = firstStr + endStr;
+        }
+        else if (receiveList.Count == 3)
+        {
+            string firstStr = string.Empty;
+            string middleStr = string.Empty;
+            string endStr = string.Empty;
+
+            for (int i = 0; i < receiveList.Count; i++)
+            {
+                string str = receiveList[i];
+
+                if (str.IndexOf("{\"requestProtocal\"") == 0)
+                {
+                    firstStr = str;
+                }
+                else if (str.IndexOf("]}]}") != -1)
+                {
+                    endStr = str;
+                }
+                else
+                {
+                    middleStr = str;
+                }
+            }
+
+            checkJsonData = firstStr + middleStr + endStr;
+        }
+        else
+        {
+            receiveList.Clear();
         }
 
-        //catch (Exception e)
+        //if (string.IsNullOrEmpty(checkJsonData) == false) 
         //{
-        //    Debug.LogError("Receive Exception: " + e.Message);
-        //    //Shutdown();
+        //    Debug.LogWarning(checkJsonData);
+        //    Debug.LogWarning("receiveList = "+ receiveList.Count);
         //}
+
+        baseRequest = GetBaseRequest(checkJsonData);
+
+        if (baseRequest != null)
+        {
+            ReceiveRequestDataOn(checkJsonData);
+
+            receiveList.Clear();
+        }
 
     }
 
-    private void ReceiveRequestDataOn(string jsonString)
+    BaseRequest GetBaseRequest(string checkJsonData)
     {
         BaseRequest baseRequest = null;
 
-        RequestProtocal requestProtocal = JsonUtility.FromJson<BaseRequest>(jsonString).requestProtocal;
+        try
+        {
+            baseRequest = JsonUtility.FromJson<BaseRequest>(checkJsonData);
+        }
+        catch (Exception e)
+        {
+            Debug.LogWarning("fail = " + checkJsonData + " receivelist Count = " + receiveList.Count);
+            //Debug.LogWarning(e);
+        }
+
+        return baseRequest;
+    }
+
+    private void ReceiveRequestDataOn(string str)
+    {
+        BaseRequest baseRequest = null;
+
+        RequestProtocal requestProtocal = JsonUtility.FromJson<BaseRequest>(str).requestProtocal;
 
         switch (requestProtocal)
         {
             case RequestProtocal.GameReady:
 
-                GameReadyRequest gameReadyRequest = JsonUtility.FromJson<GameReadyRequest>(jsonString);
-
+                GameReadyRequest gameReadyRequest = JsonUtility.FromJson<GameReadyRequest>(str);
                 roomDataIndex = gameReadyRequest.roomDataIndex;
-
-                //Debug.LogWarning("playerEnum = "+gameReadyRequest.playerEnum);
-
                 baseRequest = gameReadyRequest;
-
                 break;
 
-            case RequestProtocal.GameOutOn:
-
-                baseRequest = JsonUtility.FromJson<GameOutRequest>(jsonString);
-
-                break;
-
-            case RequestProtocal.GameStartOn:
-
-                GameStartOn GameStartOn = JsonUtility.FromJson<GameStartOn>(jsonString);
-
-                //Debug.LogWarning(GameStartOn.roomDataIndex);
-
-                baseRequest = GameStartOn;
-
-                break;
-
-            case RequestProtocal.MapCreateOn:
-
-                MapCreateRequestOn mapCreateRequestOn = JsonUtility.FromJson<MapCreateRequestOn>(jsonString);
-
-                //Debug.LogWarning(GameStartOn.roomDataIndex);
-
-                baseRequest = mapCreateRequestOn;
-
-                break;
-
-            case RequestProtocal.TurnRequest:
-
-                TurnRequest turnRequest = JsonUtility.FromJson<TurnRequest>(jsonString);
-
-                baseRequest = turnRequest;
-
-                break;
-
-            case RequestProtocal.AttackRequest:
-
-                AttackRequest attackRequest = JsonUtility.FromJson<AttackRequest>(jsonString);
-
-                baseRequest = attackRequest;
-
-                break;
-
-            case RequestProtocal.LandTradeRequest:
-
-                LandTradeRequest landTradeRequest = JsonUtility.FromJson<LandTradeRequest>(jsonString);
-
-                baseRequest = landTradeRequest;
-
-                //Debug.LogWarning($"playerEnum = {landTradeRequest.playerEnum} ,  turn = {landTradeRequest.areaData.areaIndex} , buyOn = {landTradeRequest.buyOn}");
-
-                break;
-
-            case RequestProtocal.LandTradeApproveRequest:
-
-                LandTradeApproveRequest landTradeApproveRequest = JsonUtility.FromJson<LandTradeApproveRequest>(jsonString);
-
-                baseRequest = landTradeApproveRequest;
-
-                //Debug.LogWarning($"playerEnum = {landTradeRequest.playerEnum} ,  turn = {landTradeRequest.areaData.areaIndex} , buyOn = {landTradeRequest.buyOn}");
-
-                break;
-
-            case RequestProtocal.AllianceRequest:
-
-                AllianceRequest allianceRequest = JsonUtility.FromJson<AllianceRequest>(jsonString);
-
-                baseRequest = allianceRequest;
-
-                //Debug.LogWarning($"playerEnum = {landTradeRequest.playerEnum} ,  turn = {landTradeRequest.areaData.areaIndex} , buyOn = {landTradeRequest.buyOn}");
-
-                break;
-
-            case RequestProtocal.AllianceApproveRequest:
-
-                AllianceApproveRequest allianceApproveRequest = JsonUtility.FromJson<AllianceApproveRequest>(jsonString);
-
-                baseRequest = allianceApproveRequest;
-
-                //Debug.LogWarning($"playerEnum = {landTradeRequest.playerEnum} ,  turn = {landTradeRequest.areaData.areaIndex} , buyOn = {landTradeRequest.buyOn}");
-
-                break;
-
-            case RequestProtocal.AllianceResultRequest:
-
-                AllianceResultRequest allianceResultRequest = JsonUtility.FromJson<AllianceResultRequest>(jsonString);
-
-                baseRequest = allianceResultRequest;
-
-                //Debug.LogWarning($"playerEnum = {landTradeRequest.playerEnum} ,  turn = {landTradeRequest.areaData.areaIndex} , buyOn = {landTradeRequest.buyOn}");
-
-                break;
-
-            case RequestProtocal.AllianceBetrayRequest:
-
-                AllianceBetrayRequest allianceBetrayRequest = JsonUtility.FromJson<AllianceBetrayRequest>(jsonString);
-
-                baseRequest = allianceBetrayRequest;
-
-                //Debug.LogWarning($"playerEnum = {landTradeRequest.playerEnum} ,  turn = {landTradeRequest.areaData.areaIndex} , buyOn = {landTradeRequest.buyOn}");
-
-                break;
+            case RequestProtocal.GameOutOn:                 baseRequest = JsonParser<GameOutRequest>(str); break;
+            case RequestProtocal.GameStartOn:               baseRequest = JsonParser<GameStartOn>(str); break;
+            case RequestProtocal.MapCreateOn:               baseRequest = JsonParser<MapCreateRequestOn>(str); break;
+            case RequestProtocal.TurnRequest:               baseRequest = JsonParser<TurnRequest>(str); break;
+            case RequestProtocal.AttackRequest:             baseRequest = JsonParser<AttackRequest>(str); break;
+            case RequestProtocal.LandTradeRequest:          baseRequest = JsonParser<LandTradeRequest>(str); break;
+            case RequestProtocal.LandTradeApproveRequest:   baseRequest = JsonParser<LandTradeApproveRequest>(str); break;
+            case RequestProtocal.AllianceRequest:           baseRequest = JsonParser<AllianceRequest>(str); break;
+            case RequestProtocal.AllianceApproveRequest:    baseRequest = JsonParser<AllianceApproveRequest>(str); break;
+            case RequestProtocal.AllianceResultRequest:     baseRequest = JsonParser<AllianceResultRequest>(str); break;
+            case RequestProtocal.AllianceBetrayRequest:     baseRequest = JsonParser<AllianceBetrayRequest>(str); break;
         }
 
         if (baseRequest != null)
@@ -356,6 +368,11 @@ public class ServerManager : MonoSingleton<ServerManager>
             queue.Enqueue(baseRequest);
             //receiveDataOn(baseRequest);
         }
+    }
+
+    BaseRequest JsonParser<T>(string jsonString)
+    {
+        return JsonUtility.FromJson<T>(jsonString) as BaseRequest;
     }
 
     private void Shutdown()
@@ -382,7 +399,7 @@ public class ServerManager : MonoSingleton<ServerManager>
 
     }
 
-    private void OnDestroy()
+    private void OnDisable()
     {
         GameOutRequestOn();
 
@@ -405,6 +422,7 @@ public class GameReadyRequest : BaseRequest
     public int socketCnt = 0;
     public PlayerEnum playerEnum;
     public bool isOwner = false;
+    public MapSizeEnum mapSizeEnum;
 
     public GameReadyRequest()
     {
@@ -452,7 +470,7 @@ public class TurnRequest : BaseRequest
 {
     public PlayerEnum playerEnum = PlayerEnum.Player_0;
     public bool turnStartOn = false;
-    public List<AreaData> areaDataList = new List<AreaData>();
+    public List<SendAreaData> areaDataList = new List<SendAreaData>();
 
     public TurnRequest()
     {
@@ -463,8 +481,11 @@ public class TurnRequest : BaseRequest
 [System.Serializable]
 public class AttackRequest : BaseRequest
 {
-    public AreaData fromAreaData;
-    public AreaData toAreaData;
+    public SendAreaData fromAreaData;
+    public SendAreaData toAreaData;
+
+    public DiceWarData fromDiceWarData;
+    public DiceWarData toDiceWarData;
 
     public AttackRequest()
     {
@@ -548,14 +569,17 @@ public class AllianceBetrayRequest : BaseRequest
     }
 }
 
-[System.Serializable]
-public class GameEndOnRequest : BaseRequest
-{
-    public GameEndOnRequest()
-    {
-        base.requestProtocal = RequestProtocal.GameEndOn;
-    }
-}
+//[System.Serializable]
+//public class GameEndOnRequest : BaseRequest
+//{
+//    public PlayerEnum outPlayerEnum = PlayerEnum.Player_None;
+//    public bool isOwner = false;
+
+//    public GameEndOnRequest()
+//    {
+//        base.requestProtocal = RequestProtocal.GameEndOn;
+//    }
+//}
 
 public enum RequestProtocal
 {
@@ -572,7 +596,7 @@ public enum RequestProtocal
     AllianceApproveRequest,
     AllianceResultRequest,
     AllianceBetrayRequest,
-    GameEndOn,
+    //GameEndOn,
 }
 
 [System.Serializable]

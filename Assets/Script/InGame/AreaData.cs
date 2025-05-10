@@ -21,6 +21,8 @@ public class AreaData
 
     public string bundleKey { get; set;}
 
+    public AreaData() {}
+
     public AreaData(int areaIndex)
     {
         this.id = areaIndex;

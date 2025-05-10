@@ -418,7 +418,7 @@ public class MapController : MonoBehaviour
         myData.ChoisEventOn(true);
         enemyData.ChoisEventOn(true);
 
-        await Task.Delay(300);
+        await inGameBottomController.nonePlayPanel.AttackOn(myDiceWarData, enemyDiceWarData);
 
         //점령에 성공하였다면
         if (myDiceWarData.diceSum > enemyDiceWarData.diceSum)
@@ -435,20 +435,27 @@ public class MapController : MonoBehaviour
         DeSelectOn(myData);
         enemyData.ChoisEventOn(false);
 
-        await Task.Delay(300);
-
-        attackEventOn = false;
-
         if (DataManager.Instance.isMultiOn)
         {
-            AttackRequest request = new AttackRequest()
-            {
-                fromAreaData = myData,
-                toAreaData = enemyData,
-            };
+            AttackRequestOn(myData, enemyData , myDiceWarData , enemyDiceWarData);
 
-            ServerManager.Instance.SendMessageOn(request);
+            await Task.Delay(500);
         }
+
+        attackEventOn = false;
+    }
+
+    private void AttackRequestOn(AreaData fromAreaData , AreaData toAreaData , DiceWarData fromDiceWarData, DiceWarData toDiceWarData)
+    {
+        AttackRequest request = new AttackRequest()
+        {
+            fromAreaData = fromAreaData.GetSendAreaData(),
+            toAreaData = toAreaData.GetSendAreaData(),
+            fromDiceWarData = fromDiceWarData,
+            toDiceWarData = toDiceWarData,
+        };
+
+        ServerManager.Instance.SendMessageOn(request);
     }
 
     public async UniTask AttackReceiveDataOn(AttackRequest attackRequest)
@@ -457,12 +464,13 @@ public class MapController : MonoBehaviour
         AreaData toAreaData = DataManager.Instance.GetAreaData(attackRequest.toAreaData.id);
 
         fromAreaData.ChoisEventOn(true);
-        await Task.Delay(200);
+        await Task.Delay(100);
         toAreaData.ChoisEventOn(true);
-        await Task.Delay(200);
+        await Task.Delay(100);
+
+        await inGameBottomController.nonePlayPanel.AttackOn(attackRequest.fromDiceWarData, attackRequest.toDiceWarData);
 
         fromAreaData.ChoisEventOn(false);
-        await Task.Delay(200);
         toAreaData.ChoisEventOn(false);
 
         DataManager.Instance.SetAreaData(attackRequest.fromAreaData);
@@ -542,7 +550,8 @@ public class MapController : MonoBehaviour
         bool isMyTurn = DataManager.Instance.IsMyTurn();
 
         //최대 15개 까지만 회복 가능하도록
-        int connectedCount = Mathf.Min(playerIcon.connectedCount, 15);
+        //int connectedCount = Mathf.Min(playerIcon.connectedCount, 15);
+        int connectedCount = playerIcon.connectedCount;
 
         List<AreaData> areaDataList = DataManager.Instance.areaDataList.Where(data => data.player == playerEnum).ToList();
 
@@ -554,7 +563,7 @@ public class MapController : MonoBehaviour
             {
                 allMax = areaDataList.All(data => data.dice == DataManager.Instance.diceMaxCount);
 
-                if (allMax)
+                if (allMax || connectedCount == 0)
                 {
                     break;
                 }

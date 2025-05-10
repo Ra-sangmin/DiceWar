@@ -6,7 +6,6 @@ using UnityEngine.UI;
 public class DiceUI : MonoBehaviour
 {
     [SerializeField] Image bgImage;
-    [SerializeField] Image centerImage;
     [SerializeField] List<Sprite> diceSpriteList = new List<Sprite>();
 
     // Start is called before the first frame update
@@ -28,6 +27,6 @@ public class DiceUI : MonoBehaviour
 
     public void SetDice(int diceStatus)
     {
-        centerImage.sprite = diceSpriteList[diceStatus];
+        bgImage.sprite = diceSpriteList[diceStatus];
     }
 }

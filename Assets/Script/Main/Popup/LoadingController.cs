@@ -30,11 +30,9 @@ public class LoadingController : MonoBehaviour
 
     private int joinUserCnt;
 
-    //private GameReadyRequest gameReadyRequest;
-
-    //private GameStartOn gameStartOn;
-
     bool aIPlayOn = false;
+
+    private float aiStartTime = 10;
 
     //private MapCreateRequestOn mapCreateRequestOn;
     private void Awake()
@@ -97,8 +95,6 @@ public class LoadingController : MonoBehaviour
 
                 joinUserCnt = gameReadyRequest.socketCnt;
 
-                Debug.LogWarning("joinUserCnt = " + joinUserCnt);
-
                 if (joinUserCnt == userCnt && DataManager.Instance.isOwner)
                 {
                     ServerManager.Instance.SendMessageOn(new GameStartOn());
@@ -125,11 +121,14 @@ public class LoadingController : MonoBehaviour
 
             case RequestProtocal.MapCreateOn:
 
+                loadClearOn = true;
+
                 MapCreateRequestOn mapCreateRequestOn = (MapCreateRequestOn)baseRequest;
 
                 DataManager.Instance.areaDataList = mapCreateRequestOn.area;
+                DataManager.Instance.playerDataList = mapCreateRequestOn.playerDataList;
                 DataManager.Instance.SetPlayerColor(mapCreateRequestOn.playerDataList);
-
+                
                 GameSceneLoadOn();
 
                 break;
@@ -185,6 +184,8 @@ public class LoadingController : MonoBehaviour
     {
         SetTitle("Finding Players...");
 
+        DataManager.Instance.SetOffLinePlayerCnt(0);
+
         int maxCnt = DataManager.Instance.num_player;
         int userCnt = maxCnt-DataManager.Instance.off_line_num_player;
 
@@ -205,7 +206,7 @@ public class LoadingController : MonoBehaviour
         timeText.text = timeStr;
 
         //10초후 AI 플레이로 채우기
-        if (aIPlayOn == false && secValue > 10 )
+        if (aIPlayOn == false && DataManager.Instance.isOwner && secValue > aiStartTime)
         {
             SetAIPlayer();
         }
@@ -217,8 +218,6 @@ public class LoadingController : MonoBehaviour
 
         int maxCnt = DataManager.Instance.num_player;
         int offLineUserCount = maxCnt - joinUserCnt;
-
-        Debug.LogWarning(offLineUserCount);
 
         DataManager.Instance.SetOffLinePlayerCnt(offLineUserCount);
 

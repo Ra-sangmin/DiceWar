@@ -17,4 +17,16 @@ public static class Utils
         list.Clear();
         list.AddRange(temp);
     }
+
+    public static SendAreaData GetSendAreaData(this AreaData areaData)
+    {
+        SendAreaData sendAreaData = new SendAreaData()
+        {
+            id = areaData.id,
+            player = areaData.player,
+            dice = areaData.dice
+        };
+
+        return sendAreaData;
+    }
 }

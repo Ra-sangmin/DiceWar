@@ -1,9 +1,11 @@
-﻿using System.Collections;
+﻿using Cysharp.Threading.Tasks;
+using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using Unity.VisualScripting;
+using System.Threading.Tasks;
 using UnityEngine;
-
+using UnityEngine.UI;
 
 public class DiceWarUIController : MonoBehaviour
 {
@@ -22,20 +24,38 @@ public class DiceWarUIController : MonoBehaviour
         
     }
 
+    public void SetTransform(Transform parent)
+    {
+        transform.SetParent(parent);
+        RectTransform rt = transform as RectTransform;
+        //Left 값 설정
+        rt.offsetMin = new Vector2(0, rt.offsetMin.y);
+        //Right 값 설정
+        rt.offsetMax = new Vector2(0, rt.offsetMax.y);
+
+        float spacingValue = DataManager.Instance.isMultiOn ? 12 : 20;
+
+        myDiceWarUI.GetComponentInChildren<HorizontalLayoutGroup>().spacing = spacingValue;
+        enemyDiceWarUI.GetComponentInChildren<HorizontalLayoutGroup>().spacing = spacingValue;
+
+    }
+
     public void DiceClear()
     {
         myDiceWarUI.DiceClear();
         enemyDiceWarUI.DiceClear();
     }
 
-    public IEnumerator AttackOn(DiceWarData myDiceWarData, DiceWarData enemyDiceWarData)
+    public async UniTask AttackOn(DiceWarData myDiceWarData, DiceWarData enemyDiceWarData)
     {
         DiceClear();
 
         myDiceWarUI.SetPlayer(myDiceWarData.playerEnum);
         enemyDiceWarUI.SetPlayer(enemyDiceWarData.playerEnum);
 
-        for (int i = 0; i < 8; i++)
+        int diceMax = Mathf.Max(myDiceWarData.diceResult.Count, enemyDiceWarData.diceResult.Count);
+        
+        for (int i = 0; i < diceMax; i++)
         {
             if (myDiceWarData.diceResult.Count > i)
             {
@@ -47,8 +67,7 @@ public class DiceWarUIController : MonoBehaviour
                 enemyDiceWarUI.DiceOn(i, enemyDiceWarData.diceResult[i]);
             }
 
-            yield return new WaitForSeconds(0.02f);
-            //yield return new WaitForSeconds(0.2f);
+            await Task.Delay(100);
         }
 
         myDiceWarUI.SetDiceResultText(myDiceWarData.diceSum);
@@ -61,6 +80,7 @@ public class DiceWarUIController : MonoBehaviour
     }
 }
 
+[System.Serializable]
 public class DiceWarData
 {
     public PlayerEnum playerEnum = PlayerEnum.Player_None;

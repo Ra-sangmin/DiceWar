@@ -41,7 +41,14 @@ public class IntroController : MonoBehaviour
 
     public void GetAccessToken()
     {
-        GoogleAuth.GetTokenResponse(OnGetTokenResponse);
+        if (Application.platform == RuntimePlatform.WindowsPlayer) 
+        {
+            SceneManager.LoadScene("Main");
+        }
+        else 
+        {
+            GoogleAuth.GetTokenResponse(OnGetTokenResponse);
+        }
     }
 
     private void OnGetTokenResponse(bool success, string error, TokenResponse tokenResponse)

@@ -115,6 +115,7 @@ public class InGameController : MonoBehaviour
     private void ReceiveDataOn(BaseTCPRequest baseRequest)
     {
         //Debug.LogWarning(baseRequest.requestProtocal);
+
         PlayerEnum myPlayer = DataManager.Instance.playerData.playerEnum;
 
         switch (baseRequest.requestProtocal)
@@ -275,11 +276,7 @@ public class InGameController : MonoBehaviour
 
                 mapController.playerIconController.SetAlliancePlayerIcon(allianceResultRequest);
 
-                if (allianceResultRequest.orderData.playerEnum == DataManager.Instance.playerData.playerEnum)
-                {
-                    mapController.playerIconController.SetBundleKeyuAll();
-                    //SkillUseOn();
-                }
+                mapController.playerIconController.SetBundleKeyuAll();
 
                 break;
 

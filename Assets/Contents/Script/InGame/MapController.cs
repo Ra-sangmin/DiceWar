@@ -683,9 +683,9 @@ public class MapController : MonoBehaviour
             
         }
 
-        if (DataManager.Instance.gameStart.Value == true)
+        if (DataManager.Instance.isMultiOn)
         {
-            
+            await Task.Delay(1000);
         }
     }
 

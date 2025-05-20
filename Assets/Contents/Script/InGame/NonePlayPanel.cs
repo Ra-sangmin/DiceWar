@@ -33,6 +33,8 @@ public class NonePlayPanel : MonoBehaviour
     void Start()
     {
         SetNoneBtn();
+
+        DataManager.Instance.stashCount = 0;
         SetStashText(0);
     }
 

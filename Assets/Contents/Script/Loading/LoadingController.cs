@@ -85,6 +85,7 @@ public class LoadingController : MonoBehaviour
                 if (isReadyOn == false) 
                 {
                     isReadyOn = true;
+
                     DataManager.Instance.SetTurnPosition((int)gameReadyRequest.playerEnum);
                     DataManager.Instance.isOwner = gameReadyRequest.isOwner;
 
@@ -255,10 +256,10 @@ public class LoadingController : MonoBehaviour
             //오너 플레이어 라면 맵 생성 진행 ( 1명이 맵을 생성후 배포 한다 )
             if (DataManager.Instance.isOwner)
             {
-                DataManager.Instance.InitMapData();
-                DataManager.Instance.CreateMap();
+				//DataManager.Instance.InitMapData();
 
-                ServerManager.Instance.MapCreateRequestOn();
+				DataManager.Instance.CreateMap();
+				ServerManager.Instance.MapCreateRequestOn();
             }
         }
         else 

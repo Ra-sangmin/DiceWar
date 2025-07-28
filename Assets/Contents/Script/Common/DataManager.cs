@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UniRx;
 using Unity.VisualScripting;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using Random = UnityEngine.Random;
@@ -15,11 +16,12 @@ public class DataManager : MonoSingleton<DataManager>
     public UserData userData;
     public string loginId = string.Empty;
     public bool isMultiOn = false;
-    // 셀 데이터 (cell data)
-    public MapSizeEnum mapSizeEnum = MapSizeEnum.Small;
+
+	public AILevel aiLevel = AILevel.Hard;
+    public MapSizeEnum mapSizeEnum = MapSizeEnum.Medium;
     Dictionary<MapSizeEnum, MapData> mapDataDic = new Dictionary<MapSizeEnum, MapData>();
-    public AILevel aiLevel = AILevel.Easy;
-    public int num_player = 3;//총 플레이어의 수 (기본 값 : 3)
+    
+    public int num_player = 2;//총 플레이어의 수 (기본 값 : 3)
     public int off_line_num_player = 0;//AI 수 (기본 값 : 2)
     public int num_area = 10;//총 영토의 수 (기본값 : 10)
     public int diceMaxCount = 6;//영토의 주사위 최대 갯수
@@ -45,7 +47,6 @@ public class DataManager : MonoSingleton<DataManager>
     public List<PlayerData> playerDataList = new List<PlayerData>();
     public ReactiveProperty<bool> gameStart = new ReactiveProperty<bool>(false);
 
-    private string myCoinKey = "myCoinKey";
     public bool playOn = false;
 
     private List<AllianceData> allianceDataList = new List<AllianceData>();
@@ -53,9 +54,13 @@ public class DataManager : MonoSingleton<DataManager>
     public List<AreaData> areaDataList = new List<AreaData>();
     public MapCreateRequestOn testData;
 
-    public int stashCount = 0;
+	public List<int> stashCountList = new List<int>();
+
+	//public int stashCount = 0;
 
     public int myTurnCount = 0;
+
+    public bool inGameEditOn = false;
 
     public override void Init()
     {
@@ -74,6 +79,8 @@ public class DataManager : MonoSingleton<DataManager>
 
         MapDataInit();
         //CoinDataInit();
+
+        //Debug.LogWarning(mapSizeEnum);
     }
 
     void MapDataInit() 
@@ -99,17 +106,20 @@ public class DataManager : MonoSingleton<DataManager>
     void SetPlayerColor() 
     {
         List<int> colorList = new List<int>() { 0,1,2,3,4,5,6};
-        colorList.Shuffle();
+        //colorList.Shuffle();
 
         int index = colorList.IndexOf(playerData.colorIndex);
 
         int playerEnumIndex = (int)playerData.playerEnum;
 
-        int temp = colorList[playerEnumIndex];
-        colorList[playerEnumIndex] = playerData.colorIndex;
-        colorList[index] = temp;
+        //int temp = colorList[playerEnumIndex];
+        //colorList[playerEnumIndex] = playerData.colorIndex;
+        //colorList[index] = temp;
 
-        for (int i = 0; i < num_player; i++) 
+        playerData.playerEnum = (PlayerEnum)playerData.colorIndex;
+
+
+		for (int i = 0; i < num_player; i++) 
         {
             playerColorIndexDic[(PlayerEnum)i] = colorList[i];
         }
@@ -208,22 +218,67 @@ public class DataManager : MonoSingleton<DataManager>
 
         int onLineCnt = num_player - off_line_num_player -1;
 
-        //Debug.LogWarning($"num_player = {num_player} , off_line_num_player = {off_line_num_player} , onLineCnt = {onLineCnt}");
+        if (isMultiOn == false)
+        {
+            onLineCnt = 0;
+		}
 
         for (int i = 0; i < playerDataList.Count; i++)
         {
-            playerDataList[i].isAI = i > onLineCnt;
+            bool isAI = isMultiOn == false ? playerData.colorIndex != i :  i > onLineCnt;
 
-            //Debug.LogWarning(playerDataList[i].isAI);
-        }
+			playerDataList[i].isAI = isAI;
 
-        //if (choosePositionOn)
-        //{
-          //  SetTurnPosition(turnPosition);
-        //}
+			foreach (var area in GetAreaDtaList(playerDataList[i].playerEnum))
+			{
+				area.SetDice(GetDiceCount(isAI));
+			}
+		}
     }
 
-    public Vector2 GetMapSizeValue() 
+	List<AreaData> GetAreaDtaList(PlayerEnum playerEnum)
+    {
+		return areaDataList.Where(data => data.player == playerEnum).ToList();
+	}
+
+    /// <summary>
+    /// 초기 주사위 설정
+    /// </summary>
+    /// <param name="isAi"></param>
+    /// <returns></returns>
+    int GetDiceCount(bool isAi)
+    {
+		//DiceCountData data = Resources.Load<DiceCount>("DiceCount").GetData(isAi, aiLevel);
+		DiceCountData data = DiceCountManager.Instance.GetData(isAi, aiLevel);
+
+        //Debug.LogWarning(data.minCount);
+
+		//int dice = ;
+
+		//if (isAi)
+		//{
+		//	switch (aiLevel)
+		//	{
+		//		case AILevel.Easy: dice = Random.Range(1, 4); break;
+		//		case AILevel.Normal: dice = Random.Range(2, 5); break;
+		//		case AILevel.Hard: dice = Random.Range(3, 6); break;
+		//	}
+		//}
+		//else
+		//{
+		//	switch (aiLevel)
+		//	{
+		//		case AILevel.Easy: dice = Random.Range(3, 5); break;
+		//		case AILevel.Normal: dice = Random.Range(2, 5); break;
+		//		case AILevel.Hard: dice = Random.Range(1, 4); break;
+		//	}
+		//}
+
+		return Random.Range(data.minCount, data.maxCount+1);
+	}
+
+
+	public Vector2 GetMapSizeValue() 
     {
         return GetMapSize();
     }
@@ -356,14 +411,16 @@ public class DataManager : MonoSingleton<DataManager>
 
     }
 
-    public int SetBundleKey(PlayerEnum checkEnum)
+    public List<AreaData> SetBundleKey(PlayerEnum checkEnum)
     {
         foreach (AreaData areaData in areaDataList.Where(data => data.player == checkEnum).ToList())
         {
             areaData.bundleKey = string.Empty;
         }
 
-        int maxCount = 0;
+        List<AreaData> resultAreaDataList = new List<AreaData>();
+
+		//int maxCount = 0;
         int index = 0;
 
         while (true)
@@ -375,24 +432,32 @@ public class DataManager : MonoSingleton<DataManager>
                 break;
             }
 
-            int count = SetBundleKey(checkEnum, index, checkList[0]);
+            List<AreaData> tempResultAreaDataList= SetBundleKey(checkEnum, index, checkList[0]);
 
-            maxCount = Mathf.Max(maxCount, count);
+			int count = resultAreaDataList.Count;
+
+            if (resultAreaDataList.Count < tempResultAreaDataList.Count)
+            {
+                resultAreaDataList = tempResultAreaDataList;
+
+			}
+
+            //maxCount = Mathf.Max(maxCount, count);
 
             index++;
         }
 
-        return maxCount;
+        return resultAreaDataList;
     }
 
-    public int SetBundleKey(PlayerEnum checkEnum, int index, AreaData areaData)
+    public List<AreaData> SetBundleKey(PlayerEnum checkEnum, int index, AreaData areaData)
     {
         string bundleKey = GetConnectedIndex(checkEnum, index);
         areaData.SetBundleKey(areaDataList, checkEnum, bundleKey);
 
         var sameBundleKeyPieceList = areaDataList.Where(data => data.player == checkEnum && !string.IsNullOrEmpty(data.bundleKey) && data.bundleKey.Equals(bundleKey)).ToList();
 
-        return sameBundleKeyPieceList.Count;
+        return sameBundleKeyPieceList;
     }
 
     public Vector2 GetPos(int index)
@@ -467,7 +532,9 @@ public class DataManager : MonoSingleton<DataManager>
 
     public void ReStartOn()
     {
-        areaDataList.Clear();
+        GameDataClearOn();
+
+		areaDataList.Clear();
 
         for (int i = 0; i < backUpAreaDataList.Count; i++)
         {
@@ -491,32 +558,64 @@ public class DataManager : MonoSingleton<DataManager>
         }
         else 
         {
-            playerData.playerEnum = (PlayerEnum)turnPosition;
-        }
+			playerData.playerEnum = (PlayerEnum)turnPosition;
+		}
     }
 
-    public int AddStashCount(int diceCount)
+    public void InitStashCount()
     {
-        stashCount += diceCount;
+		stashCountList = new List<int> {};
+
+		for (int i = 0; i < 7; i++)
+		{
+            stashCountList.Add(0);
+		}
+	}
+
+	public int GetStashCount(PlayerEnum playerEnum)
+	{
+		return stashCountList[(int)playerEnum];
+	}
+
+	public int AddStashCount(PlayerEnum playerEnum , int diceCount)
+    {
+        int stashCount = GetStashCount(playerEnum);
+
+		stashCount += diceCount;
 
         stashCount = Mathf.Clamp(stashCount, 0 , 15);
 
-        return stashCount;
+		return SetStashCount(playerEnum, stashCount);
     }
 
-    public void AddCoin(int addCoin)
+	public int SetStashCount(PlayerEnum playerEnum, int stashCount)
+	{
+        stashCountList[(int)playerEnum] = stashCount;
+
+        return stashCount;
+	}
+
+	public void AddCoin(int addCoin)
     {
+        if (userData == null)
+        {
+            return;
+        }
+
         userData.myCoin.Value += addCoin;
 
-        UserDataRequest request = new UserDataRequest()
+        if (string.IsNullOrEmpty(userData.email) == false ) 
         {
-            requestStatus = 1,
-            email = userData.email,
-            coin = userData.myCoin.Value,
-            successOn = ResultData =>{}
-        };
+            UserDataRequest request = new UserDataRequest()
+            {
+                requestStatus = 1,
+                email = userData.email,
+                coin = userData.myCoin.Value,
+                successOn = ResultData => { }
+            };
 
-        request.RequestOn().Forget();
+            request.RequestOn().Forget();
+        }
     }
 
     public void TurnOffOn()
@@ -537,7 +636,7 @@ public class DataManager : MonoSingleton<DataManager>
 
     public bool IsMyTurn()
     {
-        return currentTurnIndex == (int)playerData.playerEnum;
+		return currentTurnIndex == (int)playerData.playerEnum;
     }
 
     public PlayerData GetPlayerData(PlayerEnum playerEnum)
@@ -689,7 +788,16 @@ public class DataManager : MonoSingleton<DataManager>
     public void GameDataClearOn()
     {
         AllianceClearOn();
-        stashCount = 0;
+        StashCountClearOn();
+        currentTurnIndex = 0;
+	}
+
+	void StashCountClearOn()
+    {
+		for (int i = 0; i < stashCountList.Count; i++)
+        {
+            stashCountList[i] = 0;
+		}
     }
 }
 

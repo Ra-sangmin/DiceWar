@@ -38,8 +38,9 @@ public class PlayerIconController : MonoBehaviour
         }
 
         int numPlayer = DataManager.Instance.num_player;
+		//int numPlayer = 6;
 
-        if (playerIconList.Count < numPlayer)
+		if (playerIconList.Count < numPlayer)
         {
             for (int i = playerIconList.Count; i < numPlayer; i++)
             {
@@ -135,7 +136,7 @@ public class PlayerIconController : MonoBehaviour
         PlayerEnum checkEnum = checkPlayerIcon.playerEnum;
 
         //최대로 연결된 영토 숫자
-        int maxCount = DataManager.Instance.SetBundleKey(checkEnum);
+        int maxCount = DataManager.Instance.SetBundleKey(checkEnum).Count;
 
         if (maxCount <= 0)
         {
@@ -180,5 +181,22 @@ public class PlayerIconController : MonoBehaviour
         {
             playerIcon.SetAllianceColor(PlayerEnum.Player_None);
         }
+    }
+
+    public PlayerEnum BestBigPlayer()
+    {
+        PlayerEnum playerEnum = PlayerEnum.Player_None;
+        int maxCount = 0;
+
+        foreach (var playerIcon in playerIconList)
+        {
+            if (maxCount < playerIcon.connectedCount )
+            {
+                playerEnum = playerIcon.playerEnum;
+				maxCount = playerIcon.connectedCount;
+			}
+        }
+
+		return playerEnum;
     }
 }

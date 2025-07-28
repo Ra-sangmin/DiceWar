@@ -26,6 +26,8 @@ public class ServerManager : MonoSingleton<ServerManager>
 
     private string beforeData = string.Empty;
 
+    public bool receiveOn = true;
+
     void Start()
     {
         ConnectToServer();
@@ -185,7 +187,7 @@ public class ServerManager : MonoSingleton<ServerManager>
 
     void QueueListCheck()
     {
-        if (queue.Count > 0)
+        if (receiveOn && queue.Count > 0)
         {
             receiveDataOn(queue.Dequeue());
         }
@@ -337,7 +339,7 @@ public class ServerManager : MonoSingleton<ServerManager>
 
     private void ReceiveRequestDataOn(string str)
     {
-        //Debug.LogWarning(str);
+        Debug.LogWarning(str);
 
         BaseTCPRequest baseRequest = null;
 

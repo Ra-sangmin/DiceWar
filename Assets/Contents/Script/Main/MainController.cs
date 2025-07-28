@@ -9,31 +9,27 @@ using UniRx;
 
 public class MainController : MonoBehaviour
 {
-    //[SerializeField] List<RectTransform> stepPanelList = new List<RectTransform>();
-
-    [SerializeField] Text myCoinText;
-
-    [SerializeField] LoadingController loadingPopup;
+    //[SerializeField] Text myCoinText;
 
     private int step = 0;
 
     private void Awake()
     {
-        SetEvent();
+        //SetEvent();
     }
 
-    void SetEvent()
-    {
-        if (DataManager.Instance.userData == null)
-        {
-            DataManager.Instance.userData = new UserData();
-        }
+    //void SetEvent()
+    //{
+    //    if (DataManager.Instance.userData == null)
+    //    {
+    //        DataManager.Instance.userData = new UserData();
+    //    }
 
-        DataManager.Instance.userData.myCoin.
-            Subscribe(coin => SetCoin()).
-            AddTo(gameObject);
-        SetCoin();
-    }
+    //    DataManager.Instance.userData.myCoin.
+    //        Subscribe(coin => SetCoin()).
+    //        AddTo(gameObject);
+    //    SetCoin();
+    //}
 
     // Start is called before the first frame update
     void Start()
@@ -51,44 +47,22 @@ public class MainController : MonoBehaviour
         
     }
 
-    //public void StepChangeOn(int step)
+	//public void StepChangeOn(int step)
+	//{
+	//    this.step = step;
+
+	//    for (int i = 0; i < stepPanelList.Count; i++) 
+	//    {
+	//        bool activeOn = step == i;
+	//        stepPanelList[i].gameObject.SetActive(activeOn);
+	//    }
+	//}
+
+
+    //void SetCoin()
     //{
-    //    this.step = step;
-
-    //    for (int i = 0; i < stepPanelList.Count; i++) 
-    //    {
-    //        bool activeOn = step == i;
-    //        stepPanelList[i].gameObject.SetActive(activeOn);
-    //    }
+    //    myCoinText.text = DataManager.Instance.userData.myCoin.Value.ToString();
     //}
-
-    public void MultiPlayBtnClickOn()
-    {
-        StartCoroutine(MultyPlayOn());
-    }
-    IEnumerator MultyPlayOn()
-    {
-        ServerManager.Instance.Init();
-
-        yield return new WaitForEndOfFrame();
-
-        DataManager.Instance.SetAILevelEnum(AILevel.Easy);
-        DataManager.Instance.SetMapSizeEnum(MapSizeEnum.Large);
-        DataManager.Instance.SetPlayerMaxCnt(3);
-        DataManager.Instance.SetTurnPosition(0);
-        DataManager.Instance.SetOffLinePlayerCnt(0);
-        DataManager.Instance.isMultiOn = true;
-
-        yield return new WaitForEndOfFrame();
-
-        loadingPopup.gameObject.SetActive(true);
-        //loadingPopup.SetData(true);
-    }
-
-    void SetCoin()
-    {
-        myCoinText.text = DataManager.Instance.userData.myCoin.Value.ToString();
-    }
 
     public void PlayBtnClickOn()
     {
@@ -101,8 +75,28 @@ public class MainController : MonoBehaviour
     //    //StepChangeOn(1);
     //}
 
-    public void BuyCoinPopupOpen()
+    public void SettingPopupOn()
     {
-        PopupManager.Instance.BuyCoinPopupOn();
+        PopupManager.Instance.MainSettingPopupOn();
     }
+
+	public void InfoPopupOn()
+	{
+		PopupManager.Instance.MainInfoPopupOn();
+	}
+
+	//public void BuyCoinPopupOpen()
+ //   {
+ //       PopupManager.Instance.BuyCoinPopupOn();
+ //   }
+
+	public void SinglePlaySetPopupOn()
+	{
+		PopupManager.Instance.PlaySetPopupOn(false);
+	}
+
+	public void MultiPlaySetPopupOn()
+	{
+		PopupManager.Instance.PlaySetPopupOn(true);
+	}
 }

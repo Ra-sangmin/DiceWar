@@ -33,10 +33,6 @@ public class PopupManager : MonoSingleton<PopupManager>
 		newParantObj.transform.SetParent(canvas.transform);
         RectTransform rectTransform = newParantObj.AddComponent<RectTransform>();
 
-        //rectTransform.anchorMin = Vector2.zero;
-        //rectTransform.anchorMax = Vector2.one;
-        //rectTransform.pivot = Vector2.one * 0.5f;
-
         parantTranform = rectTransform;
         rectTransform.anchoredPosition3D = new Vector3(0, 0, 0);
 		rectTransform.sizeDelta = (canvas.transform as RectTransform).sizeDelta;
@@ -48,6 +44,33 @@ public class PopupManager : MonoSingleton<PopupManager>
         parantTranform.AddComponent<GraphicRaycaster>();
 
         rectTransform.transform.localScale = Vector3.one;
+	}
+
+    public void MainSettingPopupOn()
+    {
+		MainSettingPopup mainSettingPopup = Instantiate(Resources.Load<MainSettingPopup>("Popup/Main/MainSettingPopup"), parantTranform);
+	}
+
+	public void MainInfoPopupOn()
+	{
+		MainInfoPopup mainInfoPopup = Instantiate(Resources.Load<MainInfoPopup>("Popup/Main/MainInfoPopup"), parantTranform);
+	}
+
+	public void TermsOfConditionsPopupOn()
+	{
+		TeamOfConditionsPopup teamOfConditionsPopup = Instantiate(Resources.Load<TeamOfConditionsPopup>("Popup/Main/TeamOfConditionsPopup"), parantTranform);
+	}
+
+	public void PrivatePolicyPopupOn()
+	{
+		PrivatePolicyPopup privatePolicyPopup = Instantiate(Resources.Load<PrivatePolicyPopup>("Popup/Main/PrivatePolicyPopup"), parantTranform);
+	}
+
+	public void PlaySetPopupOn(bool multiOn)
+	{
+		PlaySetPopup playSetPopup = Instantiate(Resources.Load<PlaySetPopup>("Popup/Main/PlaySetPopup"), parantTranform);
+		playSetPopup.multiOn = multiOn;
+        playSetPopup.InitOn();
 	}
 
 	public void YourTurnPopupOn()

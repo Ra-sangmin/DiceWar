@@ -10,6 +10,7 @@ using UnityEngine.SceneManagement;
 using System;
 using System.Linq;
 using System.Reflection;
+using static Unity.Burst.Intrinsics.Arm;
 
 public class PlaySetPopup : MonoBehaviour
 {
@@ -21,10 +22,7 @@ public class PlaySetPopup : MonoBehaviour
     [SerializeField] List<SMToggle> aIToggleList = new List<SMToggle>();
     [SerializeField] List<SMToggle> mapSizeToggleList = new List<SMToggle>();
     [SerializeField] List<SMToggle> playersCountToggleList = new List<SMToggle>();
-    //[SerializeField] List<SMToggle> offlineUsersToggleList = new List<SMToggle>();
-    [SerializeField] LoadingController loadingPopup;
-
-    private bool loadingOn;
+	[SerializeField] List<RectTransform> colorPanelList = new List<RectTransform>();
 
     public bool multiOn = false;
 
@@ -38,14 +36,6 @@ public class PlaySetPopup : MonoBehaviour
         SetToggleEvent(aIToggleList, AIToggleChangeOn);
         SetToggleEvent(mapSizeToggleList, MapSizeToggleChangeOn);
         SetToggleEvent(playersCountToggleList, PlayersCountToggleChangeOn);
-    }
-
-    private void OnEnable()
-    {
-        if (multiOn)
-        {
-            MapSizeToggleChangeOn(2);
-        }
     }
 
     private void SetToggleEvent(List<SMToggle> toggleList, UnityAction<int> toggleEventOn, int defaultIndex = 0)
@@ -62,14 +52,45 @@ public class PlaySetPopup : MonoBehaviour
                 }
             }).AddTo(gameObject);
         }
-
-        //toggleEventOn(defaultIndex);
     }
 
-    // Start is called before the first frame update
-    void Start()
+	public void InitOn()
     {
-        SetColorData();
+		colorPanelList[0].gameObject.SetActive(!multiOn);
+		colorPanelList[1].gameObject.SetActive(multiOn);
+
+		if (multiOn)
+		{
+            SetMultiToggle();
+		}
+        else
+        {
+			SetColorData();
+		}
+	}
+
+    void SetMultiToggle()
+    {
+		SetToggleActive(aIToggleList, 2);
+		SetToggleActive(mapSizeToggleList, 2);
+		SetToggleActive(playersCountToggleList, 5);
+	}
+
+    public void SetToggleActive(List<SMToggle> toggleList, int activeIndex)
+    {
+		for (int i = 0; i < toggleList.Count; i++)
+		{
+			bool interactableOn = i >= activeIndex;
+			toggleList[i].interactable.Value = interactableOn;
+		}
+
+		toggleList[activeIndex].toggleValue.Value = true;
+    }
+
+	// Start is called before the first frame update
+	void Start()
+    {
+        //SetColorData();
     }
 
     // Update is called once per frame
@@ -79,57 +100,77 @@ public class PlaySetPopup : MonoBehaviour
     }
     private void AIToggleChangeOn(int index)
     {
-        AILevel aiLevel = AILevel.Easy;
+        AILevel aiLevel = (AILevel)(index);
 
-        switch (index)
+        if (aIToggleList[index].toggleValue.Value == false)
         {
-            case 0: aiLevel = AILevel.Easy; break;
-            case 1: aiLevel = AILevel.Normal; break;
-            case 2: aiLevel = AILevel.Hard; break;
-        }
+            aIToggleList[index].toggleValue.Value = true;
+            return;
+		}
 
         DataManager.Instance.SetAILevelEnum(aiLevel);
-    }
 
-    private void MapSizeToggleChangeOn(int index)
-    {
-        MapSizeEnum mapSizeEnum = MapSizeEnum.Small;
-
-        switch (index)
+        if (multiOn == false)
         {
-            case 0: mapSizeEnum = MapSizeEnum.Small; break;
-            case 1: mapSizeEnum = MapSizeEnum.Medium; break;
-            case 2: mapSizeEnum = MapSizeEnum.Large; break;
-        }
+			SetMapSizeToggle();
+		}
+        
+	}
 
-        DataManager.Instance.SetMapSizeEnum(mapSizeEnum);
+	void SetMapSizeToggle()
+	{
+		int activeCount = 0;
 
-        SetPlayerSelectToggle();
+		AILevel aiLevel = DataManager.Instance.aiLevel;
+
+        switch (aiLevel)
+        {
+            case AILevel.Easy: activeCount = 0;
+				break;
+			case AILevel.Normal: activeCount = 1;
+				break;
+			case AILevel.Hard: activeCount = 2;
+				break;
+		}
+
+		for (int i = 0; i < mapSizeToggleList.Count; i++)
+		{
+			bool interactableOn = i <= activeCount;
+			mapSizeToggleList[i].interactable.Value = interactableOn;
+		}
+
+		if ((int)DataManager.Instance.mapSizeEnum > activeCount)
+		{
+			MapSizeToggleChangeOn(activeCount);
+		}
+	}
+
+	private void MapSizeToggleChangeOn(int index)
+    {
+        MapSizeEnum mapSizeEnum = (MapSizeEnum)index;
+
+		if (mapSizeToggleList[index].toggleValue.Value == false)
+		{
+			mapSizeToggleList[index].toggleValue.Value = true;
+			return;
+		}
+
+		DataManager.Instance.SetMapSizeEnum(mapSizeEnum);
+
+		if (multiOn == false)
+		{
+			SetPlayerSelectToggle();
+		}
     }
 
     void SetPlayerSelectToggle()
     {
         int activeCount = DataManager.Instance.ActivePlayerCount();
 
-        //MapSizeEnum mapSizeEnum = DataManager.Instance.mapSizeEnum;
-
-        //switch (mapSizeEnum)
-        //{
-        //    case MapSizeEnum.Small: activeCount = 2; break;
-        //    case MapSizeEnum.Medium: activeCount = 4; break;
-        //    case MapSizeEnum.Large: activeCount = 5; break;
-        //}
-
         for (int i = 0; i < playersCountToggleList.Count; i++)
         {
             bool interactableOn = i <= activeCount;
             playersCountToggleList[i].interactable.SetValueAndForceNotify(interactableOn);
-
-            //if (multiOn)
-            //{
-            //    bool interactableOn2 = i <= activeCount - 1;
-            //    offlineUsersToggleList[i].interactable.SetValueAndForceNotify(interactableOn2);
-            //}
         }
 
         int playerMaxCnt = DataManager.Instance.num_player;
@@ -138,37 +179,30 @@ public class PlaySetPopup : MonoBehaviour
 
         if (playerMaxCnt > activeCount)
         {
-            playerMaxCnt = activeCount;
-            playersCountToggleList[playerMaxCnt].toggleValue.SetValueAndForceNotify(true);
-        }
-
-        if (multiOn)
-        {
-            int activeIndex = 5;
-
-            for (int i = 0; i < playersCountToggleList.Count; i++)
-            {
-                bool interactableOn = i == activeIndex;
-                playersCountToggleList[i].interactable.SetValueAndForceNotify(interactableOn);
-            }
-
-            playersCountToggleList[activeIndex].toggleValue.SetValueAndForceNotify(true);
+            PlayersCountToggleChangeOn(activeCount);
         }
     }
 
     private void PlayersCountToggleChangeOn(int index)
     {
         int playerMaxCnt = index + 2;
-        DataManager.Instance.SetPlayerMaxCnt(playerMaxCnt);
-        SetTurnPosition(DataManager.Instance.turnPosition);
-    }
 
-    //private void OfflineUsersToggleChangeOn(int index)
-    //{
-    //    int playerMaxCnt = index + 1;
-    //    DataManager.Instance.SetOffLinePlayerCnt(playerMaxCnt);
-    //    //SetTurnPosition(InGameDataManager.Instance.turnPosition);
-    //}
+		if (playersCountToggleList[index].toggleValue.Value == false)
+		{
+			playersCountToggleList[index].toggleValue.Value = true;
+			return;
+		}
+
+
+		DataManager.Instance.SetPlayerMaxCnt(playerMaxCnt);
+        SetTurnPosition(DataManager.Instance.turnPosition);
+
+        if (playerColorIndex >= DataManager.Instance.num_player)
+        {
+            playerColorIndex = DataManager.Instance.num_player - 1;
+			SetColorData();
+		}
+    }
 
     private void SetTurnPosition(int turnCount)
     {
@@ -180,7 +214,6 @@ public class PlaySetPopup : MonoBehaviour
     private void SetTurnPositionText(int turnPosition)
     {
         DataManager.Instance.SetTurnPosition(turnPosition);
-        //turnPositionCountText.text = (turnPosition + 1).ToString();
     }
 
     public void PlayerColorSetBtnOn(bool nextOn)
@@ -189,8 +222,9 @@ public class PlaySetPopup : MonoBehaviour
         {
             playerColorIndex++;
 
-            if (playerColorIndex >= playerSpriteList.Count)
-            {
+			//if (playerColorIndex >= playerSpriteList.Count)
+			if (playerColorIndex >= DataManager.Instance.num_player)
+			{
                 playerColorIndex = 0;
             }
         }
@@ -200,7 +234,7 @@ public class PlaySetPopup : MonoBehaviour
 
             if (playerColorIndex < 0)
             {
-                playerColorIndex = playerSpriteList.Count -1;
+                playerColorIndex = DataManager.Instance.num_player - 1;
             }
         }
 
@@ -217,8 +251,6 @@ public class PlaySetPopup : MonoBehaviour
 
     public void PlayBtnClickOn()
     {
-        loadingOn = true;
-
         DataManager.Instance.isMultiOn = multiOn;
 
         SceneManager.LoadScene("Loading");

@@ -66,8 +66,6 @@ public class DiceWarUIController : MonoBehaviour
             {
                 enemyDiceWarUI.DiceOn(i, enemyDiceWarData.diceResult[i]);
             }
-
-            await Task.Delay(100);
         }
 
         myDiceWarUI.SetDiceResultText(myDiceWarData.diceSum);

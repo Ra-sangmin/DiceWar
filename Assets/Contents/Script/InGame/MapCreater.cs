@@ -149,9 +149,7 @@ public class MapCreater
         {
             AreaData areaData = new AreaData(i);
 
-            areaData.dice = Random.Range(1, 5);
-
-            areaDataList.Add(areaData);
+			areaDataList.Add(areaData);
         }
 
         // 면적

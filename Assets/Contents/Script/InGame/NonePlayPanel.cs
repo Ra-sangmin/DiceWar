@@ -7,8 +7,7 @@ using UnityEngine.UI;
 
 public class NonePlayPanel : MonoBehaviour
 {
-    //[SerializeField] RectTransform singlePanel;
-    [SerializeField] List<Text> textList = new List<Text>();
+    [SerializeField] Text introText;
     [SerializeField] SkillCard skillCard;
     [SerializeField] RectTransform skillBtnPanel;
     [SerializeField] Text stashText;
@@ -32,11 +31,20 @@ public class NonePlayPanel : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        SetNoneBtn();
-
-        DataManager.Instance.stashCount = 0;
-        SetStashText(0);
+        
     }
+
+    public void Init()
+    {
+		SetNoneBtn();
+
+        DataManager.Instance.SetStashCount(DataManager.Instance.playerData.playerEnum, 0);
+		SetStashText();
+
+        diceWarUIController.DiceClear();
+
+		introText.gameObject.SetActive(true);
+	}
 
     public void SetAreaData(AreaData areaData , InGameButtonStatus inGameButtonStatus)
     {
@@ -54,16 +62,7 @@ public class NonePlayPanel : MonoBehaviour
 
     public void SetNoneBtn()
     {
-        selectAreaData = null;
-
-        //if (DataManager.Instance.IsAlliance(DataManager.Instance.playerData.playerEnum))
-        //{
-        //    SetActiveBtn(InGameButtonStatus.Betray);
-        //}
-        //else
-        //{
-        //    SetActiveBtn(InGameButtonStatus.None);
-        //}        
+        selectAreaData = null;    
     }
 
     public void SetActiveBtn(InGameButtonStatus status)
@@ -129,14 +128,12 @@ public class NonePlayPanel : MonoBehaviour
     {
         skillBtnClickEventOn(InGameButtonStatus.Buy);
         SetActiveBtn(InGameButtonStatus.Cancel);
-        //LandTradePopupOn(true);
     }
 
     public void SellBtnClickOn()
     {
         skillBtnClickEventOn(InGameButtonStatus.Sell);
         SetActiveBtn(InGameButtonStatus.Cancel);
-        //LandTradePopupOn(false);
     }
 
     private void LandTradePopupOn(bool buyOn)
@@ -214,9 +211,9 @@ public class NonePlayPanel : MonoBehaviour
         }
     }
 
-    public void SetStashText(int diceCount)
+    public void SetStashText()
     {
-        int stashCount = DataManager.Instance.AddStashCount(diceCount);
+        int stashCount = DataManager.Instance.GetStashCount(DataManager.Instance.playerData.playerEnum);
 
         if (stashCount <= 0)
         {
@@ -231,11 +228,8 @@ public class NonePlayPanel : MonoBehaviour
 
     public async UniTask AttackOn(DiceWarData myDiceWarData, DiceWarData enemyDiceWarData)
     {
-        foreach (var text in textList)
-        {
-            text.gameObject.SetActive(false);
-        }
+		introText.gameObject.SetActive(false);
 
-        await diceWarUIController.AttackOn(myDiceWarData, enemyDiceWarData);
+		await diceWarUIController.AttackOn(myDiceWarData, enemyDiceWarData);
     }
 }

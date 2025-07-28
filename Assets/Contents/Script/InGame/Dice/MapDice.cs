@@ -7,8 +7,10 @@ using UnityEngine.UI;
 public class MapDice : HexagonBase
 {
     [SerializeField] List<Image> diceImageList = new List<Image>();
+    [SerializeField] Text areaText;
+	[SerializeField] Text adjText;
 
-    protected override void Awake()
+	protected override void Awake()
     {
         base.Awake();
         SetDice(0);
@@ -48,4 +50,20 @@ public class MapDice : HexagonBase
             diceImageList[i].CrossFadeAlpha(1, 0, true);
         }
     }
+
+    public void TextInit()
+    {
+        areaText.text = string.Empty;
+		adjText.text = string.Empty;
+	}
+
+    public void AreaTextSet(int index)
+    {
+		areaText.text = index.ToString();
+	}
+
+	public void AreaAdjSet(string value)
+	{
+		adjText.text = value;
+	}
 }

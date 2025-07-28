@@ -66,7 +66,135 @@ public class AreaData
         return adj;
     }
 
-    public void AddHexagon(Hexagon hexagon)
+	public List<AreaData> GetAdjList()
+	{
+        List<AreaData> resultList = new List<AreaData>();
+
+        foreach (var targetAreaId in adj)
+        {
+			AreaData checkAreaData = DataManager.Instance.GetAreaData(targetAreaId);
+
+            if (checkAreaData != null)
+            {
+                resultList.Add(checkAreaData);
+			}
+		}
+
+		return resultList;
+	}
+
+	public bool AttackAreaOn(AreaData attackArea, AreaData checkArea)
+	{
+		bool attackOn = true;
+
+		if (attackArea.dice == 1 || //주사위가 1 이라면
+			checkArea.player == attackArea.player ||  //공격 Area와 방어 Area 가 같은 플레이라면
+			DataManager.Instance.IsAllAlliance(new List<PlayerEnum>() { attackArea.player, checkArea.player })) // 동맹 플레이어 라면
+		{
+			attackOn = false;
+		}
+
+		return attackOn;
+	}
+
+	public AreaData GetAttackAreaList(int status)
+	{
+		AreaData fromAreaData = DataManager.Instance.GetAreaData(id);
+
+        List<AreaData> checkAreaDataList = GetAdjList().Where(checkArea => AttackAreaOn(fromAreaData, checkArea)).ToList();
+
+        AreaData checkAreaData = null;
+
+        switch (status)
+        {
+            case 0: checkAreaData = checkAreaDataList.FirstOrDefault(checkArea => fromAreaData.dice > checkArea.dice);
+				break;
+			case 1: checkAreaData = checkAreaDataList.FirstOrDefault(checkArea => fromAreaData.dice >= checkArea.dice);
+				break;
+		}
+
+		return checkAreaData;
+	}
+
+	public AreaData GetAttackAreaListToPlayer(int status , PlayerEnum playerEnum)
+	{
+		AreaData areaData = GetAttackAreaList(status);
+
+        if (areaData != null && areaData.player == playerEnum) 
+        {
+            return areaData;
+		}
+
+        return null;
+	}
+
+	public List<AreaData> CheckAdj(PlayerEnum playerEnum)
+	{
+		List<AreaData> checkList = GetAdjList();
+
+		return checkList.Where(data => data.player == playerEnum).ToList();
+	}
+
+    /// <summary>
+    /// 주변 영토중에서 넘겨받은 영토와 일치하는 영토 취득
+    /// </summary>
+    /// <param name="checkList"></param>
+    /// <returns></returns>
+	public List<AreaData> CheckAdjAttakList(List<AreaData> checkList)
+	{
+		List<AreaData> adjList = GetAdjList();
+
+		List<AreaData> resultList = new List<AreaData>();
+
+        foreach (var adj in adjList)
+        {
+            if (checkList.Any(data => data.id == adj.id ) &&
+				resultList.Any(data => data.id == adj.id) == false)
+            {
+                resultList.Add(adj);
+			}
+		}
+
+		return resultList;
+	}
+
+	public List<AreaData> CheckAdjAttakList2(List<AreaData> checkList)
+	{
+		List<AreaData> adjList = GetAdjList();
+
+		List<AreaData> resultList = new List<AreaData>();
+
+		foreach (var adj in adjList)
+		{
+            if (adj.player == player) 
+                continue;
+            
+            List<AreaData> targetAdjList = adj.GetAdjList();
+
+            foreach (var check in checkList)
+            {
+                if (targetAdjList.Any(data => data.id == check.id))
+                {
+                    //Debug.LogWarning("target = " + adj.id);
+                    resultList.Add(adj);
+				}
+            }   
+
+			//targetAdjList.Any(data => data.id == checkList)
+
+
+
+			//if (checkList.Any(data => data.id == adj.id))
+			//{
+			//	resultList.Add(adj);
+			//}
+		}
+
+		return resultList;
+	}
+
+
+	public void AddHexagon(Hexagon hexagon)
     {
         if (hexagonList == null)
         {
@@ -158,9 +286,34 @@ public class AreaData
         if (mapDice != null && resultHexagon != null)
         {
             mapDice.SetPos(resultHexagon);
-        }
+
+            mapDice.TextInit();
+
+
+			if (DataManager.Instance.inGameEditOn)
+            {
+				mapDice.AreaTextSet(id);
+
+				string value = string.Empty;
+
+				for (int i = 0; i < adj.Count; i++)
+				{
+					if (i != 0)
+					{
+						value += ",";
+					}
+					value += adj[i];
+				}
+				mapDice.AreaAdjSet(value);
+			}
+		}
 
         return resultHexagon;
+    }
+
+    public bool IsDiceMax()
+    {
+        return dice == 6;
     }
 
     public void DiceAddOn()

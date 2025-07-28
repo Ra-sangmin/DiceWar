@@ -12,7 +12,6 @@ using Cysharp.Threading.Tasks;
 public class InGameController : MonoBehaviour
 {
     [SerializeField] MapController mapController;
-    [SerializeField] PopupController popupController;
     [SerializeField] Button endTurnBtn;
     [SerializeField] Timer timer;
 
@@ -72,7 +71,7 @@ public class InGameController : MonoBehaviour
             DataManager.Instance.playerData.skillCardCount = 1;
         }
 
-        mapController.CreateMapInit();
+		mapController.CreateMapInit();
 
         if (DataManager.Instance.mapSelectionOn == false || DataManager.Instance.isMultiOn)
         {
@@ -97,12 +96,7 @@ public class InGameController : MonoBehaviour
 
     private async UniTask TurnRequestOn(TurnRequest turnRequest)
     {
-        PlayerEnum nextPlayer = (PlayerEnum)(((int)turnRequest.playerEnum) + 1);
-
-        if ((int)nextPlayer == DataManager.Instance.num_player)
-        {
-            nextPlayer = PlayerEnum.Player_0;
-        }
+        PlayerEnum nextPlayer = GetNextPlayer();
 
         turnRequest.playerEnum = nextPlayer;
         turnRequest.turnStartOn = true;
@@ -140,9 +134,20 @@ public class InGameController : MonoBehaviour
                 {
                     DataManager.Instance.currentTurnIndex = (int)turnRequest.playerEnum;
 
-                    TurnCheck();
-
                     mapController.inGameBottomController.nonePlayPanel.SetNoneBtn();
+
+                    PlayerEnum currentPlayer = (PlayerEnum)DataManager.Instance.currentTurnIndex;
+
+                    PlayerIcon playerIcon = mapController.playerIconController.GetPlayerIcon(currentPlayer);
+
+                    if (playerIcon == null)
+                    {
+                        TurnRequestOn(turnRequest).Forget();
+                    }
+                    else
+                    {
+                        TurnCheck();
+                    }
                 }
 
                 break;
@@ -188,21 +193,18 @@ public class InGameController : MonoBehaviour
                 {
                     LandTradeRequest tradeData = landTradeApproveRequest.landTradeRequest;
 
+                    AreaData currentAreaData = DataManager.Instance.GetAreaData(tradeData.areaData.id);
+                    PlayerEnum changePlayerEnum = tradeData.buyOn ? tradeData.fromPlayerEnum : tradeData.toPlayerEnum;
+                    currentAreaData.PlayerChangeOn(changePlayerEnum);
+                    mapController.playerIconController.SetBundleKeyuAll();
+
                     // 내가 거래 대상이라면
                     if (tradeData.fromPlayerEnum == myPlayer || tradeData.toPlayerEnum == myPlayer)
                     {
-                        AreaData currentAreaData = DataManager.Instance.GetAreaData(tradeData.areaData.id);
-
-                        PlayerEnum changePlayerEnum = tradeData.buyOn ? tradeData.fromPlayerEnum : tradeData.toPlayerEnum;
-
-                        currentAreaData.PlayerChangeOn(changePlayerEnum);
-
                         if (tradeData.fromPlayerEnum == myPlayer)
                         {
                             mapController.inGameBottomController.nonePlayPanel.SkillUseOn();
                         }
-
-                        mapController.playerIconController.SetBundleKeyuAll();
 
                         int coinCount = tradeData.coinCount;
 
@@ -339,7 +341,7 @@ public class InGameController : MonoBehaviour
 
                 GameOutRequest outData = (GameOutRequest)baseRequest;
 
-                bool ownerChangeOn = DataManager.Instance.isOwner == false && outData.isOwner;
+                //bool ownerChangeOn = DataManager.Instance.isOwner == false && outData.isOwner;
 
                 DataManager.Instance.isOwner = outData.isOwner;
 
@@ -357,21 +359,12 @@ public class InGameController : MonoBehaviour
                 int currentIndex = DataManager.Instance.currentTurnIndex;
 
                 //내가 오너 플레이어가 되었다면
-                if (ownerChangeOn)
+                if (DataManager.Instance.isOwner)
                 {
                     PlayerData playerData = DataManager.Instance.playerDataList[currentIndex];
 
                     if (playerData.isAI)
                     {
-                        PlayerEnum nextPlayer = (PlayerEnum)(currentIndex + 1);
-
-                        if ((int)nextPlayer == DataManager.Instance.num_player)
-                        {
-                            nextPlayer = PlayerEnum.Player_0;
-                        }
-
-                        DataManager.Instance.currentTurnIndex = (int)nextPlayer;
-
                         TurnCheck();
                     }
                 }
@@ -468,11 +461,10 @@ public class InGameController : MonoBehaviour
 
     public void GoMainOn()
     {
-        popupController.PopupAllInActive();
+		DataManager.Instance.GameDataClearOn();
 
-        if (DataManager.Instance.isMultiOn)
+		if (DataManager.Instance.isMultiOn)
         {
-            DataManager.Instance.GameDataClearOn();
             ServerManager.Instance.GameOutRequestOn();
         }
 
@@ -503,10 +495,10 @@ public class InGameController : MonoBehaviour
 
     private void Update()
     {
-        if (DataManager.Instance.isMultiOn == false)
-        {
+        //if (DataManager.Instance.isMultiOn == false)
+        //{
             TurnCheckDelayCheck();
-        }   
+        //}   
 
         if (Input.GetKeyDown(KeyCode.Alpha1))
         {
@@ -520,7 +512,7 @@ public class InGameController : MonoBehaviour
 
     void TurnCheckDelayCheck() 
     {
-        if (DataManager.Instance.gameStart.Value == false || DataManager.Instance.playOn) 
+		if (DataManager.Instance.gameStart.Value == false || DataManager.Instance.playOn) 
         {
             return;
         }
@@ -551,7 +543,12 @@ public class InGameController : MonoBehaviour
             }
 
             mapController.SelectClearOn();
-        }
+
+            if (DataManager.Instance.isMultiOn)
+            {
+				timer.SetTimerOn(true);
+			}
+		}
         else
         {
             if (DataManager.Instance.isMultiOn == false || DataManager.Instance.IsAITurn() && DataManager.Instance.isOwner)
@@ -569,23 +566,49 @@ public class InGameController : MonoBehaviour
                 }
                 else 
                 {
-                    PlayerEnum nextPlayer = (PlayerEnum)(((int)currentPlayer) + 1);
-
-                    if ((int)nextPlayer == DataManager.Instance.num_player)
+                    if (DataManager.Instance.isMultiOn)
                     {
-                        nextPlayer = PlayerEnum.Player_0;
+                        TurnEndRequestOn(currentPlayer, new List<AreaData>());
                     }
+                    else
+                    {
+                        DataManager.Instance.currentTurnIndex = (int)GetNextPlayer();
 
-                    DataManager.Instance.currentTurnIndex = (int)nextPlayer;
-
-                    TurnCheck();
+                        TurnCheck();
+                    }
                 }
                 
             }
-        }
+		}
         SetEndTurnBtn();
 
         mapController.playerIconController.SetIconTurnEffect();
+    }
+
+    PlayerEnum GetNextPlayer()
+    {
+        PlayerEnum currentPlayer = (PlayerEnum)DataManager.Instance.currentTurnIndex;
+
+        PlayerEnum nextPlayer = currentPlayer;
+
+        while (true)
+        {
+            nextPlayer = (PlayerEnum)(((int)nextPlayer) + 1);
+
+            if ((int)nextPlayer == DataManager.Instance.num_player)
+            {
+                nextPlayer = PlayerEnum.Player_0;
+            }
+
+            PlayerIcon playerIcon = mapController.playerIconController.GetPlayerIcon(nextPlayer);
+
+            if (playerIcon != null)
+            {
+                break;
+            }
+        }
+
+        return nextPlayer;
     }
 
     private async UniTask AIPlayOn(PlayerEnum currentPlayer)
@@ -600,7 +623,8 @@ public class InGameController : MonoBehaviour
         }
         else 
         {
-            TurnOffOn();
+			await Task.Delay(100);
+			TurnOffOn();
         }
     }
 
@@ -628,6 +652,9 @@ public class InGameController : MonoBehaviour
         bool gameStart = DataManager.Instance.gameStart.Value;
 
         endTurnBtn.interactable = gameStart && DataManager.Instance.IsMyTurn();
+
+        //Debug.LogWarning(DataManager.Instance.IsMyTurn());
+
     }
 
     public void EndTurnBtnClickOn()
@@ -652,7 +679,7 @@ public class InGameController : MonoBehaviour
         {
             TurnEndRequestOn(DataManager.Instance.playerData.playerEnum, areaDataList);
             endTurnBtn.interactable = false;
-        }
+		}
         else
         {
             SetEndTurnBtn();
@@ -665,8 +692,6 @@ public class InGameController : MonoBehaviour
     {
         DataManager.Instance.gameStart.SetValueAndForceNotify(false);
 
-        popupController.PopupAllInActive();
-
         mapController.NewGameOn();
 
         DataManager.Instance.playOn = false;
@@ -678,8 +703,6 @@ public class InGameController : MonoBehaviour
     }
     public void ReStartOn()
     {
-        popupController.PopupAllInActive();
-
         mapController.ReStartOn();
 
         DataManager.Instance.playOn = false;

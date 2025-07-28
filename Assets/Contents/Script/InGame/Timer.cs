@@ -30,6 +30,8 @@ public class Timer : MonoBehaviour
         timerCurrentDelay = timerMaxDelay;
 
         ResetTimerValue();
+
+        Debug.LogWarning(timerOn);
     }
 
     // Update is called once per frame

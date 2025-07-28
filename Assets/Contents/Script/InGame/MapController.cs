@@ -30,16 +30,18 @@ public class MapController : MonoBehaviour
     public UnityAction gameLoseOn;
     public UnityAction turnOffOn;
     public UnityAction<AreaData> selectAreaOn;
-    public int choisIndex = -1;
 
     public Join[] join;//인접 셀을 포함한 배열(arrangement with adjacent cells)
 
     private InGameButtonStatus selectBtnStatus = InGameButtonStatus.None;
 
+    private AttackController attackController = new AttackController();
+
     private void Awake()
     {
-        //SetEvent();
-    }
+        attackController.SetClass(playerIconController, inGameBottomController);
+		//SetEvent();
+	}
 
     public void SetEvent()
     {
@@ -55,24 +57,6 @@ public class MapController : MonoBehaviour
         {
             return;
         }
-
-        ////내 아이콘을 클릭했다면
-        //if (PlayerIcon.playerEnum == DataManager.Instance.playerData.playerEnum)
-        //{
-        //    inGameBottomController.nonePlayPanel.SetNoneBtn();
-        //}
-        //else 
-        //{
-        //    //내가 동맹중인 상태라면
-        //    if (DataManager.Instance.IsAlliance(DataManager.Instance.playerData.playerEnum))
-        //    {
-        //        inGameBottomController.nonePlayPanel.SetActiveBtn(NonePlayPanel.InGameButtonStatus.Betray);
-        //    }
-        //    else
-        //    {
-        //        inGameBottomController.nonePlayPanel.SetActiveBtn(NonePlayPanel.InGameButtonStatus.Ally);
-        //    }
-        //}
 
         playerDataPanel.gameObject.SetActive(true);
         playerDataPanel.SetData(PlayerIcon);
@@ -138,26 +122,14 @@ public class MapController : MonoBehaviour
         }
     }
 
-    List<int> GetReseultDiceCount(int dice)
-    {
-        List<int> result = new List<int>();
-
-        for (int i = 0; i < dice; i++)
-        {
-            int ranDice = Random.Range(1, 7);
-            result.Add(ranDice);
-        }
-
-        return result;
-    }
-
-
     public void CreateMap()
     {
         DataManager.Instance.gameStart.SetValueAndForceNotify(false);
+        DataManager.Instance.playOn = false;
+		DataManager.Instance.InitStashCount();
 
-        // 셀 초기화
-        for (int i = 0; i < hexagonList.Count; i++)
+		// 셀 초기화
+		for (int i = 0; i < hexagonList.Count; i++)
         {
             hexagonList[i].DrawLineOnClear();
         }
@@ -355,131 +327,50 @@ public class MapController : MonoBehaviour
             return;
         }
 
-        //if (isMyTurn)
-        //{
-            //선택이 안되어있다면
-            if (choisIndex == -1)
-            {
-                if (areaData.choisOn == false && areaData.dice > 1 && areaData.player == DataManager.Instance.playerData.playerEnum)
-                {
-                    SelectOn(areaData);
-                }
-            }
-            //선택이 되어있다면
-            else
-            {
-                AreaData beforeAreaData = DataManager.Instance.GetAreaData(choisIndex);
+		//선택이 안되어있다면
+		if (attackController.choisIndex == -1)
+		{
+			if (areaData.choisOn == false && areaData.dice > 1 && areaData.player == DataManager.Instance.playerData.playerEnum)
+			{
+				SelectOn(areaData);
+			}
+		}
+		//선택이 되어있다면
+		else
+		{
+			AreaData beforeAreaData = DataManager.Instance.GetAreaData(attackController.choisIndex);
 
-                //재선택 했을때
-                if (areaData.id == choisIndex)
-                {
-                    DeSelectOn(areaData);
-                }
-                //본인의 땅중 처음 선택한땅이 아닌 다른땅을 선택했을때
-                else if (areaData.player == currentPlayerEnum && areaData.dice > 1)
-                {
-                    beforeAreaData.ChoisEventOn(false);
+			//재선택 했을때
+			if (areaData.id == attackController.choisIndex)
+			{
+				DeSelectOn(areaData);
+			}
+			//본인의 땅중 처음 선택한땅이 아닌 다른땅을 선택했을때
+			else if (areaData.player == currentPlayerEnum && areaData.dice > 1)
+			{
+				beforeAreaData.ChoisEventOn(false);
 
-                    SelectOn(areaData);
-                }
-                //다른 플레이어 땅을 선택했을때
-                else if (areaData.player != currentPlayerEnum)
-                {
-                    //인접하지 않을경우
-                    if (areaData.GetIsOnConnectedArea(beforeAreaData.id) == false)
-                    {
-                        return;
-                    }
+				SelectOn(areaData);
+			}
+			//다른 플레이어 땅을 선택했을때
+			else if (areaData.player != currentPlayerEnum)
+			{
+				//인접하지 않을경우
+				if (areaData.GetIsOnConnectedArea(beforeAreaData.id) == false)
+				{
+					return;
+				}
 
-                    //동맹이었을 경우
-                    if (DataManager.Instance.IsMyAllAlliance(areaData.player))
-                    {
-                        return;
-                    }
+				//동맹이었을 경우
+				if (DataManager.Instance.IsMyAllAlliance(areaData.player))
+				{
+					return;
+				}
 
-                    await AttackOn(beforeAreaData, areaData);
-                }
-            }
-        //}
-        //else
-        //{
-        //    //싱글 플레이 게임이이라면
-        //    if (DataManager.Instance.isMultiOn == false)
-        //    {
-        //        return;
-        //    }
-
-        //    //선택이 안되어있다면
-        //    if (choisIndex == -1)
-        //    {
-        //        SelectOn(areaData);
-        //    }
-        //    //선택이 되어있다면
-        //    else
-        //    {
-        //        AreaData beforeAreaData = DataManager.Instance.GetAreaData(choisIndex);
-
-        //        //재선택 했을때
-        //        if (areaData.id == choisIndex)
-        //        {
-        //            DeSelectOn(areaData);
-        //        }
-        //        else 
-        //        {
-        //            beforeAreaData.ChoisEventOn(false);
-        //            SelectOn(areaData);
-        //        }
-        //    }
-        //}
-    }
-
-    async UniTask AttackOn(AreaData myData, AreaData enemyData )
-    {
-        attackEventOn = true;
-
-        int myDice = myData.dice;
-        int enemyDice = enemyData.dice;
-
-        List<int> myDiceResult = GetReseultDiceCount(myDice);
-        List<int> enemyDiceResult = GetReseultDiceCount(enemyDice);
-
-        DiceWarData myDiceWarData = new DiceWarData(myData.player, myDiceResult);
-        DiceWarData enemyDiceWarData = new DiceWarData(enemyData.player, enemyDiceResult);
-
-        myData.ChoisEventOn(true);
-        enemyData.ChoisEventOn(true);
-
-        await inGameBottomController.nonePlayPanel.AttackOn(myDiceWarData, enemyDiceWarData);
-
-        //점령에 성공하였다면
-        if (myDiceWarData.diceSum > enemyDiceWarData.diceSum)
-        {
-            int resultDice = myData.dice - 1;
-            enemyData.SetDice(resultDice);
-            enemyData.PlayerChangeOn(myData.player);
-
-            playerIconController.SetBundleKeyuAll();
-        }
-
-        myData.SetDice(1);
-
-        myData.ChoisEventOn(false);
-        enemyData.ChoisEventOn(false);
-
-        if (choisIndex == myData.id)
-        {
-            choisIndex = -1;
-        }
-
-        if (DataManager.Instance.isMultiOn)
-        {
-            AttackRequestOn(myData, enemyData , myDiceWarData , enemyDiceWarData);
-
-            await Task.Delay(500);
-        }
-
-        attackEventOn = false;
-    }
+				await attackController.AttackOn(beforeAreaData, areaData);
+			}
+		}
+	}
 
     private void AttackRequestOn(AreaData fromAreaData , AreaData toAreaData , DiceWarData fromDiceWarData, DiceWarData toDiceWarData)
     {
@@ -496,34 +387,13 @@ public class MapController : MonoBehaviour
 
     public async UniTask AttackReceiveDataOn(AttackRequest attackRequest)
     {
-        AreaData fromAreaData = DataManager.Instance.GetAreaData(attackRequest.fromAreaData.id);
-        AreaData toAreaData = DataManager.Instance.GetAreaData(attackRequest.toAreaData.id);
-
-        fromAreaData.ChoisEventOn(true);
-        await Task.Delay(100);
-        toAreaData.ChoisEventOn(true);
-        await Task.Delay(100);
-
-        await inGameBottomController.nonePlayPanel.AttackOn(attackRequest.fromDiceWarData, attackRequest.toDiceWarData);
-
-        fromAreaData.ChoisEventOn(false);
-        toAreaData.ChoisEventOn(false);
-
-        DataManager.Instance.SetAreaData(attackRequest.fromAreaData);
-        DataManager.Instance.SetAreaData(attackRequest.toAreaData);
-
-        playerIconController.SetBundleKeyuAll();
+        await attackController.AttackReceiveDataOn(attackRequest);
     }
 
     void SelectOn(AreaData areaData)
     {
-        choisIndex = areaData.id;
-        areaData.ChoisEventOn(true);
-
-        //if (DataManager.Instance.isMultiOn && DataManager.Instance.IsMyTurn() == false)
-        //{
-        //    AreaTradeCheck(areaData);
-        //}
+		attackController.SetChoisIndex(areaData.id);
+		areaData.ChoisEventOn(true);
     }
 
     public void AreaTradeCheck(AreaData areaData)
@@ -539,16 +409,16 @@ public class MapController : MonoBehaviour
 
     public void SelectClearOn()
     {
-        if (choisIndex != -1)
+        if (attackController.choisIndex != -1)
         {
-            DataManager.Instance.GetAreaData(choisIndex).ChoisEventOn(false);
-            choisIndex = -1;
+            DataManager.Instance.GetAreaData(attackController.choisIndex).ChoisEventOn(false);
+			attackController.SetChoisIndex();
         }
     }
 
     public void DeSelectOn(AreaData areaData)
     {
-        choisIndex = -1;
+		attackController.SetChoisIndex();
         areaData.ChoisEventOn(false);
     }
 
@@ -585,51 +455,87 @@ public class MapController : MonoBehaviour
 
         bool isMyTurn = DataManager.Instance.IsMyTurn();
 
-        //최대 15개 까지만 회복 가능하도록
-        //int connectedCount = Mathf.Min(playerIcon.connectedCount, 15);
         int connectedCount = playerIcon.connectedCount;
 
-        List<AreaData> areaDataList = DataManager.Instance.areaDataList.Where(data => data.player == playerEnum).ToList();
+		List<AreaData> areaDataList = DataManager.Instance.areaDataList.Where(data => data.player == playerEnum).ToList();
 
-        while (true)
+		while (connectedCount > 0)
         {
-            bool allMax = false;
+			areaDataList = DataManager.Instance.areaDataList.Where(data => data.player == playerEnum).ToList();
+            areaDataList.Shuffle();
 
-            foreach (AreaData areaData in areaDataList)
+			bool allMax = areaDataList.All(data => data.dice == DataManager.Instance.diceMaxCount);
+
+			if (allMax)
+			{
+				break;
+			}
+
+			AreaData areaData = areaDataList.Where(data => data.dice < 6).FirstOrDefault();
+
+            if (areaData != null && areaData.dice < DataManager.Instance.diceMaxCount)
             {
-                allMax = areaDataList.All(data => data.dice == DataManager.Instance.diceMaxCount);
+				//주사위 추가
+				areaData.DiceAddOn();
 
-                if (allMax || connectedCount == 0)
-                {
-                    break;
-                }
-
-                //주사위가 Max가 아니라면
-                if (areaData.dice < DataManager.Instance.diceMaxCount)
-                {
-                    //주사위 추가
-                    areaData.DiceAddOn();
-
-                    if (isMyTurn && DataManager.Instance.stashCount > 0)
-                    {    
-                        DataManager.Instance.AddStashCount(-1);
-                    }
-                    else if (connectedCount > 0)
-                    {
-                        connectedCount--;
-                    }
-                }
-            }
-
-            if (allMax || connectedCount <= 0)
-            {
-                break;
-            }
+				//StashCount가 있을때
+				if (DataManager.Instance.GetStashCount(playerEnum) > 0)
+				{
+					DataManager.Instance.AddStashCount(playerEnum, -1);
+				}
+				else if (connectedCount > 0)
+				{
+					connectedCount--;
+				}
+			}
         }
 
-        if (isMyTurn)
+        //      List<AreaData> areaDataList = DataManager.Instance.areaDataList.Where(data => data.player == playerEnum).ToList();
+
+        //areaDataList.Shuffle();
+
+        //      while (true)
+        //      {
+        //	bool allMax = false;
+
+        //          foreach (AreaData areaData in areaDataList)
+        //          {
+        //              allMax = areaDataList.All(data => data.dice == DataManager.Instance.diceMaxCount);
+
+        //              if (allMax || connectedCount == 0)
+        //              {
+        //                  break;
+        //              }
+
+        //              //주사위가 Max가 아니라면
+        //              if (areaData.dice < DataManager.Instance.diceMaxCount)
+        //              {
+        //                  //주사위 추가
+        //                  areaData.DiceAddOn();
+
+        //                  //StashCount가 있을때
+        //                  if (DataManager.Instance.GetStashCount(playerEnum) > 0)
+        //                  {    
+        //                      DataManager.Instance.AddStashCount(playerEnum ,- 1);
+        //                  }
+        //                  else if (connectedCount > 0)
+        //                  {
+        //                      connectedCount--;
+        //                  }
+        //              }
+        //          }
+
+        //          if (allMax || connectedCount <= 0)
+        //          {
+        //              break;
+        //          }
+        //      }
+
+        int stashCount = DataManager.Instance.AddStashCount(playerEnum, connectedCount);
+
+		if (isMyTurn)
         {
-            inGameBottomController.nonePlayPanel.SetStashText(connectedCount);
+			inGameBottomController.nonePlayPanel.SetStashText();
         }
 
         diceAddEventOn = false;
@@ -639,56 +545,8 @@ public class MapController : MonoBehaviour
 
     public async UniTask AIAttackOn(PlayerEnum playerEnum)
     {
-        List<AreaData> areaList = DataManager.Instance.areaDataList.Where(data => data.player == playerEnum).ToList();
-
-        int diceMaxCount = DataManager.Instance.diceMaxCount;
-        List<AreaData> attackAreaList = areaList.Where(data => data.dice > diceMaxCount-2).ToList();
-
-        await Task.Delay(1000);
-
-        bool attackRandomOn = Random.Range(0, 2) == 0;
-
-        if (attackAreaList.Count > 0 && attackRandomOn)
-        {
-            bool attackOn = false;
-            
-            foreach (var attackArea in attackAreaList)
-            {
-                if (attackOn) 
-                {
-                    break;
-                }
-
-                foreach (int targetArea in attackArea.GetAdj())
-                {
-                    if (targetArea == -1)
-                    {
-                        continue;
-                    }
-
-                    AreaData checkAreaData = DataManager.Instance.GetAreaData(targetArea);
-                    if (checkAreaData.player != playerEnum &&
-                        checkAreaData.dice > 0 &&
-                        attackArea.dice >= checkAreaData.dice &&
-                        DataManager.Instance.IsAllAlliance(new List<PlayerEnum>() { attackArea.player, checkAreaData.player }) == false)
-                    {
-                        await AttackOn(attackArea, checkAreaData);
-
-                        attackOn = true;
-
-                        break;
-                    }
-                }
-            }
-            
-        }
-
-        if (DataManager.Instance.isMultiOn)
-        {
-            await Task.Delay(1000);
-        }
+		await attackController.AIAttackOn(playerEnum);
     }
-
 
     // Update is called once per frame
     void Update()
@@ -698,19 +556,23 @@ public class MapController : MonoBehaviour
             CreateMap();
         }
     }
-
+     
     public void NewGameOn()
     {
         DataManager.Instance.InitMapData();
         DataManager.Instance.CreateMap();
 
         CreateMap();
-    }
+
+		inGameBottomController.nonePlayPanel.Init();
+	}
 
     public void ReStartOn()
     {
         DataManager.Instance.ReStartOn();
         playerIconController.SetPlayerIcon();
         inGameBottomController.SetStatus(1);
-    }
+        inGameBottomController.nonePlayPanel.Init();
+
+	}
 }

@@ -21,6 +21,7 @@ using System.Collections;
 using System.Collections.Generic;
 #if UNITY_CHANGE3
 using UnityEngine.SceneManagement;
+using UnityEngine.Profiling;
 #endif
 #if UNITY_CHANGE4
 using UnityEngine.Networking;
@@ -597,7 +598,9 @@ public class Reporter : MonoBehaviour
 	{
 		logDate = System.DateTime.Now.ToString();
 		StartCoroutine("readInfo");
-	}
+
+        DontDestroyOnLoad(this);
+    }
 
 	//clear all logs
 	void clear()

@@ -78,7 +78,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: Terms Of Conditions
+  m_Text: Terms & Conditions
 --- !u!1 &1964134970545046059
 GameObject:
   m_ObjectHideFlags: 0
@@ -782,26 +782,64 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 0.88
-  m_Text: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas vel
-    augue euismod risus condimentum varius et quis quam. Proin rhoncus nec orci volutpat
-    elementum. Donec sed massa tellus. Aliquam enim libero, vulputate ut aliquam
-    et, imperdiet sit amet lorem.\n\n Interdum et malesuada fames ac ante ipsum primis
-    in faucibus. Suspendisse eget nibh dictum urna dictum tempor. Morbi a nibh vitae
-    sapien euismod ultricies id ultrices arcu. Nullam tincidunt pulvinar pretium.
-    Praesent massa nulla, vestibulum at risus ultrices, volutpat \n\nfinibus lectus.
-    Sed aliquam dictum mattis. Aenean felis nulla, rhoncus eu cursus lobortis, semper
-    in metus. Vestibulum erat turpis, fermentum in mauris vitae, congue faucibus
-    sem.\nAenean consequat ullamcorper arcu eu ornare. Nullam tincidunt est quis
-    odio feugiat, ut porta magna dignissim. Maecenas libero erat, ultricies sed lobortis
-    vitae, vestibulum non sem. Donec quis lectus nec velit facilisis porta. Pellentesque
-    quis ex cursus, accumsan lectus sed, dignissim tortor. Praesent euismod aliquet
-    lorem nec molestie. Pellentesque eget faucibus eros, non imperdiet mi. Lorem
-    ipsum dolor sit amet, consectetur adipiscing elit. Donec ac libero porttitor,
-    consectetur justo non, mollis libero.\nEtiam purus metus, congue vel dictum vel,
-    posuere ut dui. Nam non vestibulum augue, at venenatis leo. Suspendisse id magna
-    congue, rutrum risus vitae, aliquam ipsum. In efficitur urna id ante aliquet
-    lobortis. Duis vel orci sed quam tristique viverra. Proin efficitur feugiat interdum.
-    In eget sapien molestie mauris iaculis tristique."
+  m_Text: "By downloading or using the game, these terms will automatically apply
+    to you \u2013 you should make sure therefore that you read them carefully before
+    using the game. You\u2019re not allowed to copy, or modify the game, any part
+    of the game, or our trademarks in any way. You\u2019re not allowed to attempt
+    to extract the source code of the game, and you also shouldn\u2019t try to translate
+    the game into other languages, or make derivative versions. The game itself,
+    and all the trade marks, copyright, database rights and other intellectual property
+    rights related to it, still belong to Jaedong Kim.\r\n\r\nThe Dice and Deal game
+    stores and processes personal data that you have provided to us, in order to
+    provide my Service. It\u2019s your responsibility to keep your phone and access
+    to the game secure. We therefore recommend that you do not jailbreak or root
+    your phone, which is the process of removing software restrictions and limitations
+    imposed by the official operating system of your device. It could make your phone
+    vulnerable to malware/viruses/malicious programs, compromise your phone\u2019s
+    security features and it could mean that the Dice and Deal game won\u2019t work
+    properly or at all.\r\n\r\nYou should be aware that there are certain things
+    that Jaedong Kim will not take responsibility for. Certain functions of the game
+    will require the game to have an active internet connection. The connection can
+    be Wi-Fi, or provided by your mobile network provider, but Jaedong Kim cannot
+    take responsibility for the game not working at full functionality if you don\u2019t
+    have access to Wi-Fi, and you don\u2019t have any of your data allowance left.\r\n\r\nIf
+    you\u2019re using the game outside of an area with Wi-Fi, you should remember
+    that your terms of the agreement with your mobile network provider will still
+    apply. As a result, you may be charged by your mobile provider for the cost of
+    data for the duration of the connection while accessing the game, or other third
+    party charges. In using the game, you\u2019re accepting responsibility for any
+    such charges, including roaming data charges if you use the game outside of your
+    home territory (i.e. region or country) without turning off data roaming. If
+    you are not the bill payer for the device on which you\u2019re using the game,
+    please be aware that we assume that you have received permission from the bill
+    payer for using the game.\r\n\r\nAlong the same lines, Jaedong Kim cannot always
+    take responsibility for the way you use the game i.e. You need to make sure that
+    your device stays charged \u2013 if it runs out of battery and you can\u2019t
+    turn it on to avail the Service, Jaedong Kim cannot accept responsibility.\r\n\r\nWith
+    respect to Jaedong Kim\u2019s responsibility for your use of the game, when you\u2019re
+    using the game, it\u2019s important to bear in mind that although we endeavour
+    to ensure that it is updated and correct at all times, we do rely on third parties
+    to provide information to us so that we can make it available to you. Jaedong
+    Kim accepts no liability for any loss, direct or indirect, you experience as
+    a result of relying wholly on this functionality of the game.\r\n\r\nAt some
+    point, we may wish to update the game. The game is currently available on Android
+    & iOS \u2013 the requirements for both systems (and for any additional systems
+    we decide to extend the availability of the game to) may change, and you\u2019ll
+    need to download the updates if you want to keep playing the game. Jaedong Kim
+    does not promise that it will always update the game so that it is relevant to
+    you and/or works with the Android & iOS version that you have installed on your
+    device. However, you promise to always accept updates to the game when offered
+    to you, We may also wish to stop providing the game, and may terminate use of
+    it at any time without giving notice of termination to you. Unless we tell you
+    otherwise, upon any termination, (a) the rights and licenses granted to you in
+    these terms will end; (b) you must stop using the game, and (if needed) delete
+    it from your device.\r\n\r\nChanges to This Terms and Conditions\r\n\r\nI may
+    update our Terms and Conditions from time to time. Thus, you are advised to review
+    this page periodically for any changes. I will notify you of any changes by posting
+    the new Terms and Conditions on this page. These changes are effective immediately
+    after they are posted on this page.\r\n\r\nContact Us\r\n\r\nIf you have any
+    questions or suggestions about my Terms and Conditions, do not hesitate to contact
+    me at wyeth123@naver.com."
 --- !u!1 &7054026791176648212
 GameObject:
   m_ObjectHideFlags: 0
@@ -814,6 +852,7 @@ GameObject:
   - component: {fileID: 7439407293875553249}
   - component: {fileID: 4361940267268057621}
   - component: {fileID: 1619481240226462910}
+  - component: {fileID: 5682128127321340323}
   m_Layer: 5
   m_Name: BackBtn
   m_TagString: Untagged
@@ -934,6 +973,18 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+--- !u!114 &5682128127321340323
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7054026791176648212}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a20904b354e7d8c4ebe650efd74c3e19, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &7495923958659312787
 GameObject:
   m_ObjectHideFlags: 0

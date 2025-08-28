@@ -1,12 +1,9 @@
-﻿using Assets.SimpleSignIn.Google.Scripts;
-using Cysharp.Threading.Tasks;
+﻿using Cysharp.Threading.Tasks;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UniRx;
-using Unity.VisualScripting;
-using UnityEditor;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using Random = UnityEngine.Random;
@@ -17,8 +14,8 @@ public class DataManager : MonoSingleton<DataManager>
     public string loginId = string.Empty;
     public bool isMultiOn = false;
 
-	public AILevel aiLevel = AILevel.Hard;
-    public MapSizeEnum mapSizeEnum = MapSizeEnum.Medium;
+	public AILevel aiLevel = AILevel.Normal;
+    public MapSizeEnum mapSizeEnum = MapSizeEnum.Small;
     Dictionary<MapSizeEnum, MapData> mapDataDic = new Dictionary<MapSizeEnum, MapData>();
     
     public int num_player = 2;//총 플레이어의 수 (기본 값 : 3)
@@ -41,9 +38,12 @@ public class DataManager : MonoSingleton<DataManager>
 
     public bool isOwner = false;
 
-    public int currentTurnIndex = 0;
+    private int _currentTurnIndex = 0;
+	public int currentTurnIndex  { get { return _currentTurnIndex; }}
 
-    private Dictionary<PlayerEnum,int> playerColorIndexDic = new Dictionary<PlayerEnum,int>();
+	public PlayerEnum currentPlayer  { get { return (PlayerEnum)currentTurnIndex; } }
+
+	private Dictionary<PlayerEnum,int> playerColorIndexDic = new Dictionary<PlayerEnum,int>();
     public List<PlayerData> playerDataList = new List<PlayerData>();
     public ReactiveProperty<bool> gameStart = new ReactiveProperty<bool>(false);
 
@@ -62,9 +62,22 @@ public class DataManager : MonoSingleton<DataManager>
 
     public bool inGameEditOn = false;
 
-    public override void Init()
+	public bool soundOn = true;
+	private const string soundOnKey = "soundOnKey";
+	
+	private bool mapCompensation = false;
+    private const string mapCompensationKey = "mapCompensationKey";
+
+	public int newGameNeedCoin = 2;
+
+	public bool leaveEarlyPopupReadyOn = false;
+	public bool leaveEarlyPopupOpenOn = false;
+
+	public override void Init()
     {
         base.Init();
+
+        CommonDataInit();
 
         playerColorIndexDic = new Dictionary<PlayerEnum, int>
         {
@@ -83,7 +96,15 @@ public class DataManager : MonoSingleton<DataManager>
         //Debug.LogWarning(mapSizeEnum);
     }
 
-    void MapDataInit() 
+    void CommonDataInit()
+    {
+		soundOn = PlayerPrefs.GetInt(soundOnKey, 1) == 1;
+		SoundManager.Instance.SoundOffOn(!soundOn);
+		mapCompensation = PlayerPrefs.GetInt(mapCompensationKey , 1) == 1;
+	}
+
+
+	void MapDataInit() 
     {
         mapDataDic = new Dictionary<MapSizeEnum, MapData>
         {
@@ -93,9 +114,22 @@ public class DataManager : MonoSingleton<DataManager>
         };
     }
 
-    public void UserDataSave(UserDataRespons data)
+    public void CheckUserData()
     {
-        userData = new UserData(data.email, data.snsType, data.coin);
+		if (userData == null)
+		{
+            UserDataRespons data = new UserDataRespons() { email = "fktkdals1@gmail.com" };
+			UserDataSave(data);
+		}
+	}
+
+	public void UserDataSave(UserDataRespons data)
+    {
+#if UNITY_STANDALONE
+        data.coin = 100;
+#endif
+
+		userData = new UserData(data.email, data.snsType, data.coin);
     }
 
     public void InitMapData()
@@ -108,15 +142,15 @@ public class DataManager : MonoSingleton<DataManager>
         List<int> colorList = new List<int>() { 0,1,2,3,4,5,6};
         //colorList.Shuffle();
 
-        int index = colorList.IndexOf(playerData.colorIndex);
+        int index = colorList.IndexOf(playerData.ci);
 
-        int playerEnumIndex = (int)playerData.playerEnum;
+        int playerEnumIndex = (int)playerData.pe;
 
         //int temp = colorList[playerEnumIndex];
         //colorList[playerEnumIndex] = playerData.colorIndex;
         //colorList[index] = temp;
 
-        playerData.playerEnum = (PlayerEnum)playerData.colorIndex;
+        playerData.pe = (PlayerEnum)playerData.ci;
 
 
 		for (int i = 0; i < num_player; i++) 
@@ -129,7 +163,7 @@ public class DataManager : MonoSingleton<DataManager>
     {
         foreach (var playerData in playerDataList)
         {
-            playerColorIndexDic[(PlayerEnum)playerData.playerEnum] = playerData.colorIndex;
+            playerColorIndexDic[(PlayerEnum)playerData.pe] = playerData.ci;
         }
     }
 
@@ -225,13 +259,15 @@ public class DataManager : MonoSingleton<DataManager>
 
         for (int i = 0; i < playerDataList.Count; i++)
         {
-            bool isAI = isMultiOn == false ? playerData.colorIndex != i :  i > onLineCnt;
+            bool isAI = isMultiOn == false ? playerData.ci != i :  i > onLineCnt;
 
 			playerDataList[i].isAI = isAI;
 
-			foreach (var area in GetAreaDtaList(playerDataList[i].playerEnum))
+			foreach (var area in GetAreaDtaList(playerDataList[i].pe))
 			{
-				area.SetDice(GetDiceCount(isAI));
+                bool lastOn = mapCompensation && i >= (num_player - 3);
+
+				area.SetDice(GetDiceCount(isAI, lastOn));
 			}
 		}
     }
@@ -246,12 +282,14 @@ public class DataManager : MonoSingleton<DataManager>
     /// </summary>
     /// <param name="isAi"></param>
     /// <returns></returns>
-    int GetDiceCount(bool isAi)
+    int GetDiceCount(bool isAi ,bool lastOn)
     {
 		//DiceCountData data = Resources.Load<DiceCount>("DiceCount").GetData(isAi, aiLevel);
 		DiceCountData data = DiceCountManager.Instance.GetData(isAi, aiLevel);
 
-        //Debug.LogWarning(data.minCount);
+        int diceCount = isAi == false && lastOn ?
+                        Random.Range(data.minCount+1, data.maxCount + 1):
+			            Random.Range(data.minCount, data.maxCount + 1);
 
 		//int dice = ;
 
@@ -274,7 +312,7 @@ public class DataManager : MonoSingleton<DataManager>
 		//	}
 		//}
 
-		return Random.Range(data.minCount, data.maxCount+1);
+		return diceCount;
 	}
 
 
@@ -492,7 +530,7 @@ public class DataManager : MonoSingleton<DataManager>
 
     public Color SetCurrentPlayerColor(int currentPlayerColorIndex)
     {
-        this.playerData.colorIndex = currentPlayerColorIndex;
+        this.playerData.ci = currentPlayerColorIndex;
         return GetPlayerColor(currentPlayerColorIndex);
     }
     public int ActivePlayerCount()
@@ -527,7 +565,7 @@ public class DataManager : MonoSingleton<DataManager>
 
     public Color GetPlayerColor()
     {
-        return GetPlayerColor(playerData.colorIndex);
+        return GetPlayerColor(playerData.ci);
     }
 
     public void ReStartOn()
@@ -554,11 +592,11 @@ public class DataManager : MonoSingleton<DataManager>
         this.turnPosition = turnPosition;
         if (turnPosition == -1) 
         {
-            playerData.playerEnum = (PlayerEnum)Random.Range(0, num_player);
+            playerData.pe = (PlayerEnum)Random.Range(0, num_player);
         }
         else 
         {
-			playerData.playerEnum = (PlayerEnum)turnPosition;
+			playerData.pe = (PlayerEnum)turnPosition;
 		}
     }
 
@@ -595,6 +633,93 @@ public class DataManager : MonoSingleton<DataManager>
         return stashCount;
 	}
 
+    public int GetRewardCoin()
+    {
+		int resultCoin = isMultiOn ? GetMultiRewardCoin() : GetSingleRewardCoin();
+
+        return resultCoin;
+    }
+
+    public int GetSingleRewardCoin(GameResultPopup.GameResultEnum gameResultEnum = GameResultPopup.GameResultEnum.Win)
+    {
+		int addCoin = 0;
+
+		switch (aiLevel)
+		{
+			case AILevel.Easy: addCoin = 1; break;
+			case AILevel.Normal: addCoin = 2; break;
+			case AILevel.Hard: addCoin = 3; break;
+		}
+
+		int resultCoin = addCoin * num_player;
+
+        if (gameResultEnum == GameResultPopup.GameResultEnum.LeaveEarly)
+        {
+            resultCoin = Mathf.RoundToInt(resultCoin * 0.8f);
+		}
+
+		return resultCoin;
+	}
+
+	public int GetMultiRewardCoin(int resultPlayCount = 1)
+	{
+        int coinCount = 0;
+
+		if (resultPlayCount == 1)
+        {
+			int addCoin = 3;
+			coinCount = addCoin * num_player;
+		}
+        else
+        {
+			var allianceData = GetMyAllianceData();
+
+			if (allianceData != null)
+			{
+				coinCount = allianceData.coinCount;
+			}
+		}
+
+        return coinCount;
+	}
+
+    public int GetNeedBetrayCoin()
+    {
+        return 6;
+    }
+
+    public int GetNeedCoin()
+    {
+        int needCoin = 0;
+
+        if (isMultiOn)
+        {
+            needCoin = 3;
+		}
+        else
+        {
+			switch (aiLevel)
+			{
+				case AILevel.Easy:
+					needCoin = 0;
+					break;
+				case AILevel.Normal:
+					needCoin = 1;
+					break;
+				case AILevel.Hard:
+					needCoin = 2;
+					break;
+			}
+		}
+
+        return needCoin;
+	}
+
+    public void GamePlayOn()
+    {
+		AddCoin(-GetNeedCoin());
+	}
+
 	public void AddCoin(int addCoin)
     {
         if (userData == null)
@@ -604,7 +729,7 @@ public class DataManager : MonoSingleton<DataManager>
 
         userData.myCoin.Value += addCoin;
 
-        if (string.IsNullOrEmpty(userData.email) == false ) 
+		if (string.IsNullOrEmpty(userData.email) == false ) 
         {
             UserDataRequest request = new UserDataRequest()
             {
@@ -626,31 +751,56 @@ public class DataManager : MonoSingleton<DataManager>
         {
             return;
         }
-        currentTurnIndex++;
 
-        if (currentTurnIndex >= num_player)
+        int tempIndex = currentTurnIndex;
+
+		tempIndex++;
+
+        if (tempIndex >= num_player)
         {
-            currentTurnIndex = 0;
-        }
+			tempIndex = 0;
+		}
+
+        SetCurrentTurnIndex(tempIndex);
+	}
+
+    public void SetCurrentTurnIndex(int index)
+    {
+		_currentTurnIndex = index;
+	}
+
+    public bool CheckLeaveEarly(PlayerIconController pic)
+    {
+        return isMultiOn == false &&  //싱글 플레이
+               IsMyTurn() &&          // 내턴
+               mapSizeEnum == MapSizeEnum.Large && // Large 맵
+               leaveEarlyPopupReadyOn &&           // 조기 종료 준비 Flag
+               pic.GetPlayerIcon(currentPlayer).connectedCount >= 30; // 연결된 영토가 30개 이상인지
+	}
+
+
+	public bool IsMyTurn()
+    {
+		return currentTurnIndex == (int)playerData.pe;
     }
 
-    public bool IsMyTurn()
-    {
-		return currentTurnIndex == (int)playerData.playerEnum;
-    }
+	public PlayerData GetMyPlayerData()
+	{
+		return playerDataList.FirstOrDefault(data => data.pe == playerData.pe);
+	}
 
-    public PlayerData GetPlayerData(PlayerEnum playerEnum)
+	public PlayerData GetPlayerData(PlayerEnum playerEnum)
     {
-        return playerDataList.FirstOrDefault(data => data.playerEnum == playerEnum);
+        return playerDataList.FirstOrDefault(data => data.pe == playerEnum);
     }
 
     public void SetPlayerSkillData(PlayerEnum playerEnum , int skillCount)
     {
         foreach (var playerData in playerDataList)
         {
-            if (playerData.playerEnum == playerEnum) 
+            if (playerData.pe == playerEnum) 
             {
-                playerData.skillCardCount = skillCount;
+                playerData.sc = skillCount;
             }   
         }
     }
@@ -659,7 +809,7 @@ public class DataManager : MonoSingleton<DataManager>
     {
         bool isAiOn = false;
 
-        PlayerData playerData = playerDataList.FirstOrDefault(data => (int)data.playerEnum == currentTurnIndex);
+        PlayerData playerData = playerDataList.FirstOrDefault(data => (int)data.pe == currentTurnIndex);
 
         //멀티가 아닐때
         if (isMultiOn == false )
@@ -682,6 +832,11 @@ public class DataManager : MonoSingleton<DataManager>
         this.allianceDataList = allianceDataList;
     }
 
+    /// <summary>
+    /// 이미 동맹이 되어있는지 체크
+    /// </summary>
+    /// <param name="playerEnum"></param>
+    /// <returns></returns>
     public bool IsAlliance(PlayerEnum playerEnum) 
     {
         return allianceDataList.Any(data => data.playerEnum == playerEnum);
@@ -689,7 +844,7 @@ public class DataManager : MonoSingleton<DataManager>
 
     public AllianceData GetMyAllianceData()
     {
-        return allianceDataList.FirstOrDefault(data => data.playerEnum == playerData.playerEnum);
+        return allianceDataList.FirstOrDefault(data => data.playerEnum == playerData.pe);
     }
 
     public bool IsAllAlliance(List<PlayerEnum> checkPlayerEnumList)
@@ -717,7 +872,7 @@ public class DataManager : MonoSingleton<DataManager>
         List<PlayerEnum> checkPlayerEnumList = new List<PlayerEnum>() 
         {
             checkPlayerEnum,
-            playerData.playerEnum
+            playerData.pe
         };
 
         return IsAllAlliance(checkPlayerEnumList);
@@ -741,7 +896,21 @@ public class DataManager : MonoSingleton<DataManager>
         return resultData;
     }
 
-    public void AllianceClearOn() 
+	public bool AllianceClearCheckOn(PlayerIconController playerIconController)
+	{
+        bool clearOn = false;
+
+        if (allianceDataList.Count <= 1)
+		{
+            playerIconController.SetBetrayPlayerIcon(allianceDataList[0].playerEnum);
+			AllianceClearOn();
+            clearOn = true;
+		}
+
+        return clearOn;
+	}
+
+	public void AllianceClearOn() 
     {
         allianceDataList = new List<AllianceData>();
     }
@@ -753,7 +922,7 @@ public class DataManager : MonoSingleton<DataManager>
             if (allianceData.playerEnum == playerEnum)
             {
                 allianceDataList.Remove(allianceData);
-                break;
+				break;
             }
         }
     }
@@ -767,30 +936,43 @@ public class DataManager : MonoSingleton<DataManager>
 
     public void SkillCardCountAdd(int addCount = -1)
     {
-        playerData.skillCardCount += addCount;
+		PlayerData p_data = GetPlayerData(playerData.pe);
 
-        playerData.skillCardCount = Mathf.Clamp(playerData.skillCardCount,0, 3);
+		p_data.sc += addCount;
+
+		p_data.sc = Mathf.Clamp(p_data.sc,0, 3);
 
         if (isMultiOn)
         {
             SkillCardRequest request = new SkillCardRequest()
             {
-                playerEnum = playerData.playerEnum,
-                skillCardCount = playerData.skillCardCount,
+                playerEnum = p_data.pe,
+                skillCardCount = p_data.sc,
             };
 
             ServerManager.Instance.SendMessageOn(request);
 
-            SetPlayerSkillData(playerData.playerEnum, playerData.skillCardCount);
+            SetPlayerSkillData(p_data.pe, p_data.sc);
         }
     }
 
     public void GameDataClearOn()
     {
-        AllianceClearOn();
+		PlayerDataClearOn();
+		AllianceClearOn();
         StashCountClearOn();
-        currentTurnIndex = 0;
+        SetCurrentTurnIndex(0);
 	}
+
+    void PlayerDataClearOn()
+    {
+        playerData.sc = 0;
+
+		foreach (var currentPlayerData in playerDataList)
+        {
+            currentPlayerData.sc = 0;
+		}
+    }
 
 	void StashCountClearOn()
     {
@@ -799,6 +981,47 @@ public class DataManager : MonoSingleton<DataManager>
             stashCountList[i] = 0;
 		}
     }
+	public bool GetSoundOn()
+	{
+		return soundOn;
+	}
+
+	public void SetSoundOn(bool _soundOn)
+	{
+		soundOn = _soundOn;
+		PlayerPrefs.SetInt(soundOnKey, soundOn ? 1 : 0);
+		PlayerPrefs.Save();
+
+        SoundManager.Instance.SoundOffOn(!soundOn);
+	}
+
+	public bool GetMapCompensation()
+    {
+        return mapCompensation;
+	}
+
+	public void SetMapCompensation(bool _mapCompensation)
+	{
+        mapCompensation = _mapCompensation;
+		PlayerPrefs.SetInt(mapCompensationKey, mapCompensation ? 1 : 0);
+		PlayerPrefs.Save();
+	}
+
+    public bool CheckNewGame()
+    {
+        int needCoin = GetNeedCoin();
+
+		//bool newGameOn = userData != null && userData.myCoin.Value >= newGameNeedCoin;
+		bool newGameOn = userData != null && userData.myCoin.Value >= needCoin;
+
+		if (newGameOn == false)
+        {
+			//PopupManager.Instance.NeedCoinPopupOn(-newGameNeedCoin);
+			PopupManager.Instance.NeedCoinPopupOn(-needCoin);
+		}
+
+        return newGameOn;
+	}
 }
 
 [System.Serializable]
@@ -818,18 +1041,18 @@ public class Join
 [System.Serializable]
 public class PlayerData
 {
-    public PlayerEnum playerEnum = PlayerEnum.Player_0;
-    public int colorIndex = 1;
-    public int skillCardCount = 1;
+    public PlayerEnum pe = PlayerEnum.Player_0;
+    public int ci = 0;
+    public int sc = 0;
     public bool isAI = false;
 
     public PlayerData() { }
 
-    public PlayerData(PlayerEnum playerEnum , int colorIndex , int skillCardCount = 1, bool isAI = false)  
+    public PlayerData(PlayerEnum playerEnum , int colorIndex , int skillCardCount = 0, bool isAI = false)  
     {
-        this.playerEnum = playerEnum;
-        this.colorIndex = colorIndex;
-        this.skillCardCount = skillCardCount;
+        this.pe = playerEnum;
+        this.ci = colorIndex;
+        this.sc = skillCardCount;
         this.isAI = isAI;
     }
 }

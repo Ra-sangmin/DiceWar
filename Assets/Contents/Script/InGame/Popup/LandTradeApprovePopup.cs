@@ -7,7 +7,7 @@ public class LandTradeApprovePopup : MonoBehaviour
 {
     [SerializeField] PlayerToggleIcon PlayerToggleIcon;
     [SerializeField] Text tradeText;
-    [SerializeField] CoinBox coinBox;
+    [SerializeField] Text coinText;
     private LandTradeRequest landTradeRequest;
 
     // Start is called before the first frame update
@@ -28,10 +28,10 @@ public class LandTradeApprovePopup : MonoBehaviour
 
         PlayerToggleIcon.SetPlayerData(this.landTradeRequest.fromPlayerEnum);
 
-        string tradeTextValue = landTradeRequest.buyOn ? "Buyer" : "Seller";
+        string tradeTextValue = landTradeRequest.buyOn ? "Buy land" : "Sell land";
         tradeText.text = tradeTextValue;
 
-        coinBox.SetCoinCount(landTradeRequest.coinCount);
+		coinText.text = landTradeRequest.coinCount.ToString();
     }
 
     public void RefuseBtnClickOn()

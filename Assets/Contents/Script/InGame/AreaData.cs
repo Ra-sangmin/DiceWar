@@ -13,8 +13,9 @@ public class AreaData
 
     public PlayerEnum player = PlayerEnum.Player_None;
     public bool choisOn { get; set; }
+	public bool tradeOn { get; set; }
 
-    public List<int> adj = new List<int>();
+	public List<int> adj = new List<int>();
     private List<Hexagon> hexagonList = new List<Hexagon>();
 
     public List<int> cel = new List<int>();
@@ -339,7 +340,17 @@ public class AreaData
         SetColor();
     }
 
-    void SetColor()
+	public void TradeEventOn(bool tradeOn)
+	{
+		this.tradeOn = tradeOn;
+
+		for (int i = 0; i < hexagonList.Count; i++)
+		{
+			hexagonList[i].TradeOn(tradeOn);
+		}
+	}
+
+	void SetColor()
     {
         for (int i = 0; i < hexagonList.Count; i++)
         {

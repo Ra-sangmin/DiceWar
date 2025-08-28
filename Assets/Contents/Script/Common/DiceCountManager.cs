@@ -16,6 +16,9 @@ public class DiceCountManager : MonoSingleton<DiceCountManager>
 
 		string jsonValue = PlayerPrefs.GetString(diceCountListDataKey, string.Empty);
 
+		//임시로 초기화 로직 적용
+		jsonValue = string.Empty;
+
 		if (string.IsNullOrEmpty(jsonValue))
 		{
 			DiceCountListDataInit();
@@ -32,12 +35,12 @@ public class DiceCountManager : MonoSingleton<DiceCountManager>
 
 		diceCountListData.diceCountDataList = new List<DiceCountData>()
 		{
-			new DiceCountData(false, AILevel.Easy,3,4),
-			new DiceCountData(false, AILevel.Normal,2,4),
-			new DiceCountData(false, AILevel.Hard,1,3),
+			new DiceCountData(false, AILevel.Easy,2,4),
+			new DiceCountData(false, AILevel.Normal,1,3),
+			new DiceCountData(false, AILevel.Hard,1,4),
 			new DiceCountData(true,  AILevel.Easy,1,3),
-			new DiceCountData(true,  AILevel.Normal,2,4),
-			new DiceCountData(true,  AILevel.Hard,3,5),
+			new DiceCountData(true,  AILevel.Normal,1,3),
+			new DiceCountData(true,  AILevel.Hard,1,4),
 		};
 	}
 

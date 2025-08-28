@@ -47,7 +47,7 @@ public class MapDice : HexagonBase
 
         for (int i = 0; i < dice; i++)
         {
-            diceImageList[i].CrossFadeAlpha(1, 0, true);
+			diceImageList[i].CrossFadeAlpha(1, 0, true);
         }
     }
 

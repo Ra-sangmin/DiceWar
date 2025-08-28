@@ -2930,6 +2930,7 @@ GameObject:
   - component: {fileID: 703553758928634233}
   - component: {fileID: 1040427965197998144}
   - component: {fileID: 7396266670489947843}
+  - component: {fileID: 1547823542613220453}
   m_Layer: 0
   m_Name: BuyCoinBtn_0
   m_TagString: Untagged
@@ -3079,6 +3080,18 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   button: {fileID: 1040427965197998144}
+--- !u!114 &1547823542613220453
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5125455511251040905}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a20904b354e7d8c4ebe650efd74c3e19, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &5173860725071892833
 GameObject:
   m_ObjectHideFlags: 0
@@ -5144,6 +5157,7 @@ GameObject:
   - component: {fileID: 5415935636515302595}
   - component: {fileID: 3941665745859041731}
   - component: {fileID: 6298006401356503410}
+  - component: {fileID: 5898011387995413521}
   m_Layer: 0
   m_Name: BuyCoinBtn_1
   m_TagString: Untagged
@@ -5293,6 +5307,18 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   button: {fileID: 3941665745859041731}
+--- !u!114 &5898011387995413521
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8505734677160084927}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a20904b354e7d8c4ebe650efd74c3e19, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &8601010109056833188
 GameObject:
   m_ObjectHideFlags: 0
@@ -5306,6 +5332,7 @@ GameObject:
   - component: {fileID: 7609122102930848378}
   - component: {fileID: 6374466051581429214}
   - component: {fileID: 8229466833279284494}
+  - component: {fileID: 4279588123149225857}
   m_Layer: 5
   m_Name: BuyAdsBtn
   m_TagString: Untagged
@@ -5430,6 +5457,18 @@ MonoBehaviour:
   _showAdButton: {fileID: 6374466051581429214}
   _androidAdUnitId: Rewarded_Android
   _iOSAdUnitId: Rewarded_iOS
+--- !u!114 &4279588123149225857
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8601010109056833188}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a20904b354e7d8c4ebe650efd74c3e19, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &8715600730590027022
 GameObject:
   m_ObjectHideFlags: 0
@@ -5442,6 +5481,7 @@ GameObject:
   - component: {fileID: 962729412435783044}
   - component: {fileID: 8348109162259404269}
   - component: {fileID: 7349557762183834862}
+  - component: {fileID: 4976932843544756960}
   m_Layer: 5
   m_Name: BackBtn
   m_TagString: Untagged
@@ -5562,6 +5602,18 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+--- !u!114 &4976932843544756960
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8715600730590027022}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a20904b354e7d8c4ebe650efd74c3e19, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &8784893428270638997
 GameObject:
   m_ObjectHideFlags: 0

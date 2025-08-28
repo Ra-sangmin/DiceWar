@@ -19,14 +19,16 @@ public class ServerTest : MonoBehaviour
     public PlayerEnum playerEnum;
     public PlayerEnum toPlayerEnum;
 
-    private void Awake()
+	public TcpClientExample tcpClientTest;
+
+	private void Awake()
     {
-        ServerManager.Instance.receiveDataOn += ReceiveDataOn;
+        //ServerManager.Instance.receiveDataOn += ReceiveDataOn;
     }
 
     private void OnDestroy()
     {
-        ServerManager.Instance.receiveDataOn -= ReceiveDataOn;
+        //ServerManager.Instance.receiveDataOn -= ReceiveDataOn;
     }
 
     private void ReceiveDataOn(BaseTCPRequest baseRequest) 
@@ -59,14 +61,17 @@ public class ServerTest : MonoBehaviour
         }
     }
 
-    // Start is called before the first frame update
-    void Start()
+	// Start is called before the first frame update
+	void Start()
     {
-        
+		string IP = "ec2-52-78-148-28.ap-northeast-2.compute.amazonaws.com";
+		int PORT = 8000;
 
-        //ServerManager.Instance.ConnectToServer();
-        //ConnectToServer();
-    }
+		tcpClientTest.Connect(IP, PORT);
+
+		//ServerManager.Instance.ConnectToServer();
+		//ConnectToServer();
+	}
 
     // Update is called once per frame
 
@@ -99,12 +104,24 @@ public class ServerTest : MonoBehaviour
     //    }
     //}
 
+    public string test;
+
     void Update()
     {
         if (Input.GetKeyDown(KeyCode.Alpha1))
         {
-            //ServerManager.Instance.TurnRequestOn(playerEnum,true);
-        }
+			GameReadyRequest gameReadyRequest = new GameReadyRequest()
+			{
+				maxPlayerCnt = 2,
+				userCnt = 2,
+				mapSizeEnum = DataManager.Instance.mapSizeEnum
+			};
+
+			string jsonStr = JsonUtility.ToJson(gameReadyRequest);
+			tcpClientTest.Send(test);
+
+            Debug.LogWarning(jsonStr);
+		}
 
         if (Input.GetKeyDown(KeyCode.Alpha2))
         {
@@ -121,6 +138,11 @@ public class ServerTest : MonoBehaviour
             //ServerManager.Instance.LandTradeRequestOn(playerEnum, false);
         }
     }
+
+    public void SendTest()
+    {
+		tcpClientTest.Send(test);
+	}
 
     public int maxCnt;
     public int userCnt;

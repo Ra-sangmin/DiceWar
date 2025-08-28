@@ -18,13 +18,13 @@ public class VictoryPopup : MonoBehaviour
 
     public void GoMainBtnClickOn()
     {
-        FindFirstObjectByType<InGameController>().GoMainOn();
+        //FindFirstObjectByType<InGameController>().GoMainOn();
         gameObject.SetActive(false);
     }
 
     public void NewGameBtnClickOn()
     {
-        FindFirstObjectByType<InGameController>().NewGameOn();
+        //FindFirstObjectByType<InGameController>().NewGameOn();
         gameObject.SetActive(false);
     }
 }

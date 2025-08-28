@@ -1,11 +1,9 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Events;
-using UnityEngine.Experimental.AI;
 using UnityEngine.UI;
+using DG.Tweening;
 
 public class Hexagon : HexagonBase
 {
@@ -14,16 +12,18 @@ public class Hexagon : HexagonBase
     [SerializeField] Image centerImage;
     [SerializeField] List<Sprite> hexagonSpriteList = new List<Sprite>();
     [SerializeField] List<LineRenderer> lineRendererList = new List<LineRenderer>();
+	[SerializeField] List<Image> lineImageList = new List<Image>();
 
-    public int area;
+	public int area;
     public PlayerEnum playerEnum = PlayerEnum.Player_None;
-    private bool choisOn = false;
-
-    public Join join;
-
+	public Join join;
     public UnityAction<int> clickOn = data => { };
 
-    protected override void Awake()
+	private bool choisOn = false;
+	private bool tradeOn = false;
+	private Tweener colorTweener;
+
+	protected override void Awake()
     {
         base.Awake();
 
@@ -90,15 +90,30 @@ public class Hexagon : HexagonBase
         SetColor();
     }
 
+    public void TradeOn(bool tradeOn)
+    {
+        this.tradeOn = tradeOn;
+		SetColor();
+	}
+
     public void SetColor()
     {
         Color color = Color.black;
 
+		colorTweener.Kill();
+
+        if (tradeOn)
+		{
+			centerImage.color = DataManager.Instance.GetPlayerColor(playerEnum);
+            colorTweener = centerImage.DOColor(new Color(0.2f, 0.2f, 0.2f), 0.75f).SetLoops(-1, LoopType.Yoyo);
+            return;
+		}
+		
         if (choisOn)
-        {
-            color = Color.gray;
-        }
-        else
+		{
+			color = Color.gray;
+		}
+		else
         {
             color = DataManager.Instance.GetPlayerColor(playerEnum);
         }
@@ -139,8 +154,9 @@ public class Hexagon : HexagonBase
 
     public void DrawLineOn(int lineIndex)
     {
-        lineRendererList[lineIndex].gameObject.SetActive(true);
-    }
+		lineRendererList[lineIndex].gameObject.SetActive(true);
+		//lineImageList[lineIndex].gameObject.SetActive(true);
+	}
 
     public List<Vector2> GetDotPos(int index) 
     {

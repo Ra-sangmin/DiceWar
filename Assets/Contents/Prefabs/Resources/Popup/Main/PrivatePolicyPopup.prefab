@@ -438,6 +438,7 @@ GameObject:
   - component: {fileID: 919806253633009185}
   - component: {fileID: 8929382363593337030}
   - component: {fileID: 4015036039875880361}
+  - component: {fileID: 3738691952905702908}
   m_Layer: 5
   m_Name: BackBtn
   m_TagString: Untagged
@@ -558,6 +559,18 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+--- !u!114 &3738691952905702908
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3858278712018402654}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a20904b354e7d8c4ebe650efd74c3e19, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &5331958072447679578
 GameObject:
   m_ObjectHideFlags: 0
@@ -1037,26 +1050,64 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 0.88
-  m_Text: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas vel
-    augue euismod risus condimentum varius et quis quam. Proin rhoncus nec orci volutpat
-    elementum. Donec sed massa tellus. Aliquam enim libero, vulputate ut aliquam
-    et, imperdiet sit amet lorem.\n\n Interdum et malesuada fames ac ante ipsum primis
-    in faucibus. Suspendisse eget nibh dictum urna dictum tempor. Morbi a nibh vitae
-    sapien euismod ultricies id ultrices arcu. Nullam tincidunt pulvinar pretium.
-    Praesent massa nulla, vestibulum at risus ultrices, volutpat \n\nfinibus lectus.
-    Sed aliquam dictum mattis. Aenean felis nulla, rhoncus eu cursus lobortis, semper
-    in metus. Vestibulum erat turpis, fermentum in mauris vitae, congue faucibus
-    sem.\nAenean consequat ullamcorper arcu eu ornare. Nullam tincidunt est quis
-    odio feugiat, ut porta magna dignissim. Maecenas libero erat, ultricies sed lobortis
-    vitae, vestibulum non sem. Donec quis lectus nec velit facilisis porta. Pellentesque
-    quis ex cursus, accumsan lectus sed, dignissim tortor. Praesent euismod aliquet
-    lorem nec molestie. Pellentesque eget faucibus eros, non imperdiet mi. Lorem
-    ipsum dolor sit amet, consectetur adipiscing elit. Donec ac libero porttitor,
-    consectetur justo non, mollis libero.\nEtiam purus metus, congue vel dictum vel,
-    posuere ut dui. Nam non vestibulum augue, at venenatis leo. Suspendisse id magna
-    congue, rutrum risus vitae, aliquam ipsum. In efficitur urna id ante aliquet
-    lobortis. Duis vel orci sed quam tristique viverra. Proin efficitur feugiat interdum.
-    In eget sapien molestie mauris iaculis tristique."
+  m_Text: "Jaedong Kim built the Dice and Deal game as a Commercial game. This SERVICE
+    is provided by Jaedong Kim and is intended for use as is.\r\n\r\nThis page is
+    used to inform visitors regarding my policies with the collection, use, and disclosure
+    of Personal Information if anyone decided to use my Service.\r\n\r\nIf you choose
+    to use my Service, then you agree to the collection and use of information in
+    relation to this policy. The Personal Information that I collect is used for
+    providing and improving the Service. I will not use or share your information
+    with anyone except as described in this Privacy Policy.\r\n\r\nThe terms used
+    in this Privacy Policy have the same meanings as in our Terms and Conditions,
+    which is accessible at Dice and Deal unless otherwise defined in this Privacy
+    Policy.\r\n\r\nInformation Collection and Use\r\n\r\nFor a better experience,
+    while using our Service, I may require you to provide us with certain personally
+    identifiable information. The information that I request will be retained on
+    your device and is not collected by me in any way.\r\n\r\nThe game does use third
+    party services that may collect information used to identify you.\r\n\r\nLink
+    to privacy policy of third party service providers used by the game\r\n\r\nGoogle
+    Play Services\r\nLog Data\r\n\r\nI want to inform you that whenever you use my
+    Service, in a case of an error in the game I collect data and information (through
+    third party products) on your phone called Log Data. This Log Data may include
+    information such as your device Internet Protocol (\u201CIP\u201D) address, device
+    name, operating system version, the configuration of the game when utilizing
+    my Service, the time and date of your use of the Service, and other statistics.\r\n\r\nCookies\r\n\r\nCookies
+    are files with a small amount of data that are commonly used as anonymous unique
+    identifiers. These are sent to your browser from the websites that you visit
+    and are stored on your device's internal memory.\r\n\r\nThis Service does not
+    use these \u201Ccookies\u201D explicitly. However, the game may use third party
+    code and libraries that use \u201Ccookies\u201D to collect information and improve
+    their services. You have the option to either accept or refuse these cookies
+    and know when a cookie is being sent to your device. If you choose to refuse
+    our cookies, you may not be able to use some portions of this Service.\r\n\r\nService
+    Providers\r\n\r\nI may employ third-party companies and individuals due to the
+    following reasons:\r\n\r\nTo facilitate our Service;\r\nTo provide the Service
+    on our behalf;\r\nTo perform Service-related services; or\r\nTo assist us in
+    analyzing how our Service is used.\r\nI want to inform users of this Service
+    that these third parties have access to your Personal Information. The reason
+    is to perform the tasks assigned to them on our behalf. However, they are obligated
+    not to disclose or use the information for any other purpose.\r\n\r\nSecurity\r\n\r\nI
+    value your trust in providing us your Personal Information, thus we are striving
+    to use commercially acceptable means of protecting it. But remember that no method
+    of transmission over the internet, or method of electronic storage is 100% secure
+    and reliable, and I cannot guarantee its absolute security.\r\n\r\nLinks to Other
+    Sites\r\n\r\nThis Service may contain links to other sites. If you click on a
+    third-party link, you will be directed to that site. Note that these external
+    sites are not operated by me. Therefore, I strongly advise you to review the
+    Privacy Policy of these websites. I have no control over and assume no responsibility
+    for the content, privacy policies, or practices of any third-party sites or services.\r\n\r\nChildren\u2019s
+    Privacy\r\n\r\nThese Services do not address anyone under the age of 13. I do
+    not knowingly collect personally identifiable information from children under
+    13. In the case I discover that a child under 13 has provided me with personal
+    information, I immediately delete this from our servers. If you are a parent
+    or guardian and you are aware that your child has provided us with personal information,
+    please contact me so that I will be able to do necessary actions.\r\n\r\nChanges
+    to This Privacy Policy\r\n\r\nI may update our Privacy Policy from time to time.
+    Thus, you are advised to review this page periodically for any changes. I will
+    notify you of any changes by posting the new Privacy Policy on this page. These
+    changes are effective immediately after they are posted on this page.\r\n\r\nContact
+    Us\r\n\r\nIf you have any questions or suggestions about my Privacy Policy, do
+    not hesitate to contact me at wyeth123@naver.com."
 --- !u!1 &8044520799846819657
 GameObject:
   m_ObjectHideFlags: 0

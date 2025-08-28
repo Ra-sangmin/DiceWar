@@ -1,6 +1,7 @@
 ﻿using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
+using static GameResultPopup;
 
 public class PopupManager : MonoSingleton<PopupManager>
 {
@@ -9,12 +10,8 @@ public class PopupManager : MonoSingleton<PopupManager>
 
     public bool otherPopupOn = false;
     
-	private ToastPopup yourTurnPopup;
-    private ToastPopup timeOverPopup;
-    private OptionPopup optionPopup;
-    private TutorialPopup tutorialPopup;
-    //private VictoryPopup victoryPopup;
-    //private DefeatPopup defeatPopup;
+    //private OptionPopup optionPopup;
+    //private TutorialPopup tutorialPopup;
 
     public override void Init() 
 	{
@@ -69,18 +66,14 @@ public class PopupManager : MonoSingleton<PopupManager>
 	public void PlaySetPopupOn(bool multiOn)
 	{
 		PlaySetPopup playSetPopup = Instantiate(Resources.Load<PlaySetPopup>("Popup/Main/PlaySetPopup"), parantTranform);
-		playSetPopup.multiOn = multiOn;
-        playSetPopup.InitOn();
+        playSetPopup.InitOn(multiOn);
 	}
 
 	public void YourTurnPopupOn()
 	{
-        if (yourTurnPopup == null)
-		{
-            yourTurnPopup = Instantiate(Resources.Load<ToastPopup>("Popup/InGame/YourTurnPopup"), parantTranform);
-        }
+		ToastPopup yourTurnPopup = Instantiate(Resources.Load<ToastPopup>("Popup/InGame/YourTurnPopup"), parantTranform);
 
-        if (yourTurnPopup != null)
+		if (yourTurnPopup != null)
 		{
 			yourTurnPopup.ActiveOn();
         }
@@ -88,61 +81,66 @@ public class PopupManager : MonoSingleton<PopupManager>
 
     public void TimeOverPopupOn()
     {
-        if (timeOverPopup == null)
-        {
-            timeOverPopup = Instantiate(Resources.Load<ToastPopup>("Popup/InGame/TimeOverPopup"), parantTranform);
-        }
+		ToastPopup timeOverPopup = Instantiate(Resources.Load<ToastPopup>("Popup/InGame/TimeOverPopup"), parantTranform);
 
-        if (timeOverPopup != null)
+		if (timeOverPopup != null)
         {
             timeOverPopup.ActiveOn();
         }
     }
 
-    public void OptionPopupOn(InGameController inGameController)
+	public void NeedCoinPopupOn(int needCoin)
+	{
+		NeedCoinPopup needCoinPopup = Instantiate(Resources.Load<NeedCoinPopup>("Popup/InGame/NeedCoinPopup"), parantTranform);
+
+		if (needCoinPopup != null)
+		{
+			needCoinPopup.ActiveOn(needCoin);
+		}
+	}
+
+	public void OptionPopupOn(InGameControllerBase inGameController)
     {
-        if (optionPopup == null)
-        {
-            optionPopup = Instantiate(Resources.Load<OptionPopup>("Popup/InGame/OptionPopup"), parantTranform);
-            optionPopup.DataInit(inGameController);
-        }
+		OptionPopup optionPopup = Instantiate(Resources.Load<OptionPopup>("Popup/InGame/OptionPopup"), parantTranform);
 
         if (optionPopup != null)
         {
-            optionPopup.gameObject.SetActive(true);
+			optionPopup.DataInit(inGameController);
         }
     }
 
-    public void TutorialPopupOn()
-    {
-        if (tutorialPopup == null)
-        {
-            tutorialPopup = Instantiate(Resources.Load<TutorialPopup>("Popup/InGame/TutorialPopup"), parantTranform);
-        }
+	public void LeaveEarlyPopupOn(InGameControllerBase inGameController, int getCoin)
+	{
+		LeaveEarlyPopup leaveEarlyPopup = Instantiate(Resources.Load<LeaveEarlyPopup>("Popup/InGame/LeaveEarlyPopup"), parantTranform);
 
-        if (tutorialPopup != null)
+		if (leaveEarlyPopup != null)
+		{
+			leaveEarlyPopup.DataInit(inGameController, getCoin);
+		}
+	}
+
+	public void TutorialPopupOn()
+    {
+		TutorialPopup tutorialPopup = Instantiate(Resources.Load<TutorialPopup>("Popup/InGame/TutorialPopup"), parantTranform);
+
+		if (tutorialPopup != null)
         {
-            tutorialPopup.gameObject.SetActive(true);
             tutorialPopup.TutorialOn();
         }
     }
 
-    public void GameResultPopupOn(InGameController inGameController ,  bool win , int coinCount)
+    public void GameResultPopupOn(InGameControllerBase inGameController , GameResultEnum gameResultEnum, int coinCount)
     {
         GameResultPopup gameResultPopup = Instantiate(Resources.Load<GameResultPopup>("Popup/InGame/GameResultPopup"), parantTranform);
-        gameResultPopup.DataInit(inGameController, win , coinCount);
-
-        //if (win)
-        //{
-        //    VictoryPopup victoryPopup = Instantiate(Resources.Load<VictoryPopup>("Popup/InGame/VictoryPopup"), parantTranform);
-        //}
-        //else
-        //{
-        //    DefeatPopup defeatPopup = Instantiate(Resources.Load<DefeatPopup>("Popup/InGame/DefeatPopup"), parantTranform);
-        //}
+        gameResultPopup.DataInit(inGameController, gameResultEnum, coinCount);
     }
+	public void GiveUpPopupOn(InGameControllerBase inGameController, int coinCount = 0)
+	{
+		GiveUpPopup giveUpPopup = Instantiate(Resources.Load<GiveUpPopup>("Popup/InGame/GiveUpPopup"), parantTranform);
+		giveUpPopup.DataInit(inGameController, coinCount);
+	}
 
-    public LandTradePopup LandTradePopupOn()
+	public LandTradePopup LandTradePopupOn()
     {
         LandTradePopup landTradePopup = Instantiate(Resources.Load<LandTradePopup>("Popup/InGame/LandTradePopup"), parantTranform);
 
@@ -178,7 +176,14 @@ public class PopupManager : MonoSingleton<PopupManager>
         return landTradeApprovePopup;
     }
 
-    public BuyCoinPopup BuyCoinPopupOn()
+	public ApprovePopup ApprovePopup(ApproveData approveData)
+	{
+		ApprovePopup approvePopup = Instantiate(Resources.Load<ApprovePopup>("Popup/InGame/ApprovePopup"), parantTranform);
+		approvePopup.SetData(approveData);
+		return approvePopup;
+	}
+
+	public BuyCoinPopup BuyCoinPopupOn()
     {
         BuyCoinPopup buyCoinPopup = Instantiate(Resources.Load<BuyCoinPopup>("Popup/Common/BuyCoinPopup"), parantTranform);
 

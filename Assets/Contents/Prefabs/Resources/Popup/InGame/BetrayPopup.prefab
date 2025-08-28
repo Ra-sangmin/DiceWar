@@ -495,6 +495,7 @@ GameObject:
   - component: {fileID: 6950704489233729669}
   - component: {fileID: 5538331931259889414}
   - component: {fileID: 2066839058829453660}
+  - component: {fileID: 579453203162580035}
   m_Layer: 0
   m_Name: CancelBtn
   m_TagString: Untagged
@@ -604,10 +605,10 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 8138012913340380668}
-        m_TargetAssemblyTypeName: UnityEngine.GameObject, UnityEngine
-        m_MethodName: SetActive
-        m_Mode: 6
+      - m_Target: {fileID: 14225820438189625}
+        m_TargetAssemblyTypeName: BasePopup, Assembly-CSharp
+        m_MethodName: CloseBtnClickOn
+        m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
@@ -616,6 +617,18 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+--- !u!114 &579453203162580035
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 626188215650870144}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a20904b354e7d8c4ebe650efd74c3e19, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1147819356857259710
 GameObject:
   m_ObjectHideFlags: 0
@@ -942,7 +955,8 @@ MonoBehaviour:
   activeImage: {fileID: 2473658284838213404}
   addCoinPanel: {fileID: 4163672808700845207}
   coinText: {fileID: 2849050944469065292}
-  coinCount: 5
+  coinCount:
+    value: 3
 --- !u!1 &1439995818874313817
 GameObject:
   m_ObjectHideFlags: 0
@@ -955,6 +969,7 @@ GameObject:
   - component: {fileID: 3477854593442578390}
   - component: {fileID: 8716640478162406049}
   - component: {fileID: 3014827133389500398}
+  - component: {fileID: 3239975419705676542}
   m_Layer: 0
   m_Name: BetrayBtn
   m_TagString: Untagged
@@ -1076,6 +1091,18 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+--- !u!114 &3239975419705676542
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1439995818874313817}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a20904b354e7d8c4ebe650efd74c3e19, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1690793668131884312
 GameObject:
   m_ObjectHideFlags: 0
@@ -3429,6 +3456,7 @@ GameObject:
   - component: {fileID: 554011173838784791}
   - component: {fileID: 3985572556099931946}
   - component: {fileID: 1632118232985820048}
+  - component: {fileID: 5179546810865760938}
   m_Layer: 5
   m_Name: BackBtn
   m_TagString: Untagged
@@ -3537,10 +3565,10 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 8138012913340380668}
-        m_TargetAssemblyTypeName: UnityEngine.GameObject, UnityEngine
-        m_MethodName: SetActive
-        m_Mode: 6
+      - m_Target: {fileID: 14225820438189625}
+        m_TargetAssemblyTypeName: BasePopup, Assembly-CSharp
+        m_MethodName: CloseBtnClickOn
+        m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
@@ -3549,6 +3577,18 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+--- !u!114 &5179546810865760938
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7086757609449109691}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a20904b354e7d8c4ebe650efd74c3e19, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &7271206495966641764
 GameObject:
   m_ObjectHideFlags: 0
@@ -3974,6 +4014,7 @@ GameObject:
   - component: {fileID: 7509532197815731256}
   - component: {fileID: 8059553871299792782}
   - component: {fileID: 4263087644643692409}
+  - component: {fileID: 6741959133419722740}
   m_Layer: 5
   m_Name: PlusBtn
   m_TagString: Untagged
@@ -4095,3 +4136,15 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+--- !u!114 &6741959133419722740
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9205968416547283762}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a20904b354e7d8c4ebe650efd74c3e19, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 

@@ -64,7 +64,7 @@ public class MainInfoPopup : MonoBehaviour
 
 	public void RateUsOn()
 	{
-		string url = "https://play.google.com/store/games?hl=ko";
+		string url = "https://play.google.com/store/apps/details?id=com.JaedongKim.DiceandDeal";
 		Application.OpenURL(url);
 	}
 }

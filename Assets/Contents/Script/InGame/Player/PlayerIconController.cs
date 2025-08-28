@@ -60,7 +60,7 @@ public class PlayerIconController : MonoBehaviour
 
     public void SetMyEffect()
     {
-        PlayerEnum myPlayerEnum = DataManager.Instance.playerData.playerEnum;
+        PlayerEnum myPlayerEnum = DataManager.Instance.playerData.pe;
 
         PlayerIcon myPlayerIcon = playerIconList.FirstOrDefault(data => data.playerEnum == myPlayerEnum);
 
@@ -87,7 +87,7 @@ public class PlayerIconController : MonoBehaviour
             SetBundleKey(checkList[i]);
         }
 
-        PlayerEnum myPlayerEnum = DataManager.Instance.playerData.playerEnum;
+        PlayerEnum myPlayerEnum = DataManager.Instance.playerData.pe;
 
         //남은 인원 체크
         var resultList = GetActiveList();
@@ -103,7 +103,7 @@ public class PlayerIconController : MonoBehaviour
         //남은 인원수가 1명이라면
         if (resultList.Count == 1)
         {
-            if (DataManager.Instance.playerData.playerEnum == resultList[0].playerEnum)
+            if (DataManager.Instance.playerData.pe == resultList[0].playerEnum)
             {
                 gameWinOn();
             }

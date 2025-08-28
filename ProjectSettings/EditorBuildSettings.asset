@@ -5,6 +5,9 @@ EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Scenes:
+  - enabled: 0
+    path: Assets/Contents/Scenes/serverTest.unity
+    guid: fe65afea2fcf25e4586c6f35c80db47d
   - enabled: 1
     path: Assets/Contents/Scenes/Intro.unity
     guid: f6fb77630c53bdf49a98d14f1b07dd50
@@ -15,7 +18,10 @@ EditorBuildSettings:
     path: Assets/Contents/Scenes/Loading.unity
     guid: 35dfb3af3f5942c48aebee0123183fcd
   - enabled: 1
-    path: Assets/Contents/Scenes/Game.unity
+    path: Assets/Contents/Scenes/Game_Single.unity
     guid: 2cda990e2423bbf4892e6590ba056729
+  - enabled: 1
+    path: Assets/Contents/Scenes/Game_Multi.unity
+    guid: 90204c737bdee0c47886c5e47acc9218
   m_configObjects: {}
   m_UseUCBPForAssetBundles: 0

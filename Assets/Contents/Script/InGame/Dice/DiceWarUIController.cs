@@ -3,6 +3,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UI;
@@ -46,7 +47,7 @@ public class DiceWarUIController : MonoBehaviour
         enemyDiceWarUI.DiceClear();
     }
 
-    public async UniTask AttackOn(DiceWarData myDiceWarData, DiceWarData enemyDiceWarData)
+    public async UniTask AttackOn(DiceWarData myDiceWarData, DiceWarData enemyDiceWarData, CancellationTokenSource source)
     {
         DiceClear();
 
@@ -54,8 +55,11 @@ public class DiceWarUIController : MonoBehaviour
         enemyDiceWarUI.SetPlayer(enemyDiceWarData.playerEnum);
 
         int diceMax = Mathf.Max(myDiceWarData.diceResult.Count, enemyDiceWarData.diceResult.Count);
-        
-        for (int i = 0; i < diceMax; i++)
+
+        bool isHardOn = DataManager.Instance.aiLevel == AILevel.Hard;
+		int delay = isHardOn ? 0 : 50;
+
+		for (int i = 0; i < diceMax; i++)
         {
             if (myDiceWarData.diceResult.Count > i)
             {
@@ -66,16 +70,25 @@ public class DiceWarUIController : MonoBehaviour
             {
                 enemyDiceWarUI.DiceOn(i, enemyDiceWarData.diceResult[i]);
             }
-        }
 
-        myDiceWarUI.SetDiceResultText(myDiceWarData.diceSum);
+			await UniTask.Delay(delay , cancellationToken: source.Token);
+		}
+
+
+		myDiceWarUI.SetDiceResultText(myDiceWarData.diceSum);
         enemyDiceWarUI.SetDiceResultText(enemyDiceWarData.diceSum);
 
         DiceWarUI winDiceWarUI = myDiceWarData.diceSum > enemyDiceWarData.diceSum ? myDiceWarUI : enemyDiceWarUI;
 
         winDiceWarUI.WinTextEffectOn();
-        //yield return 
-    }
+
+        if (isHardOn == false)
+        {
+			await UniTask.Delay(300, cancellationToken: source.Token);
+		}
+
+		//yield return 
+	}
 }
 
 [System.Serializable]

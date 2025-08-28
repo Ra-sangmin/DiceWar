@@ -767,6 +767,7 @@ GameObject:
   - component: {fileID: 6933864585590515401}
   - component: {fileID: 6144277435067344094}
   - component: {fileID: 5647954602602170658}
+  - component: {fileID: 8775580993679959942}
   m_Layer: 5
   m_Name: PlusBtn
   m_TagString: Untagged
@@ -888,6 +889,18 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+--- !u!114 &8775580993679959942
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1229407601539064221}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a20904b354e7d8c4ebe650efd74c3e19, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1266122332066552473
 GameObject:
   m_ObjectHideFlags: 0
@@ -1964,6 +1977,7 @@ GameObject:
   - component: {fileID: 7406986968420198069}
   - component: {fileID: 1073970713224237779}
   - component: {fileID: 6748487875131962232}
+  - component: {fileID: 6527553671694164164}
   m_Layer: 5
   m_Name: CancelBtn
   m_TagString: Untagged
@@ -2073,10 +2087,10 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 6828540187991757916}
-        m_TargetAssemblyTypeName: UnityEngine.GameObject, UnityEngine
-        m_MethodName: SetActive
-        m_Mode: 6
+      - m_Target: {fileID: 3155155280714331283}
+        m_TargetAssemblyTypeName: BasePopup, Assembly-CSharp
+        m_MethodName: CloseBtnClickOn
+        m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
@@ -2085,6 +2099,18 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+--- !u!114 &6527553671694164164
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1890948477405615932}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a20904b354e7d8c4ebe650efd74c3e19, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1896419093800730897
 GameObject:
   m_ObjectHideFlags: 0
@@ -2537,6 +2563,7 @@ GameObject:
   - component: {fileID: 7089102903270673246}
   - component: {fileID: 4392264372287572751}
   - component: {fileID: 841521688782650580}
+  - component: {fileID: 8506600885467842367}
   m_Layer: 5
   m_Name: BackBtn
   m_TagString: Untagged
@@ -2645,10 +2672,10 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 6828540187991757916}
-        m_TargetAssemblyTypeName: UnityEngine.GameObject, UnityEngine
-        m_MethodName: SetActive
-        m_Mode: 6
+      - m_Target: {fileID: 3155155280714331283}
+        m_TargetAssemblyTypeName: BasePopup, Assembly-CSharp
+        m_MethodName: CloseBtnClickOn
+        m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
@@ -2657,6 +2684,18 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+--- !u!114 &8506600885467842367
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2487556638890500058}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a20904b354e7d8c4ebe650efd74c3e19, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &2847318291639648544
 GameObject:
   m_ObjectHideFlags: 0
@@ -6203,6 +6242,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   playerToggleIconPrefab: {fileID: 1808955666307766652, guid: efdad6e75fc91d444b6e66933c4095c3, type: 3}
   playerToggleIconParant: {fileID: 9135574926119512935}
+  buyOn: 0
 --- !u!1 &6865552810347794734
 GameObject:
   m_ObjectHideFlags: 0
@@ -6840,6 +6880,7 @@ GameObject:
   - component: {fileID: 1416249383607115800}
   - component: {fileID: 5747818204121333975}
   - component: {fileID: 4440373459296535529}
+  - component: {fileID: 7597091156410792363}
   m_Layer: 5
   m_Name: ProposeBtn
   m_TagString: Untagged
@@ -6961,6 +7002,18 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+--- !u!114 &7597091156410792363
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7921685204436816505}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a20904b354e7d8c4ebe650efd74c3e19, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &7993682843612023567
 GameObject:
   m_ObjectHideFlags: 0

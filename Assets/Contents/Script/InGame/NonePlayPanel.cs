@@ -1,6 +1,7 @@
 ﻿using Cysharp.Threading.Tasks;
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
@@ -10,7 +11,8 @@ public class NonePlayPanel : MonoBehaviour
     [SerializeField] Text introText;
     [SerializeField] SkillCard skillCard;
     [SerializeField] RectTransform skillBtnPanel;
-    [SerializeField] Text stashText;
+	[SerializeField] CanvasGroup stashCanvasGroup;
+	[SerializeField] Text stashText;
     [SerializeField] List<Button> btnList = new List<Button>();
     [SerializeField] DiceWarUIController diceWarUIController;
 
@@ -18,7 +20,10 @@ public class NonePlayPanel : MonoBehaviour
 
     public UnityAction<InGameButtonStatus> skillBtnClickEventOn = data => { };
 
-    public enum InGameButtonStatus
+    public bool skillCardPanelActive = false;
+
+
+	public enum InGameButtonStatus
     {
         None = -1,
         Ally = 0,
@@ -38,7 +43,7 @@ public class NonePlayPanel : MonoBehaviour
     {
 		SetNoneBtn();
 
-        DataManager.Instance.SetStashCount(DataManager.Instance.playerData.playerEnum, 0);
+        DataManager.Instance.SetStashCount(DataManager.Instance.playerData.pe, 0);
 		SetStashText();
 
         diceWarUIController.DiceClear();
@@ -48,15 +53,15 @@ public class NonePlayPanel : MonoBehaviour
 
     public void SetAreaData(AreaData areaData , InGameButtonStatus inGameButtonStatus)
     {
-        selectAreaData = areaData;
-
-        if (inGameButtonStatus == InGameButtonStatus.Buy) 
+        if (inGameButtonStatus == InGameButtonStatus.Buy && areaData.player != DataManager.Instance.GetMyPlayerData().pe) 
         {
-            LandTradePopupOn(true);
+			selectAreaData = areaData;
+			LandTradePopupOn(true);
         }
-        else if (inGameButtonStatus == InGameButtonStatus.Sell)
+        else if (inGameButtonStatus == InGameButtonStatus.Sell && areaData.player == DataManager.Instance.GetMyPlayerData().pe)
         {
-            LandTradePopupOn(false);
+			selectAreaData = areaData;
+			LandTradePopupOn(false);
         }
     }
 
@@ -88,9 +93,16 @@ public class NonePlayPanel : MonoBehaviour
         skillCard.gameObject.SetActive(DataManager.Instance.isMultiOn);
     }
 
-    public void SkillCardPanelActiveOn(bool activeOn)
+    public void SkillCardPanelToggleOn()
     {
-        skillBtnPanel.gameObject.SetActive(activeOn);
+        SkillCardPanelActiveOn(!skillCardPanelActive);
+	}
+
+	public void SkillCardPanelActiveOn(bool activeOn)
+    {
+        this.skillCardPanelActive = activeOn;
+
+		skillBtnPanel.gameObject.SetActive(activeOn);
 
         foreach (var btn in btnList)
         {
@@ -99,10 +111,11 @@ public class NonePlayPanel : MonoBehaviour
 
         if (activeOn)
         {
-            if (SkillAlreadyUseCheck() || DataManager.Instance.IsMyTurn() == false) 
-                return;
+			//if (SkillAlreadyUseCheck() || DataManager.Instance.IsMyTurn() == false) 
+			if (SkillAlreadyUseCheck())
+				return;
             
-            bool allianceOn = DataManager.Instance.IsAlliance(DataManager.Instance.playerData.playerEnum);
+            bool allianceOn = DataManager.Instance.IsAlliance(DataManager.Instance.playerData.pe);
 
             if (allianceOn) 
             {
@@ -167,19 +180,14 @@ public class NonePlayPanel : MonoBehaviour
         SkillCardPanelActiveOn(false);
     }
 
-    public void AllianceClearOn(AllianceResultRequest allianceResultRequest)
+    public void AllianceClearOn(List<AllianceData> allianceDataList)
     {
-        List<AllianceData> allianceDataList = allianceResultRequest.allianceDataList;
-
         DataManager.Instance.SetAllianceList(allianceDataList);
 
-        if (allianceResultRequest.orderData.playerEnum == DataManager.Instance.playerData.playerEnum)
-        {
-            SkillUseOn();
-        }
-
         SetNoneBtn();
-    }
+
+		SkillCardPanelActiveOn(skillCardPanelActive);
+	}
 
     public void BetrayBtnClickOn()
     {
@@ -188,7 +196,10 @@ public class NonePlayPanel : MonoBehaviour
 
         BetrayPopup BetrayPopup = PopupManager.Instance.BetrayPopupOn();
         BetrayPopup.SetData();
-    }
+
+		SkillCardPanelActiveOn(false);
+
+	}
 
     /// <summary>
     /// 스킬 3개 다 사용했는지 체크
@@ -196,14 +207,14 @@ public class NonePlayPanel : MonoBehaviour
     /// <returns></returns>
     private bool SkillAlreadyUseCheck()
     {
-        return DataManager.Instance.playerData.skillCardCount <= 0;
+        return DataManager.Instance.GetMyPlayerData().sc <= 0;
     }
 
     public void SkillUseOn(int addCount = -1)
     {
         DataManager.Instance.SkillCardCountAdd(addCount);
 
-        skillCard.SetCountIcon(DataManager.Instance.playerData.playerEnum);
+        skillCard.SetCountIcon(DataManager.Instance.GetMyPlayerData().pe);
 
         if (SkillAlreadyUseCheck())
         {
@@ -213,23 +224,23 @@ public class NonePlayPanel : MonoBehaviour
 
     public void SetStashText()
     {
-        int stashCount = DataManager.Instance.GetStashCount(DataManager.Instance.playerData.playerEnum);
+        int stashCount = DataManager.Instance.GetStashCount(DataManager.Instance.playerData.pe);
 
         if (stashCount <= 0)
         {
-            stashText.gameObject.SetActive(false);
+            stashCanvasGroup.alpha = 0;
         }
         else
         {
-            stashText.gameObject.SetActive(true);
-            stashText.text = $"stash : {stashCount}";
+			stashCanvasGroup.alpha = 1;
+            stashText.text = $"Stash : {stashCount}";
         }
     }
 
-    public async UniTask AttackOn(DiceWarData myDiceWarData, DiceWarData enemyDiceWarData)
+    public async UniTask AttackOn(DiceWarData myDiceWarData, DiceWarData enemyDiceWarData , CancellationTokenSource source)
     {
 		introText.gameObject.SetActive(false);
 
-		await diceWarUIController.AttackOn(myDiceWarData, enemyDiceWarData);
+		await diceWarUIController.AttackOn(myDiceWarData, enemyDiceWarData , source);
     }
 }

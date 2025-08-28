@@ -11,7 +11,7 @@ public class SkillCard : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        SetCountIcon(DataManager.Instance.playerData.playerEnum);
+        SetCountIcon(DataManager.Instance.playerData.pe);
     }
 
     // Update is called once per frame
@@ -24,7 +24,7 @@ public class SkillCard : MonoBehaviour
     {
         PlayerData playerData = DataManager.Instance.GetPlayerData(playerEnum);
 
-        int countIndex = playerData.skillCardCount;
+        int countIndex = playerData.sc;
 
         for (int i = 0; i < skillCardList.Count; i++)
         {

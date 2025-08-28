@@ -23,6 +23,8 @@ public class IntroController : MonoBehaviour
 
         //StartCoroutine(PostRequest());
         //SignOut();
+
+        SoundManager.Instance.PlayBGM(BGMEnum.Intro);
     }
 
     public void SignOut()
@@ -65,7 +67,7 @@ public class IntroController : MonoBehaviour
 
     private void LoginClear(UserInfo userInfo)
     {
-        UserDataRequest request = new UserDataRequest()
+		UserDataRequest request = new UserDataRequest()
         {
             requestStatus = 0,
             email = userInfo.email,

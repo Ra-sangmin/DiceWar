@@ -51,7 +51,9 @@ public class LoadingController : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        if (DataManager.Instance.isMultiOn)
+		SoundManager.Instance.PlayBGM(BGMEnum.Loading);
+
+		if (DataManager.Instance.isMultiOn)
         {
             ServerManager.Instance.receiveDataOn += ReceiveDataOn;
         }
@@ -190,7 +192,7 @@ public class LoadingController : MonoBehaviour
         int maxCnt = DataManager.Instance.num_player;
         int userCnt = maxCnt-DataManager.Instance.off_line_num_player;
 
-        await Task.Delay(1000);
+        await UniTask.Delay(1000);
 
         ServerManager.Instance.GameReadyRequestOn(maxCnt, userCnt);
     }
@@ -206,8 +208,11 @@ public class LoadingController : MonoBehaviour
 
         timeText.text = timeStr;
 
-        //10초후 AI 플레이로 채우기
-        if (aIPlayOn == false && DataManager.Instance.isOwner && secValue > aiStartTime)
+  //      Debug.LogWarning(DataManager.Instance.isOwner);
+		//Debug.LogWarning(secValue);
+
+		//15초후 AI 플레이로 채우기
+		if (aIPlayOn == false && DataManager.Instance.isOwner && secValue > aiStartTime)
         {
             SetAIPlayer();
         }
@@ -273,12 +278,10 @@ public class LoadingController : MonoBehaviour
 
     private void GameSceneLoadOn()
     {
-        if (DataManager.Instance.isMultiOn)
-        {
-            DataManager.Instance.AddCoin(-3);
-        }
+		//DataManager.Instance.GamePlayOn();
 
-        SceneManager.LoadScene("Game");
+        string sceneName = DataManager.Instance.isMultiOn ? "Game_Multi" : "Game_Single";
+		SceneManager.LoadScene(sceneName);
     }
 
     // Update is called once per frame

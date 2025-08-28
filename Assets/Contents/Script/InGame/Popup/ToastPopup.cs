@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using DG.Tweening;
+using UnityEngine.Events;
 
 public class ToastPopup : MonoBehaviour
 {
@@ -11,7 +12,9 @@ public class ToastPopup : MonoBehaviour
 
     private Tween fadeTween;
 
-    public void SetImageColor()
+    public float maxAlphaValue = 0.85f;
+
+	public void SetImageColor()
     {
         //Color color = InGameDataManager.Instance.GetPlayerColor();
 
@@ -31,7 +34,7 @@ public class ToastPopup : MonoBehaviour
             }
         }
 
-        canvasGroup.alpha = 0.85f;
-        fadeTween = canvasGroup.DOFade(0,1f).SetDelay(0.5f);
+        canvasGroup.alpha = maxAlphaValue;
+        fadeTween = canvasGroup.DOFade(0,1f).SetDelay(0.5f).OnComplete(()=> Destroy(gameObject));
     }
 }

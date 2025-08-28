@@ -15,12 +15,9 @@ public class MyCoinPanel : MonoBehaviour
 
     void SetEvent()
     {
-        if (DataManager.Instance.userData == null)
-        {
-            DataManager.Instance.userData = new UserData();
-        }
+        DataManager.Instance.CheckUserData();
 
-        DataManager.Instance.userData.myCoin.
+		DataManager.Instance.userData.myCoin.
             Subscribe(coin => SetCoin())
             .AddTo(gameObject);
         SetCoin();

@@ -1763,6 +1763,7 @@ GameObject:
   - component: {fileID: 4997600838599382548}
   - component: {fileID: 5178913824225089551}
   - component: {fileID: 168331170189076390}
+  - component: {fileID: 1930831912620377606}
   m_Layer: 0
   m_Name: GoMainBtn
   m_TagString: Untagged
@@ -1884,6 +1885,18 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+--- !u!114 &1930831912620377606
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8198263251135689551}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a20904b354e7d8c4ebe650efd74c3e19, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &8309225846082486504
 GameObject:
   m_ObjectHideFlags: 0
@@ -1896,6 +1909,7 @@ GameObject:
   - component: {fileID: 3391528625152433882}
   - component: {fileID: 190153352264884454}
   - component: {fileID: 4621984887219089748}
+  - component: {fileID: 9003204041264856587}
   m_Layer: 0
   m_Name: NewGameBtn
   m_TagString: Untagged
@@ -2017,3 +2031,15 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+--- !u!114 &9003204041264856587
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8309225846082486504}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a20904b354e7d8c4ebe650efd74c3e19, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 

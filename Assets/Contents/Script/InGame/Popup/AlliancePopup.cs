@@ -28,7 +28,7 @@ public class AlliancePopup : MonoBehaviour
     }
     void CreatePlayerToggleIcon()
     {
-        PlayerEnum myPlayerEnum = DataManager.Instance.playerData.playerEnum;
+        PlayerEnum myPlayerEnum = DataManager.Instance.playerData.pe;
 
         for (int i = 0; i < DataManager.Instance.num_player; i++)
         {
@@ -53,14 +53,14 @@ public class AlliancePopup : MonoBehaviour
 
     public void SetData() 
     {
-        PlayerEnum myPlayerEnum = DataManager.Instance.playerData.playerEnum;
+        PlayerEnum myPlayerEnum = DataManager.Instance.playerData.pe;
 
         foreach (var playerToggleIcon in playerToggleIconList)
         {
             playerToggleIcon.SelectOn(playerToggleIcon.playerEnum == myPlayerEnum);
         }
 
-        maxCoinCount = 3 * DataManager.Instance.num_player;
+        maxCoinCount = DataManager.Instance.GetNeedCoin() * DataManager.Instance.num_player;
 
         SetCointCount();
     }
@@ -69,7 +69,7 @@ public class AlliancePopup : MonoBehaviour
     {
         PlayerToggleIcon currentSelectPlayer = playerToggleIconList[selectIndex];
 
-        PlayerEnum myPlayerEnum = DataManager.Instance.playerData.playerEnum;
+        PlayerEnum myPlayerEnum = DataManager.Instance.playerData.pe;
 
         if (currentSelectPlayer.playerEnum == myPlayerEnum)
         {
@@ -83,7 +83,7 @@ public class AlliancePopup : MonoBehaviour
 
     private void SetCointCount()
     {
-        PlayerEnum myPlayerEnum = DataManager.Instance.playerData.playerEnum;
+        PlayerEnum myPlayerEnum = DataManager.Instance.playerData.pe;
 
         int maxCoinCount = this.maxCoinCount;
 
@@ -171,7 +171,7 @@ public class AlliancePopup : MonoBehaviour
 
         List<AllianceData> allianceDataList = new List<AllianceData> ();
 
-        PlayerEnum myPlayerEnum = DataManager.Instance.playerData.playerEnum;
+        PlayerEnum myPlayerEnum = DataManager.Instance.playerData.pe;
         int myCoinCount = 0;
 
         foreach (var selectItem in selectList)

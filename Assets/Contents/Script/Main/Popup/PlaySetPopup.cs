@@ -11,22 +11,23 @@ using System;
 using System.Linq;
 using System.Reflection;
 using static Unity.Burst.Intrinsics.Arm;
+using static GameResultPopup;
 
 public class PlaySetPopup : MonoBehaviour
 {
     [SerializeField] Image playerImage;
     [SerializeField] List<Sprite> playerSpriteList = new List<Sprite>();
-
-    private int playerColorIndex = 0;
-
     [SerializeField] List<SMToggle> aIToggleList = new List<SMToggle>();
     [SerializeField] List<SMToggle> mapSizeToggleList = new List<SMToggle>();
     [SerializeField] List<SMToggle> playersCountToggleList = new List<SMToggle>();
 	[SerializeField] List<RectTransform> colorPanelList = new List<RectTransform>();
+    [SerializeField] PlayCoinBtn playCoinBtn;
+	[SerializeField] RectTransform needCoinBG;
+	[SerializeField] MyCoinPanel myCoinPanel;
+	[SerializeField] Text victoryRewardText;
+	private int playerColorIndex = 0;
 
-    public bool multiOn = false;
-
-    private void Awake()
+	private void Awake()
     {
         SetEvent();
     }
@@ -36,7 +37,13 @@ public class PlaySetPopup : MonoBehaviour
         SetToggleEvent(aIToggleList, AIToggleChangeOn);
         SetToggleEvent(mapSizeToggleList, MapSizeToggleChangeOn);
         SetToggleEvent(playersCountToggleList, PlayersCountToggleChangeOn);
-    }
+
+        DataManager.Instance.userData.myCoin
+            .Subscribe(_ => SetNeedCoinCheck())
+            .AddTo(gameObject);
+
+        //playCoinBtn.playBtnClickOn = PlayBtnClickOn;
+	}
 
     private void SetToggleEvent(List<SMToggle> toggleList, UnityAction<int> toggleEventOn, int defaultIndex = 0)
     {
@@ -54,8 +61,10 @@ public class PlaySetPopup : MonoBehaviour
         }
     }
 
-	public void InitOn()
+	public void InitOn(bool multiOn)
     {
+        DataManager.Instance.isMultiOn = multiOn;
+
 		colorPanelList[0].gameObject.SetActive(!multiOn);
 		colorPanelList[1].gameObject.SetActive(multiOn);
 
@@ -71,9 +80,11 @@ public class PlaySetPopup : MonoBehaviour
 
     void SetMultiToggle()
     {
-		SetToggleActive(aIToggleList, 2);
-		SetToggleActive(mapSizeToggleList, 2);
-		SetToggleActive(playersCountToggleList, 5);
+        SetToggleActive(aIToggleList, 2);
+        SetToggleActive(mapSizeToggleList, 2);
+        SetToggleActive(playersCountToggleList, 5);
+
+        SetNeedCoinCheck();
 	}
 
     public void SetToggleActive(List<SMToggle> toggleList, int activeIndex)
@@ -90,8 +101,8 @@ public class PlaySetPopup : MonoBehaviour
 	// Start is called before the first frame update
 	void Start()
     {
-        //SetColorData();
-    }
+		//AdsManager.Instance.SetRewardedAdsButton(rewardedAdsButton);
+	}
 
     // Update is called once per frame
     void Update()
@@ -100,7 +111,9 @@ public class PlaySetPopup : MonoBehaviour
     }
     private void AIToggleChangeOn(int index)
     {
-        AILevel aiLevel = (AILevel)(index);
+		SoundManager.Instance.PlaySe(SeEnum.Yes);
+
+		AILevel aiLevel = (AILevel)(index);
 
         if (aIToggleList[index].toggleValue.Value == false)
         {
@@ -110,11 +123,12 @@ public class PlaySetPopup : MonoBehaviour
 
         DataManager.Instance.SetAILevelEnum(aiLevel);
 
-        if (multiOn == false)
+        if (DataManager.Instance.isMultiOn == false)
         {
 			SetMapSizeToggle();
 		}
-        
+
+		SetVictoryRewardText();
 	}
 
 	void SetMapSizeToggle()
@@ -143,11 +157,15 @@ public class PlaySetPopup : MonoBehaviour
 		{
 			MapSizeToggleChangeOn(activeCount);
 		}
+
+		SetNeedCoinCheck();
 	}
 
 	private void MapSizeToggleChangeOn(int index)
     {
-        MapSizeEnum mapSizeEnum = (MapSizeEnum)index;
+		SoundManager.Instance.PlaySe(SeEnum.Yes);
+
+		MapSizeEnum mapSizeEnum = (MapSizeEnum)index;
 
 		if (mapSizeToggleList[index].toggleValue.Value == false)
 		{
@@ -157,7 +175,7 @@ public class PlaySetPopup : MonoBehaviour
 
 		DataManager.Instance.SetMapSizeEnum(mapSizeEnum);
 
-		if (multiOn == false)
+		if (DataManager.Instance.isMultiOn == false)
 		{
 			SetPlayerSelectToggle();
 		}
@@ -185,7 +203,9 @@ public class PlaySetPopup : MonoBehaviour
 
     private void PlayersCountToggleChangeOn(int index)
     {
-        int playerMaxCnt = index + 2;
+		SoundManager.Instance.PlaySe(SeEnum.Yes);
+
+		int playerMaxCnt = index + 2;
 
 		if (playersCountToggleList[index].toggleValue.Value == false)
 		{
@@ -202,9 +222,23 @@ public class PlaySetPopup : MonoBehaviour
             playerColorIndex = DataManager.Instance.num_player - 1;
 			SetColorData();
 		}
-    }
 
-    private void SetTurnPosition(int turnCount)
+        SetVictoryRewardText();
+	}
+
+    void SetVictoryRewardText()
+	{
+        int rewardCoin = DataManager.Instance.GetRewardCoin();
+        victoryRewardText.text = $"{rewardCoin} coins";
+	}
+
+    void SetNeedCoinCheck()
+    {
+        bool needCoinOn = playCoinBtn.SetNeedCoinCheck();
+		needCoinBG.gameObject.SetActive(needCoinOn);
+	}
+
+	private void SetTurnPosition(int turnCount)
     {
         turnCount = math.clamp(turnCount, 0, DataManager.Instance.num_player - 1);
 
@@ -251,8 +285,21 @@ public class PlaySetPopup : MonoBehaviour
 
     public void PlayBtnClickOn()
     {
-        DataManager.Instance.isMultiOn = multiOn;
+		DataManager.Instance.AddCoin(-DataManager.Instance.GetNeedCoin());
+		SceneManager.LoadScene("Loading");
+    }
 
-        SceneManager.LoadScene("Loading");
+    public void AdPlayBtnClickOn()
+    {
+		int addCoin = 10;
+
+		DataManager.Instance.AddCoin(addCoin);
+
+		SetNeedCoinCheck();
+	}
+
+    public void CloseBtnClickOn()
+    {
+        Destroy(gameObject);
     }
 }

@@ -5,7 +5,7 @@ using UnityEngine.Events;
 using UnityEngine.UI;
 using UniRx;
 
-public class LandTradePopup : MonoBehaviour
+public class LandTradePopup : BasePopup
 {
     [SerializeField] PlayerToggleIcon playerToggleIconPrefab;
     [SerializeField] RectTransform playerToggleIconParant;
@@ -27,7 +27,7 @@ public class LandTradePopup : MonoBehaviour
 
     void CreatePlayerToggleIcon()
     {
-        PlayerEnum myPlayerEnum = DataManager.Instance.playerData.playerEnum;
+        PlayerEnum myPlayerEnum = DataManager.Instance.playerData.pe;
 
         for (int i = 0; i < DataManager.Instance.num_player; i++)
         {
@@ -105,7 +105,7 @@ public class LandTradePopup : MonoBehaviour
             return;
         }
 
-        PlayerEnum fromPlayerEnum = DataManager.Instance.playerData.playerEnum;
+        PlayerEnum fromPlayerEnum = DataManager.Instance.playerData.pe;
         PlayerEnum toPlayerEnum = selectPlayer.playerEnum;
 
         LandTradeRequest request = new LandTradeRequest()
@@ -121,6 +121,6 @@ public class LandTradePopup : MonoBehaviour
 
         proposeBtnClickEventOn();
 
-        gameObject.SetActive(false);
+        CloseBtnClickOn();
     }
 }

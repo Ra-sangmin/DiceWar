@@ -483,7 +483,7 @@ GameObject:
   - component: {fileID: 7155819030310020350}
   - component: {fileID: 6423319684800995715}
   m_Layer: 0
-  m_Name: Toggle
+  m_Name: MapCompensationToggle
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -555,7 +555,19 @@ MonoBehaviour:
   m_Group: {fileID: 0}
   onValueChanged:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 6158818807515524753}
+        m_TargetAssemblyTypeName: MainSettingPopup, Assembly-CSharp
+        m_MethodName: MapCompensationToggleChangeOn
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
   m_IsOn: 0
 --- !u!1 &3100422810880391302
 GameObject:
@@ -569,6 +581,7 @@ GameObject:
   - component: {fileID: 4671002908499407857}
   - component: {fileID: 6852051393365923723}
   - component: {fileID: 1274372404789829836}
+  - component: {fileID: 276453304089238575}
   m_Layer: 5
   m_Name: CloseBtn
   m_TagString: Untagged
@@ -689,6 +702,18 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+--- !u!114 &276453304089238575
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3100422810880391302}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a20904b354e7d8c4ebe650efd74c3e19, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &3186998520052631889
 GameObject:
   m_ObjectHideFlags: 0
@@ -814,6 +839,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a7e5d6c4262917c4384141a6c6c2b96d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  soundToggle: {fileID: 7919571432109882096}
+  mapCompensationToggle: {fileID: 6423319684800995715}
 --- !u!1 &3749314975868203805
 GameObject:
   m_ObjectHideFlags: 0
@@ -826,6 +853,7 @@ GameObject:
   - component: {fileID: 7598366440633741805}
   - component: {fileID: 6429202897180779855}
   - component: {fileID: 4918611234458865127}
+  - component: {fileID: 5772168574059609242}
   m_Layer: 5
   m_Name: logoutBtn
   m_TagString: Untagged
@@ -935,10 +963,10 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
-        m_TargetAssemblyTypeName: MainController, Assembly-CSharp
-        m_MethodName: StepChangeOn
-        m_Mode: 3
+      - m_Target: {fileID: 6158818807515524753}
+        m_TargetAssemblyTypeName: MainSettingPopup, Assembly-CSharp
+        m_MethodName: LogOutBtnClickOn
+        m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
@@ -947,18 +975,18 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
-      - m_Target: {fileID: 3461212884343000687}
-        m_TargetAssemblyTypeName: UnityEngine.GameObject, UnityEngine
-        m_MethodName: SetActive
-        m_Mode: 6
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
+--- !u!114 &5772168574059609242
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3749314975868203805}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a20904b354e7d8c4ebe650efd74c3e19, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &4102154259274015613
 GameObject:
   m_ObjectHideFlags: 0
@@ -1354,7 +1382,7 @@ GameObject:
   - component: {fileID: 3385504221469829704}
   - component: {fileID: 7919571432109882096}
   m_Layer: 0
-  m_Name: Toggle
+  m_Name: SoundToggle
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1426,5 +1454,17 @@ MonoBehaviour:
   m_Group: {fileID: 0}
   onValueChanged:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 6158818807515524753}
+        m_TargetAssemblyTypeName: MainSettingPopup, Assembly-CSharp
+        m_MethodName: SoundToggleChangeOn
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
   m_IsOn: 1

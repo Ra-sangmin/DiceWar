@@ -3,12 +3,14 @@ using UnityEngine.Advertisements;
 
 public class AdsManager : MonoSingleton<AdsManager>, IUnityAdsInitializationListener
 {
-    private bool _testMode = true;
-    private string _gameId;
+    private bool _testMode = false;
+    private string _gameId = string.Empty;
 
     public bool InitClear = false;
 
     private RewardedAdsButton rewardedAdsButton;
+
+    private const int addCoinCount = 10;
 
     public override void Init()
     {
@@ -27,7 +29,10 @@ public class AdsManager : MonoSingleton<AdsManager>, IUnityAdsInitializationList
 
         if (!Advertisement.isInitialized && Advertisement.isSupported)
         {
-            Advertisement.Initialize(_gameId, _testMode, this);
+            if (_gameId != string.Empty)
+            {
+				Advertisement.Initialize(_gameId, _testMode, this);
+			}
         }
 
     }
@@ -49,7 +54,7 @@ public class AdsManager : MonoSingleton<AdsManager>, IUnityAdsInitializationList
         //광고 시청을 완료하였다면
         if (state.Equals(UnityAdsShowCompletionState.COMPLETED))
         {
-            DataManager.Instance.AddCoin(10);
+            DataManager.Instance.AddCoin(addCoinCount);
         }
     }
 

@@ -22,7 +22,7 @@ public class AllianceApprovePopup : MonoBehaviour
 
     void CreatePlayerToggleIcon()
     {
-        PlayerEnum myPlayerEnum = DataManager.Instance.playerData.playerEnum;
+        PlayerEnum myPlayerEnum = DataManager.Instance.playerData.pe;
 
         for (int i = 0; i < DataManager.Instance.num_player; i++)
         {
@@ -48,7 +48,7 @@ public class AllianceApprovePopup : MonoBehaviour
     {
         this.allianceRequest = allianceRequest;
 
-        PlayerEnum myPlayerEnum = DataManager.Instance.playerData.playerEnum;
+        PlayerEnum myPlayerEnum = DataManager.Instance.playerData.pe;
 
         foreach (var playerToggleIcon in playerToggleIconList)
         {
@@ -70,7 +70,7 @@ public class AllianceApprovePopup : MonoBehaviour
     {
         PlayerToggleIcon currentSelectPlayer = playerToggleIconList[selectIndex];
 
-        PlayerEnum myPlayerEnum = DataManager.Instance.playerData.playerEnum;
+        PlayerEnum myPlayerEnum = DataManager.Instance.playerData.pe;
 
         if (currentSelectPlayer.playerEnum == myPlayerEnum)
         {
@@ -106,7 +106,7 @@ public class AllianceApprovePopup : MonoBehaviour
 
     void DataRequestOn(bool approveOn)
     {
-        PlayerEnum playerEnum = DataManager.Instance.playerData.playerEnum;
+        PlayerEnum playerEnum = DataManager.Instance.playerData.pe;
 
         AllianceApproveRequest request = new AllianceApproveRequest()
         {

@@ -52,6 +52,8 @@ public class BuyCoinPopup : MonoBehaviour
 
     public void WatchAdsOn()
     {
+        Debug.LogWarning("WatchAdsOn");
+
         int addCoin = 10;
 
         DataManager.Instance.AddCoin(addCoin);

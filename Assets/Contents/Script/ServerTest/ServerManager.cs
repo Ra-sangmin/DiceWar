@@ -2,117 +2,134 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Net.Sockets;
+using System.Text;
+using System.Threading;
 using UnityEngine;
 using UnityEngine.Events;
 
 public class ServerManager : MonoSingleton<ServerManager>
 {
-    private TcpClient tcpClient;
-    private NetworkStream stream;
+    //private TcpClient tcpClient;
+    //private NetworkStream stream;
 
-    private Socket _socket = null;
-    byte[] _recvBuffer = new byte[10240];
+    //private Socket _socket = null;
+    //byte[] _recvBuffer = new byte[10240];
 
     private Queue<string> sendQueue = new Queue<string>();
 
     private Queue<BaseTCPRequest> queue = new Queue<BaseTCPRequest>();
 
-    private List<string> receiveList = new List<string>();
+	private Queue<string> receiveQueue = new Queue<string>();
 
     public UnityAction<BaseTCPRequest> receiveDataOn = data => { };
 
     public int roomDataIndex = -1;
 
-    private string beforeData = string.Empty;
-
     public bool receiveOn = true;
 
-    void Start()
+    public TcpClientExample tcpClientTest;
+
+
+	private TcpClient client;
+	private NetworkStream stream;
+	private Thread receiveThread;
+	private byte[] buffer = new byte[1024 * 4];
+
+	// 수신 버퍼
+	private List<byte> receiveBuffer = new List<byte>();
+
+
+	void Start()
     {
         ConnectToServer();
     }
 
     public void ConnectToServer()
     {
-        // tcp서버를 선언
-        _socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+		string IP = "52.78.148.28";
+		int PORT = 8000;
 
-        string IP = "ec2-52-78-148-28.ap-northeast-2.compute.amazonaws.com";
-        int PORT = 8000;
+		client = new TcpClient();
+		client.Connect(IPAddress.Parse(IP), PORT);
+		stream = client.GetStream();
 
-        // 서버 연결
-        _socket.Connect(IP, PORT);
+		receiveThread = new Thread(ReceiveLoop);
+		receiveThread.IsBackground = true;
+		receiveThread.Start();
+	}
 
-        if (_socket.Connected)
-        {
-            // 서버연결됨
-            Debug.Log("connected");
+	private void ReceiveLoop()
+	{
+		while (true)
+		{
+			try
+			{
+				int byteCount = stream.Read(buffer, 0, buffer.Length);
+				if (byteCount <= 0)
+				{
+					Debug.LogWarning("서버 연결 끊김");
+					break;
+				}
 
-            //sendMessage();
-        }
-        else
-        {
-            // 서버 연결 실패
-            Debug.Log("fail to connect");
-        }
-    }
+				// 받은 데이터 버퍼에 저장
+				receiveBuffer.AddRange(buffer[..byteCount]);
 
-    //이렇게 하면 서버에 접속 완료
-    private void SendMessageOn(string jsonUserString)
-    {
-        //Debug.Log("Send : " + jsonUserString);
-
-        if(_socket == null)
-        {
-            return;
-        }
-
-        Byte[] sendData = System.Text.Encoding.UTF8.GetBytes(jsonUserString);
-
-        try
-        {
-            //_socket.BeginSend(sendData, 0, sendData.Length, SocketFlags.None, new AsyncCallback(SendComplete), null);
-
-            _socket.Send(sendData, 0, sendData.Length, SocketFlags.None);
-        }
-
-        catch (Exception e)
-        {
-            // 위 함수에서 뻑이 난다면 아래 에러 메시지 출력
-            Debug.LogError("send fail exception = " + e.Message);
-
-            // 서버 퇴장
-            //Shutdown();
+				// 패킷 파싱 시도
+				ParsePackets();
+			}
+			catch (Exception e)
+			{
+				Debug.LogWarning($"예외: {e.Message}");
+				break;
+			}
         }
     }
 
-    private void SendComplete(IAsyncResult ar)
+    private void ParsePackets()
     {
-        // 메시지 보네는게 성공하면 콜백 되는 함수 입니다.
-        try
+        while (true)
         {
-            if (null == _socket)
-            {
+            // 최소한 4바이트는 있어야 길이 읽을 수 있음
+            if (receiveBuffer.Count < 4)
                 return;
-            }
 
-            int len = _socket.EndSend(ar);
+            // 길이 읽기
+            int packetLength = BitConverter.ToInt32(receiveBuffer.ToArray(), 0);
 
-            if (len == 1)
-            {
-                Debug.Log("Send success");
-            }
-        }
+            // 전체 패킷이 도착했는지 확인
+            if (receiveBuffer.Count < 4 + packetLength)
+                return;
 
-        catch (Exception e)
-        {
-            Debug.LogError("Send Exception: " + e.Message);
+            // 패킷 추출
+            byte[] packetData = receiveBuffer.GetRange(4, packetLength).ToArray();
 
-            //Shutdown();
-        }
+            // 버퍼에서 제거
+            receiveBuffer.RemoveRange(0, 4 + packetLength);
 
+            // 받은 데이터 처리 (예: 문자열로 출력)
+            string jsonString = Encoding.UTF8.GetString(packetData);
+
+			receiveQueue.Enqueue(jsonString);
+
+			//Debug.LogWarning($"받은 메시지: {jsonString}");
+		}
     }
+
+	public void SendMessageOn(string jsonUserString)
+	{
+		if (stream == null) return;
+
+		byte[] data = Encoding.UTF8.GetBytes(jsonUserString);
+		byte[] length = BitConverter.GetBytes(data.Length);
+
+		byte[] packet = new byte[length.Length + data.Length];
+		Buffer.BlockCopy(length, 0, packet, 0, length.Length);
+		Buffer.BlockCopy(data, 0, packet, length.Length, data.Length);
+
+		stream.Write(packet, 0, packet.Length);
+	}
 
     public void GameReadyRequestOn(int maxPlayerCnt , int userCnt)
     {
@@ -132,7 +149,7 @@ public class ServerManager : MonoSingleton<ServerManager>
         {
             GameOutRequest gameOutRequest = new GameOutRequest()
             {
-                outPlayerEnum = DataManager.Instance.playerData.playerEnum,
+                outPlayerEnum = DataManager.Instance.playerData.pe,
             };
 
             SendMessageOn(gameOutRequest);
@@ -159,15 +176,9 @@ public class ServerManager : MonoSingleton<ServerManager>
 
         string jsonStr = JsonUtility.ToJson(request);
 
-        //if (request.requestProtocal == RequestProtocal.GameOutOn)
-        //{
-        //    SendMessageOn(jsonStr);
-        //}
-        //else
-        {
-            sendQueue.Enqueue(jsonStr);
-        }
-    }
+		//Debug.LogWarning("send "+jsonStr);
+		sendQueue.Enqueue(jsonStr);
+	}
 
     void SendQueueListCheck()
     {
@@ -181,7 +192,6 @@ public class ServerManager : MonoSingleton<ServerManager>
     {
         SendQueueListCheck();
         QueueListCheck();
-        receiveMessage();
         ReceiveListDataCheck();
     }
 
@@ -193,180 +203,24 @@ public class ServerManager : MonoSingleton<ServerManager>
         }
     }
 
-    void receiveMessage()
-    {
-        if (_socket == null || _socket.Available != 0)
-            return;
-        
-        try
-        {
-            // 메시지를 받습니다. 이또한 패킷형태로 받아야 하지만 잘 모르니 데이터 형태로 받겟습니다.
-            _socket.BeginReceive(_recvBuffer, 0, _recvBuffer.Length, SocketFlags.None, new AsyncCallback(ReceiveComplete), null);
-        }
-        catch (Exception e)
-        {
-            //실패시 에러 메시지
-            Debug.LogError("BeginException: " + e.Message);
-            //Shutdown();
-        }
-    }
-
-
-    private void ReceiveComplete(IAsyncResult ar)
-    {
-        if (null == _socket)
-        {
-            //Debug.Log("socket is null");
-            return;
-        }
-
-        int len = _socket.EndReceive(ar);
-
-        if (len != 0)
-        {
-            byte[] cuttingBuffer = new byte[len];
-
-            for (int i = 0; i < len; i++)
-            {
-                cuttingBuffer[i] = _recvBuffer[i];
-            }
-
-            string jsonString = System.Text.Encoding.UTF8.GetString(cuttingBuffer);
-
-            receiveList.Add(jsonString);
-
-            //출력이 끝나면 버퍼 초기화
-            System.Array.Clear(_recvBuffer, 0, _recvBuffer.Length);
-        }
-    }
-
     void ReceiveListDataCheck()
     {
-        if (receiveList.Count == 0)
+        if (receiveQueue.Count == 0)
             return;
 
-        string checkJsonData = string.Empty;
-        BaseRequest baseRequest = null;
+		string checkJsonData = receiveQueue.Dequeue();
 
-        //Debug.LogWarning(receiveList.Count);
-
-        if (receiveList.Count == 1)
-        {
-            checkJsonData = receiveList[0];
-        }
-        else if (receiveList.Count == 2)
-        {
-            string firstStr = string.Empty;
-            string endStr = string.Empty;
-
-            if (receiveList[0].IndexOf("{\"requestProtocal\"") == 0)
-            {
-                firstStr = receiveList[0];
-                endStr = receiveList[1];
-            }
-            else
-            {
-                firstStr = receiveList[1];
-                endStr = receiveList[0];
-            }
-
-            checkJsonData = firstStr + endStr;
-        }
-        else if (receiveList.Count == 3)
-        {
-            string firstStr = string.Empty;
-            string middleStr = string.Empty;
-            string endStr = string.Empty;
-
-            for (int i = 0; i < receiveList.Count; i++)
-            {
-                string str = receiveList[i];
-
-                if (str.IndexOf("{\"requestProtocal\"") == 0)
-                {
-                    firstStr = str;
-                }
-                else if (str.IndexOf("]}]}") != -1)
-                {
-                    endStr = str;
-                }
-                else
-                {
-                    middleStr = str;
-                }
-            }
-
-            checkJsonData = firstStr + middleStr + endStr;
-        }
-        else
-        {
-            receiveList.Clear();
-        }
-
-        //if (string.IsNullOrEmpty(checkJsonData) == false) 
-        //{
-        //    Debug.LogWarning(checkJsonData);
-        //    Debug.LogWarning("receiveList = "+ receiveList.Count);
-        //}
-
-        baseRequest = GetBaseRequest(checkJsonData);
-
-        if (baseRequest != null)
-        {
-            ReceiveRequestDataOn(checkJsonData);
-
-            receiveList.Clear();
-        }
-
-    }
-
-    BaseRequest GetBaseRequest(string checkJsonData)
-    {
-        BaseRequest baseRequest = null;
-
-        try
-        {
-            baseRequest = JsonUtility.FromJson<BaseRequest>(checkJsonData);
-        }
-        catch (Exception e)
-        {
-            Debug.LogWarning("fail = " + checkJsonData + " receivelist Count = " + receiveList.Count);
-            //Debug.LogWarning(e);
-        }
-
-        return baseRequest;
-    }
+		ReceiveRequestDataOn(checkJsonData);
+	}
 
     private void ReceiveRequestDataOn(string str)
     {
-        Debug.LogWarning(str);
+		BaseTCPRequest baseRequest = GetBaseReqeust(str);
 
-        BaseTCPRequest baseRequest = null;
-
-        RequestProtocal requestProtocal = JsonUtility.FromJson<BaseTCPRequest>(str).requestProtocal;
-
-        switch (requestProtocal)
+		if (baseRequest.requestProtocal == RequestProtocal.GameReady)
         {
-            case RequestProtocal.GameReady:
-
-                GameReadyRequest gameReadyRequest = JsonUtility.FromJson<GameReadyRequest>(str);
-                roomDataIndex = gameReadyRequest.roomDataIndex;
-                baseRequest = gameReadyRequest;
-                break;
-
-            case RequestProtocal.GameOutOn:                 baseRequest = JsonParser<GameOutRequest>(str); break;
-            case RequestProtocal.GameStartOn:               baseRequest = JsonParser<GameStartOn>(str); break;
-            case RequestProtocal.MapCreateOn:               baseRequest = JsonParser<MapCreateRequestOn>(str); break;
-            case RequestProtocal.TurnRequest:               baseRequest = JsonParser<TurnRequest>(str); break;
-            case RequestProtocal.AttackRequest:             baseRequest = JsonParser<AttackRequest>(str); break;
-            case RequestProtocal.LandTradeRequest:          baseRequest = JsonParser<LandTradeRequest>(str); break;
-            case RequestProtocal.LandTradeApproveRequest:   baseRequest = JsonParser<LandTradeApproveRequest>(str); break;
-            case RequestProtocal.AllianceRequest:           baseRequest = JsonParser<AllianceRequest>(str); break;
-            case RequestProtocal.AllianceApproveRequest:    baseRequest = JsonParser<AllianceApproveRequest>(str); break;
-            case RequestProtocal.AllianceResultRequest:     baseRequest = JsonParser<AllianceResultRequest>(str); break;
-            case RequestProtocal.AllianceBetrayRequest:     baseRequest = JsonParser<AllianceBetrayRequest>(str); break;
-            case RequestProtocal.SkillCardRequest:          baseRequest = JsonParser<SkillCardRequest>(str); break;
-        }
+			roomDataIndex = baseRequest.roomDataIndex;
+		}
 
         if (baseRequest != null)
         {
@@ -374,40 +228,40 @@ public class ServerManager : MonoSingleton<ServerManager>
         }
     }
 
-    BaseTCPRequest JsonParser<T>(string jsonString)
+	BaseTCPRequest GetBaseReqeust(string str)
     {
-        return JsonUtility.FromJson<T>(jsonString) as BaseTCPRequest;
-    }
+		BaseTCPRequest baseRequest = null;
 
-    private void Shutdown()
+		RequestProtocal requestProtocal = JsonParser<BaseTCPRequest>(str).requestProtocal;
+
+		switch (requestProtocal)
+		{
+			case RequestProtocal.GameReady: baseRequest = JsonParser<GameReadyRequest>(str); break;
+			case RequestProtocal.GameOutOn: baseRequest = JsonParser<GameOutRequest>(str); break;
+			case RequestProtocal.GameStartOn: baseRequest = JsonParser<GameStartOn>(str); break;
+			case RequestProtocal.MapCreateOn: baseRequest = JsonParser<MapCreateRequestOn>(str); break;
+			case RequestProtocal.TurnRequest: baseRequest = JsonParser<TurnRequest>(str); break;
+			case RequestProtocal.AttackRequest: baseRequest = JsonParser<AttackRequest>(str); break;
+			case RequestProtocal.LandTradeRequest: baseRequest = JsonParser<LandTradeRequest>(str); break;
+			case RequestProtocal.LandTradeApproveRequest: baseRequest = JsonParser<LandTradeApproveRequest>(str); break;
+			case RequestProtocal.AllianceRequest: baseRequest = JsonParser<AllianceRequest>(str); break;
+			case RequestProtocal.AllianceApproveRequest: baseRequest = JsonParser<AllianceApproveRequest>(str); break;
+			case RequestProtocal.AllianceResultRequest: baseRequest = JsonParser<AllianceResultRequest>(str); break;
+			case RequestProtocal.AllianceBetrayRequest: baseRequest = JsonParser<AllianceBetrayRequest>(str); break;
+			case RequestProtocal.SkillCardRequest: baseRequest = JsonParser<SkillCardRequest>(str); break;
+		}
+
+        return baseRequest;
+	}
+
+    T JsonParser<T>(string jsonString)
     {
-        // 중간에 뻑났을때 소켓 초기화 해주는 부분
-        if (_socket != null)
-        {
-            try
-            {
-                Debug.Log("shutdown");
-
-                _socket.Shutdown(SocketShutdown.Both);
-
-                _socket = null;
-
-            }
-            catch (Exception e)
-            {
-                Debug.LogError("Shutdown Exception: " + e.Message);
-
-                _socket = null;
-            }
-        }
-
+        return JsonUtility.FromJson<T>(jsonString);
     }
 
     private void OnDisable()
     {
         GameOutRequestOn();
-
-        Shutdown();
     }
 }
 
@@ -566,7 +420,10 @@ public class AllianceResultRequest : BaseTCPRequest
 [System.Serializable]
 public class AllianceBetrayRequest : BaseTCPRequest
 {
-    public PlayerEnum playerEnum;
+	public AllianceData orderData;
+	public List<AllianceData> allianceDataList = new List<AllianceData>();
+
+	public PlayerEnum betrayPlayerEnum;
 
     public AllianceBetrayRequest()
     {

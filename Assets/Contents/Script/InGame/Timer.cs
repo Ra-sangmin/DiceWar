@@ -10,7 +10,7 @@ public class Timer : MonoBehaviour
     [SerializeField] RectTransform activeOnPanel;
     private bool timerOn = false;
 
-    private float timerCurrentDelay;
+    public float timerCurrentDelay;
     private float timerMaxDelay = 10;
 
     public UnityAction timerOverOn = () => { };
@@ -30,8 +30,6 @@ public class Timer : MonoBehaviour
         timerCurrentDelay = timerMaxDelay;
 
         ResetTimerValue();
-
-        Debug.LogWarning(timerOn);
     }
 
     // Update is called once per frame

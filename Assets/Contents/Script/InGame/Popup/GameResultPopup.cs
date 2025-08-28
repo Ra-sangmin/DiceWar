@@ -8,14 +8,29 @@ public class GameResultPopup : MonoBehaviour
 {
     [SerializeField] Text titleText;
     [SerializeField] Text coinText;
-    private InGameController inGameController;
-    private bool win;
+    //[SerializeField] RectTransform needCoinTextPanel;
+    //[SerializeField] Text needCoinText;
+
+    //[SerializeField] RewardedAdsButton rewardedAdsButton;
+    //[SerializeField] RectTransform playButton;
+
+    private InGameControllerBase inGameController;
+    private GameResultEnum gameResultEnum;
+
+    public enum GameResultEnum
+    {
+        Win,
+        Lose,
+        GiveUp,
+        LeaveEarly
+    }
+
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        
-    }
+		//AdsManager.Instance.SetRewardedAdsButton(rewardedAdsButton);
+	}
 
     // Update is called once per frame
     void Update()
@@ -23,12 +38,22 @@ public class GameResultPopup : MonoBehaviour
         
     }
 
-    public void DataInit(InGameController inGameController, bool win , int coinCount)
+    public void DataInit(InGameControllerBase inGameController, GameResultEnum gameResultEnum, int coinCount)
     {
         this.inGameController = inGameController;
-        this.win = win;
+        this.gameResultEnum = gameResultEnum;
 
-        titleText.text = win ? "Victory" : "Defeat";
+        string titleTextStr = string.Empty;
+
+        switch (gameResultEnum)
+        {
+            case GameResultEnum.Win: titleTextStr = "You Win"; break;
+			case GameResultEnum.Lose: titleTextStr = "You Lose"; break;
+			case GameResultEnum.GiveUp: titleTextStr = "Give Up"; break;
+			case GameResultEnum.LeaveEarly: titleTextStr = "Leave Early"; break;
+		}
+
+        titleText.text = titleTextStr;
 
         DataManager.Instance.AddCoin(coinCount);
 
@@ -41,9 +66,40 @@ public class GameResultPopup : MonoBehaviour
                 .Repeat()
                 .Subscribe(_ => ServerManager.Instance.GameOutRequestOn())
                 .AddTo(this);
-    }
 
-    public void GoMainBtnClickOn()
+  //      SetNeedCoinCheck();
+
+		//DataManager.Instance.userData.myCoin
+	 //       .Subscribe(_ => SetNeedCoinCheck())
+	 //       .AddTo(gameObject);
+
+	}
+
+	//void SetNeedCoinCheck()
+	//{
+	//	int needCoin = DataManager.Instance.GetNeedCoin();
+
+	//	bool needCoinOn = DataManager.Instance.userData.myCoin.Value < needCoin;
+
+	//	//needCoinBG.gameObject.SetActive(needCoinOn);
+	//	playButton.gameObject.SetActive(!needCoinOn);
+
+ //       needCoinText.transform.parent.gameObject.SetActive(needCoinOn);
+
+ //       if (DataManager.Instance.aiLevel == AILevel.Easy)
+ //       {
+ //           needCoinTextPanel.gameObject.SetActive(false);
+ //       }
+ //       else
+ //       {
+ //           needCoinTextPanel.gameObject.SetActive(true);
+ //           needCoinText.text = $"-{needCoin}";
+ //       }
+
+ //       //needCoinText.text = $"-{needCoin}";
+	//}
+
+	public void GoMainBtnClickOn()
     {
         inGameController.GoMainOn();
         gameObject.SetActive(false);
@@ -57,8 +113,13 @@ public class GameResultPopup : MonoBehaviour
         }
         else 
         {
-            inGameController.NewGameOn();
-            gameObject.SetActive(false);
+			if (DataManager.Instance.CheckNewGame())
+			{
+				inGameController.NewGameOn();
+				gameObject.SetActive(false);
+			}
         }
     }
+
+	
 }

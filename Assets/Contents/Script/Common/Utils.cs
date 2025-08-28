@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DG.Tweening;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -29,4 +30,12 @@ public static class Utils
 
         return sendAreaData;
     }
+
+	public static void TweenKill(this Tween tween)
+	{
+		if (tween != null && tween.IsActive() && tween.IsPlaying())
+		{
+			tween.Kill();
+		}
+	}
 }

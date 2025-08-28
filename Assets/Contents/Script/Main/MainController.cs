@@ -34,9 +34,10 @@ public class MainController : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        //StepChangeOn(1);
+		//StepChangeOn(1);
+		SoundManager.Instance.PlayBGM(BGMEnum.Intro);
 
-        PopupManager.Instance.SetCanvasParant(transform);
+		PopupManager.Instance.SetCanvasParant(transform);
 
         ServerManager.Instance.Init();
     }

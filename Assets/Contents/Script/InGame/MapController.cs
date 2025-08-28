@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Events;
@@ -19,7 +20,8 @@ public class MapController : MonoBehaviour
     [SerializeField] PlayerDataPanel playerDataPanel;
 
     private List<Hexagon> hexagonList = new List<Hexagon>(); //인접 셀을 포함한 배열(arrangement with adjacent cells)
-    private List<MapDice> mapDiceList = new List<MapDice>();
+	private List<HexagonLine> hexagonLineList = new List<HexagonLine>(); //인접 셀을 포함한 배열(arrangement with adjacent cells)
+	private List<MapDice> mapDiceList = new List<MapDice>();
 
     private bool diceAddEventOn = false;
     private bool attackEventOn = false;
@@ -31,16 +33,23 @@ public class MapController : MonoBehaviour
     public UnityAction turnOffOn;
     public UnityAction<AreaData> selectAreaOn;
 
-    public Join[] join;//인접 셀을 포함한 배열(arrangement with adjacent cells)
+    private Join[] join;//인접 셀을 포함한 배열(arrangement with adjacent cells)
 
     private InGameButtonStatus selectBtnStatus = InGameButtonStatus.None;
 
     private AttackController attackController = new AttackController();
 
+    private Timer timer;
+
     private void Awake()
     {
         attackController.SetClass(playerIconController, inGameBottomController);
 		//SetEvent();
+	}
+
+    public void SetTimer(Timer timer)
+    {
+        this.timer = timer;
 	}
 
     public void SetEvent()
@@ -97,7 +106,8 @@ public class MapController : MonoBehaviour
         join = DataManager.Instance.GetJoinData();
         SetHexagonPanel();
         CreateHexagon();
-        CreateMap();
+        CreateHexagonLine();
+		CreateMap();
     }
 
     void SetHexagonPanel()
@@ -122,16 +132,38 @@ public class MapController : MonoBehaviour
         }
     }
 
-    public void CreateMap()
+	void CreateHexagonLine()
+	{
+		RectTransform rectTransform = hexagonLinePrefab.transform as RectTransform;
+		rectTransform.sizeDelta = DataManager.Instance.GetHexagonSizeDelta();
+
+		for (int i = 0; i < DataManager.Instance.GetCelMax(); i++)
+		{
+			HexagonLine hexagon = Instantiate(hexagonLinePrefab, hexagonLinePrefab.transform.parent);
+
+			hexagon.gameObject.SetActive(true);
+			hexagon.SetPos(i);
+
+			hexagonLineList.Add(hexagon);
+
+			//hexagon.gameObject.SetActive(true);
+			//hexagon.SetPos(i);
+			//hexagon.clickOn = HexagonClickOn;
+
+			//hexagonList.Add(hexagon);
+		}
+	}
+
+	public void CreateMap()
     {
         DataManager.Instance.gameStart.SetValueAndForceNotify(false);
         DataManager.Instance.playOn = false;
 		DataManager.Instance.InitStashCount();
 
-		// 셀 초기화
-		for (int i = 0; i < hexagonList.Count; i++)
+        // 셀 초기화
+        for (int i = 0; i < hexagonLineList.Count; i++)
         {
-            hexagonList[i].DrawLineOnClear();
+			hexagonLineList[i].DrawLineOnClear();
         }
 
         List<Vector2> readyData = new List<Vector2>();
@@ -155,7 +187,6 @@ public class MapController : MonoBehaviour
             hexagon.SetArea(areaData.id);
             hexagon.SetPlayer(areaData.player);
 
-
             areaData.AddHexagon(hexagon);
 
             Vector2 posIndex = DataManager.Instance.GetPos(i);
@@ -176,7 +207,7 @@ public class MapController : MonoBehaviour
                     readyData.Contains(new Vector2(i, pos)) == false &&
                     readyData.Contains(new Vector2(pos, i)) == false)
                 {
-                    hexagonList[i].DrawLineOn(z);
+					hexagonLineList[i].DrawLineOn(z);
                     readyData.Add(new Vector2(i, pos));
                 }
             }
@@ -262,16 +293,18 @@ public class MapController : MonoBehaviour
 
     void SetAroundLine(Vector2 posIndex, int i)
     {
-        if (posIndex.y == 0)
+        HexagonLine hexagonLine = hexagonLineList[i];
+
+		if (posIndex.y == 0)
         {
-            hexagonList[i].DrawLineOn(2);
-            hexagonList[i].DrawLineOn(3);
+			hexagonLine.DrawLineOn(2);
+			hexagonLine.DrawLineOn(3);
         }
 
         if (posIndex.y == (int)DataManager.Instance.GetMapSizeValue().y - 1)
         {
-            hexagonList[i].DrawLineOn(0);
-            hexagonList[i].DrawLineOn(1);
+			hexagonLine.DrawLineOn(0);
+			hexagonLine.DrawLineOn(1);
         }
 
         if (posIndex.x == 0)
@@ -284,7 +317,7 @@ public class MapController : MonoBehaviour
 
                 if (join[i].dir[checkIndex] <= 0)
                 {
-                    hexagonList[i].DrawLineOn(checkIndex);
+					hexagonLine.DrawLineOn(checkIndex);
                 }
             }
         }
@@ -299,7 +332,7 @@ public class MapController : MonoBehaviour
 
                 if (join[i].dir[checkIndex] <= 0)
                 {
-                    hexagonList[i].DrawLineOn(checkIndex);
+					hexagonLine.DrawLineOn(checkIndex);
                 }
             }
         }
@@ -307,19 +340,18 @@ public class MapController : MonoBehaviour
 
     public async void HexagonClickOn(int index)
     {
-        if (attackEventOn || DataManager.Instance.gameStart.Value == false)
+        if (attackEventOn)
         {
             return;
         }
 
-        AreaData areaData = DataManager.Instance.GetAreaDataForCel(index);
+		SoundManager.Instance.PlaySe(SeEnum.Yes);
 
-        PlayerEnum currentPlayerEnum = DataManager.Instance.playerData.playerEnum;
+		AreaData areaData = DataManager.Instance.GetAreaDataForCel(index);
+
+        PlayerEnum currentPlayerEnum = DataManager.Instance.playerData.pe;
 
         bool isMyTurn = DataManager.Instance.IsMyTurn();
-
-        if (isMyTurn == false)
-            return;
 
         if (selectBtnStatus == InGameButtonStatus.Buy || selectBtnStatus == InGameButtonStatus.Sell)
         {
@@ -327,10 +359,18 @@ public class MapController : MonoBehaviour
             return;
         }
 
+		if (isMyTurn == false)
+			return;
+
+        if (DataManager.Instance.isMultiOn && timer != null && timer.timerCurrentDelay < 1)
+        {
+            return;
+        }
+
 		//선택이 안되어있다면
 		if (attackController.choisIndex == -1)
 		{
-			if (areaData.choisOn == false && areaData.dice > 1 && areaData.player == DataManager.Instance.playerData.playerEnum)
+			if (areaData.choisOn == false && areaData.dice > 1 && areaData.player == DataManager.Instance.playerData.pe)
 			{
 				SelectOn(areaData);
 			}
@@ -367,7 +407,11 @@ public class MapController : MonoBehaviour
 					return;
 				}
 
-				await attackController.AttackOn(beforeAreaData, areaData);
+                attackEventOn = true;
+
+				await attackController.AttackOn(beforeAreaData, areaData, new CancellationTokenSource());
+
+				attackEventOn = false;
 			}
 		}
 	}
@@ -398,7 +442,7 @@ public class MapController : MonoBehaviour
 
     public void AreaTradeCheck(AreaData areaData)
     {
-        PlayerEnum currentPlayerEnum = DataManager.Instance.playerData.playerEnum;
+        PlayerEnum currentPlayerEnum = DataManager.Instance.playerData.pe;
 
         NonePlayPanel.InGameButtonStatus btnStatus = areaData.player == currentPlayerEnum ?
                                                         NonePlayPanel.InGameButtonStatus.Sell : //내 땅을 선택했을때
@@ -424,18 +468,18 @@ public class MapController : MonoBehaviour
 
     public List<AreaData> EndTurnBtnClickOn()
     {
-        if (diceAddEventOn || DataManager.Instance.gameStart.Value == false)
+		if (diceAddEventOn || DataManager.Instance.gameStart.Value == false)
         {
             return null;
         }
 
-        SelectClearOn();
+		SelectClearOn();
 
-        PlayerEnum currentPlayerEnum = DataManager.Instance.playerData.playerEnum;
+        PlayerEnum currentPlayerEnum = DataManager.Instance.playerData.pe;
 
         List<AreaData> areaDataList = DiceAddOn(currentPlayerEnum);
 
-        turnOffOn();
+        //turnOffOn();
 
         return areaDataList;
     }
@@ -543,9 +587,9 @@ public class MapController : MonoBehaviour
         return areaDataList;
     }
 
-    public async UniTask AIAttackOn(PlayerEnum playerEnum)
+    public async UniTask AIAttackOn(PlayerEnum playerEnum , CancellationTokenSource source)
     {
-		await attackController.AIAttackOn(playerEnum);
+		await attackController.AIAttackOn(playerEnum, source);
     }
 
     // Update is called once per frame
@@ -571,8 +615,8 @@ public class MapController : MonoBehaviour
     {
         DataManager.Instance.ReStartOn();
         playerIconController.SetPlayerIcon();
-        inGameBottomController.SetStatus(1);
+        playerIconController.SetIconTurnEffect();
+		inGameBottomController.SetStatus(1);
         inGameBottomController.nonePlayPanel.Init();
-
 	}
 }

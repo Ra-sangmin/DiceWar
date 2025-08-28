@@ -6,18 +6,18 @@ using UnityEngine.UI;
 public class InGameBottomController : MonoBehaviour
 {
     [SerializeField] RectTransform mapSelectPanel;
-    public NonePlayPanel nonePlayPanel;
+	[SerializeField] Text needCoinText;
+	public NonePlayPanel nonePlayPanel;
 
     // 0 = 맵 선택 , 1 = 튜토리얼 , 2 = 게임 시작
     public int status = 0;
 
     // Start is called before the first frame update
     void Start()
-    {
+    {   
+	}
 
-    }
-
-    public void SetStatus(int status)
+	public void SetStatus(int status)
     {
         this.status = status;
 

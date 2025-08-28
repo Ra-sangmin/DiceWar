@@ -1,10 +1,14 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
+using static GameResultPopup;
 
 public class OptionPopup : MonoBehaviour
 {
-    private InGameController inGameController;
+    [SerializeField] Button restartBtn;
+	[SerializeField] VerticalLayoutGroup vlg;
+	private InGameControllerBase inGameController;
 
     // Start is called before the first frame update
     void Start()
@@ -18,12 +22,17 @@ public class OptionPopup : MonoBehaviour
         
     }
 
-    public void DataInit(InGameController inGameController)
+    public void DataInit(InGameControllerBase inGameController)
     {
         this.inGameController = inGameController;
-    }
 
-    public void SettingPopupOn()
+		restartBtn.gameObject.SetActive(!DataManager.Instance.isMultiOn);
+
+		float spacing = DataManager.Instance.isMultiOn ? 30 : 20;
+		vlg.spacing = spacing;
+	}
+
+	public void SettingPopupOn()
     {
         //PopupManager.Instance.se;
     }
@@ -31,16 +40,46 @@ public class OptionPopup : MonoBehaviour
     public void RestartBtnClickOn()
     {
         inGameController.ReStartOn();
-        gameObject.SetActive(false);
-    }
+        CloseBtnClickOn();
+	}
 
-    public void GoMainBtnClickOn()
-    {
-        inGameController.GoMainOn();
-    }
+	public void NewGameBtnClickOn()
+	{
+        if (DataManager.Instance.CheckNewGame())
+        {
+			inGameController.NewGameOn();
+			CloseBtnClickOn();
+		}
+	}
+
+	public void GoMainBtnClickOn()
+	{
+        int coinCount = 0;
+
+        if (DataManager.Instance.isMultiOn)
+        {
+			AllianceData allianceData = DataManager.Instance.GetMyAllianceData();
+
+            if (allianceData != null)
+            {
+                coinCount = -allianceData.coinCount;
+			}
+
+			PopupManager.Instance.GiveUpPopupOn(inGameController, coinCount);
+		}
+        else 
+        {
+			inGameController.GoMainOn();
+		}
+	}
 
     public void TutorialBtnClickOn()
     {
         PopupManager.Instance.TutorialPopupOn();
+    }
+
+    public void CloseBtnClickOn()
+    {
+        Destroy(gameObject);
     }
 }

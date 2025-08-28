@@ -10,7 +10,9 @@ using UnityEngine.SceneManagement;
 
 public class IntroController : MonoBehaviour
 {
-    public GoogleAuth GoogleAuth;
+	[SerializeField] Transform reporter;
+
+	public GoogleAuth GoogleAuth;
 
     private int snsType = 0;
 
@@ -25,7 +27,11 @@ public class IntroController : MonoBehaviour
         //SignOut();
 
         SoundManager.Instance.PlayBGM(BGMEnum.Intro);
-    }
+
+#if TEST
+		reporter.gameObject.SetActive(true);
+#endif
+	}
 
     public void SignOut()
     {

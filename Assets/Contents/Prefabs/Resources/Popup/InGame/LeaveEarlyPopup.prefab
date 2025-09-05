@@ -234,6 +234,7 @@ GameObject:
   - component: {fileID: 796079339016885978}
   - component: {fileID: 5804240141094338023}
   - component: {fileID: 1329965646398406631}
+  - component: {fileID: 43302676151590303}
   m_Layer: 0
   m_Name: Text
   m_TagString: Untagged
@@ -291,7 +292,7 @@ MonoBehaviour:
   m_FontData:
     m_Font: {fileID: 12800000, guid: 32e9b6df16a199446a5b7cf317716e39, type: 3}
     m_FontSize: 48
-    m_FontStyle: 0
+    m_FontStyle: 1
     m_BestFit: 0
     m_MinSize: 10
     m_MaxSize: 121
@@ -302,6 +303,20 @@ MonoBehaviour:
     m_VerticalOverflow: 0
     m_LineSpacing: 1
   m_Text: Finish Early & Claim 80%
+--- !u!114 &43302676151590303
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1473941259784692578}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 31457150c8eaef7498c8612bbd8541b7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  statusEnum: 8
+  key: 19
 --- !u!1 &3878996976726512823
 GameObject:
   m_ObjectHideFlags: 0
@@ -390,6 +405,7 @@ GameObject:
   - component: {fileID: 2210914066131890947}
   - component: {fileID: 6726494719937284502}
   - component: {fileID: 5068767493175799375}
+  - component: {fileID: 4757057003627152652}
   m_Layer: 5
   m_Name: Text
   m_TagString: Untagged
@@ -447,7 +463,7 @@ MonoBehaviour:
   m_FontData:
     m_Font: {fileID: 12800000, guid: 32e9b6df16a199446a5b7cf317716e39, type: 3}
     m_FontSize: 46
-    m_FontStyle: 0
+    m_FontStyle: 1
     m_BestFit: 0
     m_MinSize: 0
     m_MaxSize: 300
@@ -458,6 +474,20 @@ MonoBehaviour:
     m_VerticalOverflow: 0
     m_LineSpacing: 1
   m_Text: Continue
+--- !u!114 &4757057003627152652
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5435944259730901873}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 31457150c8eaef7498c8612bbd8541b7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  statusEnum: 8
+  key: 10
 --- !u!1 &5476693243411828760
 GameObject:
   m_ObjectHideFlags: 0
@@ -1249,6 +1279,7 @@ GameObject:
   - component: {fileID: 556155846586918198}
   - component: {fileID: 369921490697409935}
   - component: {fileID: 9089838794750392990}
+  - component: {fileID: 7981561592674253033}
   m_Layer: 5
   m_Name: Coin_Text
   m_TagString: Untagged
@@ -1306,7 +1337,7 @@ MonoBehaviour:
   m_FontData:
     m_Font: {fileID: 12800000, guid: 32e9b6df16a199446a5b7cf317716e39, type: 3}
     m_FontSize: 46
-    m_FontStyle: 0
+    m_FontStyle: 1
     m_BestFit: 0
     m_MinSize: 3
     m_MaxSize: 47
@@ -1317,3 +1348,17 @@ MonoBehaviour:
     m_VerticalOverflow: 0
     m_LineSpacing: 1
   m_Text: Finish
+--- !u!114 &7981561592674253033
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8987010711475917144}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 31457150c8eaef7498c8612bbd8541b7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  statusEnum: 8
+  key: 20

@@ -16,7 +16,7 @@ public class NonePlayPanel : MonoBehaviour
     [SerializeField] List<Button> btnList = new List<Button>();
     [SerializeField] DiceWarUIController diceWarUIController;
 
-    private AreaData selectAreaData;
+	private AreaData selectAreaData;
 
     public UnityAction<InGameButtonStatus> skillBtnClickEventOn = data => { };
 
@@ -233,7 +233,10 @@ public class NonePlayPanel : MonoBehaviour
         else
         {
 			stashCanvasGroup.alpha = 1;
-            stashText.text = $"Stash : {stashCount}";
+
+			string stashTextStr = LocalizeManager.Instance.GetStrData( LocalizeStatus.Game, 38);
+
+			stashText.text = $"{stashTextStr} : {stashCount}";
         }
     }
 

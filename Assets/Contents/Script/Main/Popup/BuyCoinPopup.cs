@@ -47,7 +47,7 @@ public class BuyCoinPopup : MonoBehaviour
     {
         int addCoin = index == 0 ? 10 : 30;
 
-        DataManager.Instance.AddCoin(addCoin);
+        DataManager.Instance.AddCoin(0,addCoin);
     }
 
     public void WatchAdsOn()

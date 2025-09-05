@@ -34,8 +34,18 @@ public class LoadingController : MonoBehaviour
 
     private float aiStartTime = 15;
 
-    //private MapCreateRequestOn mapCreateRequestOn;
-    private void Awake()
+    public enum LoadingStatus
+    {
+        None,
+        FindingPlayers,
+		MatchingComplated,
+		Loading,
+	}
+
+    public LoadingStatus loadingStatus = LoadingStatus.Loading;
+
+	//private MapCreateRequestOn mapCreateRequestOn;
+	private void Awake()
     {
         SetEvent();
         //SetData(true);
@@ -185,7 +195,7 @@ public class LoadingController : MonoBehaviour
 
     public async UniTask FindingPlayerOn()
     {
-        SetTitle("Finding Players...");
+		SetStatus(LoadingStatus.FindingPlayers);
 
         DataManager.Instance.SetOffLinePlayerCnt(0);
 
@@ -237,7 +247,7 @@ public class LoadingController : MonoBehaviour
 
         matchngComplatedOn = true;
 
-        SetTitle("Matching Complated");
+		SetStatus(LoadingStatus.MatchingComplated);
 
         Observable
                 .Timer(TimeSpan.FromSeconds(1))
@@ -254,9 +264,9 @@ public class LoadingController : MonoBehaviour
 
         loadClearOn = true;
 
-        SetTitle("Loading..");
+        SetStatus(LoadingStatus.Loading);
 
-        if (DataManager.Instance.isMultiOn)
+		if (DataManager.Instance.isMultiOn)
         {
             //오너 플레이어 라면 맵 생성 진행 ( 1명이 맵을 생성후 배포 한다 )
             if (DataManager.Instance.isOwner)
@@ -275,6 +285,24 @@ public class LoadingController : MonoBehaviour
             GameSceneLoadOn();
         }
     }
+
+    public void SetStatus(LoadingStatus loadingStatus)
+    {
+        this.loadingStatus = loadingStatus;
+
+        int key = 0;
+
+        switch (this.loadingStatus)
+		{
+            case LoadingStatus.FindingPlayers:      key = 0; break;
+			case LoadingStatus.MatchingComplated:   key = 1; break;
+			case LoadingStatus.Loading:             key = 2; break;
+		}
+
+		string resultStr = LocalizeManager.Instance.GetStrData(LocalizeStatus.Loading, key);
+
+		SetTitle(resultStr);
+	}
 
     private void GameSceneLoadOn()
     {

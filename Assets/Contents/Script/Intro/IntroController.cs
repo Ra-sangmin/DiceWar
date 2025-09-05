@@ -1,3 +1,5 @@
+using AppleAuth.Enums;
+using AppleAuth;
 using Assets.SimpleSignIn.Google.Scripts;
 using Cysharp.Threading.Tasks;
 using System;
@@ -7,33 +9,35 @@ using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Networking;
 using UnityEngine.SceneManagement;
+using AppleAuth.Native;
 
 public class IntroController : MonoBehaviour
 {
 	[SerializeField] Transform reporter;
 
+	[SerializeField] AppleLogin appleLogin;
+
 	public GoogleAuth GoogleAuth;
 
-    private int snsType = 0;
-
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+	// Start is called once before the first execution of Update after the MonoBehaviour is created
+	void Start()
     {
-        DataManager.Instance.userData = null;
+		PopupManager.Instance.SetCanvasParant(transform);
+
+		DataManager.Instance.userData = null;
 
         GoogleAuth = new GoogleAuth();
-
-        //StartCoroutine(PostRequest());
-        //SignOut();
 
         SoundManager.Instance.PlayBGM(BGMEnum.Intro);
 
 #if TEST
 		reporter.gameObject.SetActive(true);
 #endif
+
+		appleLogin.gameObject.SetActive(AppleAuthManager.IsCurrentPlatformSupported);
 	}
 
-    public void SignOut()
+	public void SignOut()
     {
         GoogleAuth.SignOut(revokeAccessToken: true);
     }
@@ -60,7 +64,12 @@ public class IntroController : MonoBehaviour
         }
     }
 
-    private void OnGetTokenResponse(bool success, string error, TokenResponse tokenResponse)
+    public void AppleLogin()
+    {
+		appleLogin.SigninWithApple(data => LoginClear(data));
+	}
+
+	private void OnGetTokenResponse(bool success, string error, TokenResponse tokenResponse)
     {
         if (!success) return;
 
@@ -68,16 +77,22 @@ public class IntroController : MonoBehaviour
 
         var userInfo = JsonUtility.FromJson<UserInfo>(jwt.Payload);
 
-        LoginClear(userInfo);
+        UserData userData = new UserData()
+        {
+			email = userInfo.email,
+			snsType = 0,
+		};
+
+		LoginClear(userData);
     }
 
-    private void LoginClear(UserInfo userInfo)
+    private void LoginClear(UserData tempUserData)
     {
 		UserDataRequest request = new UserDataRequest()
         {
             requestStatus = 0,
-            email = userInfo.email,
-            snsType = snsType,
+            email = tempUserData.email,
+            snsType = tempUserData.snsType,
             successOn = ResultData =>
             {
                 UserDataRespons userData = (ResultData as UserDataRespons);
@@ -90,4 +105,14 @@ public class IntroController : MonoBehaviour
 
         request.RequestOn().Forget();
     }
+
+	public void SettingPopupOn()
+	{
+		PopupManager.Instance.MainSettingPopupOn();
+	}
+
+	public void InfoPopupOn()
+	{
+		PopupManager.Instance.MainInfoPopupOn();
+	}
 }

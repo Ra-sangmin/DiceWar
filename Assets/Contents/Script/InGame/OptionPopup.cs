@@ -2,19 +2,24 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UniRx;
 using static GameResultPopup;
 
 public class OptionPopup : MonoBehaviour
 {
     [SerializeField] Button restartBtn;
 	[SerializeField] VerticalLayoutGroup vlg;
+	[SerializeField] PlayCoinBtn playCoinBtn;
+
 	private InGameControllerBase inGameController;
 
     // Start is called before the first frame update
     void Start()
     {
-        
-    }
+		DataManager.Instance.userData.myCoin
+		    .Subscribe(_ => playCoinBtn.SetNeedCoinCheck())
+		    .AddTo(gameObject);
+	}
 
     // Update is called once per frame
     void Update()

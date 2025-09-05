@@ -1,5 +1,12 @@
 {
   "dependencies": {
+    "com.cherrydev.awesomeattributes": {
+      "version": "https://github.com/OlegVishnivetsky/awesome-attributes.git?path=/Assets/Plugins/AwesomeAttributes",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {},
+      "hash": "aeada00321449c3580d0f67bd653a6daa38c7356"
+    },
     "com.cysharp.unitask": {
       "version": "https://github.com/Cysharp/UniTask.git?path=src/UniTask/Assets/Plugins/UniTask",
       "depth": 0,

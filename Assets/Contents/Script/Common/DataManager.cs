@@ -129,7 +129,7 @@ public class DataManager : MonoSingleton<DataManager>
         data.coin = 100;
 #endif
 
-		userData = new UserData(data.email, data.snsType, data.coin);
+		userData = new UserData(data.email, data.snsType, data.freeCoin , data.chargeCoin);
     }
 
     public void InitMapData()
@@ -720,14 +720,14 @@ public class DataManager : MonoSingleton<DataManager>
 		AddCoin(-GetNeedCoin());
 	}
 
-	public void AddCoin(int addCoin)
+	public void AddCoin(int freeCoin, int chargeCoin = 0)
     {
         if (userData == null)
         {
             return;
         }
 
-        userData.myCoin.Value += addCoin;
+        userData.AddCoin(freeCoin, chargeCoin);
 
 		if (string.IsNullOrEmpty(userData.email) == false ) 
         {
@@ -735,8 +735,9 @@ public class DataManager : MonoSingleton<DataManager>
             {
                 requestStatus = 1,
                 email = userData.email,
-                coin = userData.myCoin.Value,
-                successOn = ResultData => { }
+                freeCoin = userData.freeCoin,
+				chargeCoin = userData.chargeCoin,
+				successOn = ResultData => { }
             };
 
             request.RequestOn().Forget();
@@ -1100,17 +1101,3 @@ public class MapData
     }
 }
 
-public class UserData
-{
-    public string email = string.Empty;
-    public int snsType = 0;
-    public ReactiveProperty<int> myCoin = new ReactiveProperty<int>(0);
-
-    public UserData() { }
-    public UserData(string email, int snsType , int coin) 
-    {
-        this.email = email;
-        this.snsType = snsType;
-        this.myCoin.Value = coin;
-    }
-}

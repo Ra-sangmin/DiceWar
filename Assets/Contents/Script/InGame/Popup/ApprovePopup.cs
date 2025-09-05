@@ -57,7 +57,9 @@ public class ApprovePopup : MonoBehaviour
 	{
 		PlayerToggleIcon.SetPlayerData(landTradeRequest.fromPlayerEnum);
 
-		string tradeTextValue = landTradeRequest.buyOn ? "Buy land" : "Sell land";
+		int key = landTradeRequest.buyOn ? 25 : 26;
+
+		string tradeTextValue = LocalizeManager.Instance.GetStrData(LocalizeStatus.Game, key);
 
 		tradeText.text = tradeTextValue;
 

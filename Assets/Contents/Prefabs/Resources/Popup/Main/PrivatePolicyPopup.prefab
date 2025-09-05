@@ -57,7 +57,7 @@ MonoBehaviour:
     m_Left: 0
     m_Right: 0
     m_Top: 48
-    m_Bottom: 0
+    m_Bottom: 50
   m_ChildAlignment: 1
   m_Spacing: 42.5
   m_ChildForceExpandWidth: 0
@@ -829,8 +829,9 @@ GameObject:
   - component: {fileID: 6670786847114241272}
   - component: {fileID: 8743727596226026809}
   - component: {fileID: 7938610797069747500}
+  - component: {fileID: 183811219849199038}
   m_Layer: 0
-  m_Name: Text (1)
+  m_Name: TitleText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -886,7 +887,7 @@ MonoBehaviour:
   m_FontData:
     m_Font: {fileID: 12800000, guid: 32e9b6df16a199446a5b7cf317716e39, type: 3}
     m_FontSize: 63
-    m_FontStyle: 0
+    m_FontStyle: 1
     m_BestFit: 0
     m_MinSize: 10
     m_MaxSize: 65
@@ -897,6 +898,20 @@ MonoBehaviour:
     m_VerticalOverflow: 0
     m_LineSpacing: 1
   m_Text: Private Policy
+--- !u!114 &183811219849199038
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6191539013421917642}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 31457150c8eaef7498c8612bbd8541b7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  statusEnum: 4
+  key: 3
 --- !u!1 &6285744425853948137
 GameObject:
   m_ObjectHideFlags: 0
@@ -983,8 +998,9 @@ GameObject:
   - component: {fileID: 7788200271387771753}
   - component: {fileID: 6479610174153172341}
   - component: {fileID: 4381974487683455599}
+  - component: {fileID: 8811060209511830669}
   m_Layer: 0
-  m_Name: Text (1)
+  m_Name: ContentsText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1004,10 +1020,10 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 186448699715555734}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 1245, y: 1200}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 814, y: -190.5}
+  m_SizeDelta: {x: 1245, y: 0}
   m_Pivot: {x: 0.5, y: 1}
 --- !u!222 &6479610174153172341
 CanvasRenderer:
@@ -1040,7 +1056,7 @@ MonoBehaviour:
   m_FontData:
     m_Font: {fileID: 12800000, guid: 2fcf490d2f6bdf540a00ab4aee074bbc, type: 3}
     m_FontSize: 38
-    m_FontStyle: 0
+    m_FontStyle: 1
     m_BestFit: 0
     m_MinSize: 3
     m_MaxSize: 300
@@ -1050,64 +1066,21 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 0.88
-  m_Text: "Jaedong Kim built the Dice and Deal game as a Commercial game. This SERVICE
-    is provided by Jaedong Kim and is intended for use as is.\r\n\r\nThis page is
-    used to inform visitors regarding my policies with the collection, use, and disclosure
-    of Personal Information if anyone decided to use my Service.\r\n\r\nIf you choose
-    to use my Service, then you agree to the collection and use of information in
-    relation to this policy. The Personal Information that I collect is used for
-    providing and improving the Service. I will not use or share your information
-    with anyone except as described in this Privacy Policy.\r\n\r\nThe terms used
-    in this Privacy Policy have the same meanings as in our Terms and Conditions,
-    which is accessible at Dice and Deal unless otherwise defined in this Privacy
-    Policy.\r\n\r\nInformation Collection and Use\r\n\r\nFor a better experience,
-    while using our Service, I may require you to provide us with certain personally
-    identifiable information. The information that I request will be retained on
-    your device and is not collected by me in any way.\r\n\r\nThe game does use third
-    party services that may collect information used to identify you.\r\n\r\nLink
-    to privacy policy of third party service providers used by the game\r\n\r\nGoogle
-    Play Services\r\nLog Data\r\n\r\nI want to inform you that whenever you use my
-    Service, in a case of an error in the game I collect data and information (through
-    third party products) on your phone called Log Data. This Log Data may include
-    information such as your device Internet Protocol (\u201CIP\u201D) address, device
-    name, operating system version, the configuration of the game when utilizing
-    my Service, the time and date of your use of the Service, and other statistics.\r\n\r\nCookies\r\n\r\nCookies
-    are files with a small amount of data that are commonly used as anonymous unique
-    identifiers. These are sent to your browser from the websites that you visit
-    and are stored on your device's internal memory.\r\n\r\nThis Service does not
-    use these \u201Ccookies\u201D explicitly. However, the game may use third party
-    code and libraries that use \u201Ccookies\u201D to collect information and improve
-    their services. You have the option to either accept or refuse these cookies
-    and know when a cookie is being sent to your device. If you choose to refuse
-    our cookies, you may not be able to use some portions of this Service.\r\n\r\nService
-    Providers\r\n\r\nI may employ third-party companies and individuals due to the
-    following reasons:\r\n\r\nTo facilitate our Service;\r\nTo provide the Service
-    on our behalf;\r\nTo perform Service-related services; or\r\nTo assist us in
-    analyzing how our Service is used.\r\nI want to inform users of this Service
-    that these third parties have access to your Personal Information. The reason
-    is to perform the tasks assigned to them on our behalf. However, they are obligated
-    not to disclose or use the information for any other purpose.\r\n\r\nSecurity\r\n\r\nI
-    value your trust in providing us your Personal Information, thus we are striving
-    to use commercially acceptable means of protecting it. But remember that no method
-    of transmission over the internet, or method of electronic storage is 100% secure
-    and reliable, and I cannot guarantee its absolute security.\r\n\r\nLinks to Other
-    Sites\r\n\r\nThis Service may contain links to other sites. If you click on a
-    third-party link, you will be directed to that site. Note that these external
-    sites are not operated by me. Therefore, I strongly advise you to review the
-    Privacy Policy of these websites. I have no control over and assume no responsibility
-    for the content, privacy policies, or practices of any third-party sites or services.\r\n\r\nChildren\u2019s
-    Privacy\r\n\r\nThese Services do not address anyone under the age of 13. I do
-    not knowingly collect personally identifiable information from children under
-    13. In the case I discover that a child under 13 has provided me with personal
-    information, I immediately delete this from our servers. If you are a parent
-    or guardian and you are aware that your child has provided us with personal information,
-    please contact me so that I will be able to do necessary actions.\r\n\r\nChanges
-    to This Privacy Policy\r\n\r\nI may update our Privacy Policy from time to time.
-    Thus, you are advised to review this page periodically for any changes. I will
-    notify you of any changes by posting the new Privacy Policy on this page. These
-    changes are effective immediately after they are posted on this page.\r\n\r\nContact
-    Us\r\n\r\nIf you have any questions or suggestions about my Privacy Policy, do
-    not hesitate to contact me at wyeth123@naver.com."
+  m_Text: 
+--- !u!114 &8811060209511830669
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6868617772015802750}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3245ec927659c4140ac4f8d17403cc18, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_HorizontalFit: 0
+  m_VerticalFit: 2
 --- !u!1 &8044520799846819657
 GameObject:
   m_ObjectHideFlags: 0
@@ -1193,3 +1166,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 78e4920ebf0dff24b925d02ec332c097, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  contentsText: {fileID: 4381974487683455599}

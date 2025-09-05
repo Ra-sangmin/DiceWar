@@ -1,18 +1,37 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class PrivatePolicyPopup : MonoBehaviour
 {
-    // Start is called before the first frame update
-    void Start()
+    [SerializeField] Text contentsText;
+
+    private string krStr = string.Empty;
+	private string enStr = string.Empty;
+
+	// Start is called before the first frame update
+	void Start()
+    {
+        SetStr();
+        SetContentsText();
+	}
+
+    void SetStr()
+    {
+        krStr = "김재동은 주사위와 거래 게임을 상업용 게임으로 만들었습니다. 이 서비스는 김재동이 제공하며, 그대로 사용하기 위한 것입니다.\r\n\r\n이 페이지는 방문자에게 제 서비스를 이용하기로 결정한 경우 개인정보 수집, 사용 및 공개 정책에 대해 알려주는 데 사용됩니다.\r\n\r\n제 서비스를 이용하기로 선택하면 이 정책과 관련된 정보 수집 및 사용에 동의하게 됩니다. 제가 수집한 개인정보는 서비스 제공 및 개선에 사용됩니다. 저는 이 개인정보 보호정책에 명시된 경우를 제외하고는 귀하의 정보를 누구와도 사용하거나 공유하지 않습니다.\r\n\r\n이 개인정보 보호정책에서 사용되는 용어는 본 개인정보 보호정책에 달리 정의되지 않는 한 Dice and Deal에서 이용할 수 있는 약관과 동일한 의미를 갖습니다.\r\n\r\n정보 수집 및 사용\r\n\r\n더 나은 경험을 위해, 저희 서비스를 이용하는 동안 특정 개인 식별 정보를 제공해 주시기 바랍니다. 제가 요청하는 정보는 귀하의 기기에 보관되며, 어떠한 방식으로도 제가 수집하지 않습니다.\r\n\r\n이 게임은 사용자를 식별하는 데 사용되는 정보를 수집할 수 있는 타사 서비스를 사용합니다.\r\n\r\n게임에서 사용하는 타사 서비스 제공업체의 개인정보 보호 정책 링크\r\n\r\nGoogle 플레이 서비스\r\n로그 데이터\r\n\r\n제 서비스를 사용할 때마다 게임에서 오류가 발생할 경우, 저는 귀하의 휴대폰에서 로그 데이터라는 제3자 제품을 통해 데이터와 정보를 수집합니다. 이 로그 데이터에는 귀하의 기기 인터넷 프로토콜(IP) 주소, 기기 이름, 운영 체제 버전, 제 서비스를 사용할 때의 게임 구성, 서비스 이용 시간과 날짜 및 기타 통계와 같은 정보가 포함될 수 있습니다.\r\n\r\n쿠키\r\n\r\n쿠키는 일반적으로 익명의 고유 식별자로 사용되는 소량의 데이터가 포함된 파일입니다. 이러한 파일은 방문한 웹사이트에서 브라우저로 전송되며 장치의 내부 메모리에 저장됩니다.\r\n\r\n이 서비스는 이러한 \"쿠키\"를 명시적으로 사용하지 않습니다. 그러나 게임은 정보를 수집하고 서비스를 개선하기 위해 \"쿠키\"를 사용하는 타사 코드와 라이브러리를 사용할 수 있습니다. 이러한 쿠키를 수락하거나 거부하고 쿠키가 기기로 전송되는 시기를 알 수 있는 옵션이 있습니다. 쿠키를 거부하기로 선택하면 이 서비스의 일부를 사용할 수 없을 수도 있습니다.\r\n\r\n서비스 제공업체\r\n\r\n다음과 같은 이유로 타사 회사와 개인을 고용할 수 있습니다:\r\n\r\n서비스를 원활하게 제공하기 위해;\r\n우리를 대신하여 서비스를 제공하기 위해;\r\n서비스 관련 서비스를 수행하려면; 또는\r\n저희 서비스가 어떻게 사용되는지 분석하는 데 도움을 드리기 위해.\n이 서비스의 사용자에게 이 제3자가 귀하의 개인 정보에 액세스할 수 있음을 알리고 싶습니다. 그 이유는 당사를 대신하여 할당된 작업을 수행하기 위해서입니다.그러나 그들은 정보를 공개하거나 다른 목적으로 사용해서는 안 됩니다.\n\r\n보안\r\n\r\n귀하의 개인정보 제공에 대한 신뢰를 높이 평가하며, 따라서 저희는 상업적으로 허용 가능한 보호 수단을 사용하기 위해 노력하고 있습니다. 그러나 인터넷을 통한 전송 방법이나 전자 저장 방법이 100% 안전하고 신뢰할 수 있는 방법은 없으며, 절대적인 보안을 보장할 수는 없습니다.\n\r\n다른 사이트 링크\r\n\r\n이 서비스에는 다른 사이트로의 링크가 포함될 수 있습니다. 타사 링크를 클릭하면 해당 사이트로 이동합니다. 이러한 외부 사이트는 제가 운영하지 않습니다. 따라서 이러한 웹사이트의 개인정보 보호정책을 검토할 것을 강력히 권장합니다. 저는 타사 사이트나 서비스의 콘텐츠, 개인정보 보호정책 또는 관행에 대해 아무런 통제권이 없으며 책임을 지지 않습니다.\n\n\r\n어린이 프라이버시\r\n\r\n이 서비스는 13세 미만의 누구에게도 제공되지 않습니다. 저는 13세 미만의 어린이로부터 고의로 개인 식별 가능한 정보를 수집하지 않습니다. 13세 미만의 어린이가 개인 정보를 제공한 것을 발견한 경우, 저는 즉시 서버에서 이 정보를 삭제합니다. 부모 또는 보호자로서 자녀가 개인 정보를 제공한 것을 알고 있다면, 필요한 조치를 취할 수 있도록 저에게 연락해 주세요\r\n이 개인정보 보호 정책의 변경 사항\r\n\r\n개인정보 보호정책을 수시로 업데이트할 수 있습니다. 따라서 이 페이지에서 변경 사항이 있는지 주기적으로 검토하는 것이 좋습니다. 변경 사항이 있으면 이 페이지에 새로운 개인정보 보호정책을 게시하여 알려드리겠습니다. 이러한 변경 사항은 이 페이지에 게시된 즉시 적용됩니다.\r\n\r\n연락 주세요\r\n\r\n제 개인정보 보호정책에 대해 궁금한 점이나 제안이 있으시면 주저하지 말고 wyeth123@naver.com 으로 연락해 주세요.";
+        enStr = "Jaedong Kim built the Dice and Deal game as a Commercial game. This SERVICE is provided by Jaedong Kim and is intended for use as is.\r\n\r\nThis page is used to inform visitors regarding my policies with the collection, use, and disclosure of Personal Information if anyone decided to use my Service.\r\n\r\nIf you choose to use my Service, then you agree to the collection and use of information in relation to this policy. The Personal Information that I collect is used for providing and improving the Service. I will not use or share your information with anyone except as described in this Privacy Policy.\r\n\r\nThe terms used in this Privacy Policy have the same meanings as in our Terms and Conditions, which is accessible at Dice and Deal unless otherwise defined in this Privacy Policy.\r\n\r\nInformation Collection and Use\r\n\r\nFor a better experience, while using our Service, I may require you to provide us with certain personally identifiable information. The information that I request will be retained on your device and is not collected by me in any way.\r\n\r\nThe game does use third party services that may collect information used to identify you.\r\n\r\nLink to privacy policy of third party service providers used by the game\r\n\r\nGoogle Play Services\r\nLog Data\r\n\r\nI want to inform you that whenever you use my Service, in a case of an error in the game I collect data and information (through third party products) on your phone called Log Data. This Log Data may include information such as your device Internet Protocol (“IP”) address, device name, operating system version, the configuration of the game when utilizing my Service, the time and date of your use of the Service, and other statistics.\r\n\r\nCookies\r\n\r\nCookies are files with a small amount of data that are commonly used as anonymous unique identifiers. These are sent to your browser from the websites that you visit and are stored on your device's internal memory.\r\n\r\nThis Service does not use these “cookies” explicitly. However, the game may use third party code and libraries that use “cookies” to collect information and improve their services. You have the option to either accept or refuse these cookies and know when a cookie is being sent to your device. If you choose to refuse our cookies, you may not be able to use some portions of this Service.\r\n\r\nService Providers\r\n\r\nI may employ third-party companies and individuals due to the following reasons:\r\n\r\nTo facilitate our Service;\r\nTo provide the Service on our behalf;\r\nTo perform Service-related services; or\r\nTo assist us in analyzing how our Service is used.\r\nI want to inform users of this Service that these third parties have access to your Personal Information. The reason is to perform the tasks assigned to them on our behalf. However, they are obligated not to disclose or use the information for any other purpose.\r\n\r\nSecurity\r\n\r\nI value your trust in providing us your Personal Information, thus we are striving to use commercially acceptable means of protecting it. But remember that no method of transmission over the internet, or method of electronic storage is 100% secure and reliable, and I cannot guarantee its absolute security.\r\n\r\nLinks to Other Sites\r\n\r\nThis Service may contain links to other sites. If you click on a third-party link, you will be directed to that site. Note that these external sites are not operated by me. Therefore, I strongly advise you to review the Privacy Policy of these websites. I have no control over and assume no responsibility for the content, privacy policies, or practices of any third-party sites or services.\r\n\r\nChildren’s Privacy\r\n\r\nThese Services do not address anyone under the age of 13. I do not knowingly collect personally identifiable information from children under 13. In the case I discover that a child under 13 has provided me with personal information, I immediately delete this from our servers. If you are a parent or guardian and you are aware that your child has provided us with personal information, please contact me so that I will be able to do necessary actions.\r\n\r\nChanges to This Privacy Policy\r\n\r\nI may update our Privacy Policy from time to time. Thus, you are advised to review this page periodically for any changes. I will notify you of any changes by posting the new Privacy Policy on this page. These changes are effective immediately after they are posted on this page.\r\n\r\nContact Us\r\n\r\nIf you have any questions or suggestions about my Privacy Policy, do not hesitate to contact me at wyeth123@naver.com.";
+	}
+
+	// Update is called once per frame
+	void Update()
     {
         
     }
 
-    // Update is called once per frame
-    void Update()
+    public void SetContentsText()
     {
-        
-    }
+        string text = LocalizeManager.Instance.language.Value == SystemLanguage.Korean ? krStr : enStr;
+		contentsText.text = text;
+	}
 }

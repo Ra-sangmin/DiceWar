@@ -5,12 +5,11 @@ using UnityEngine.UI;
 
 public class InGameBottomController : MonoBehaviour
 {
-    [SerializeField] RectTransform mapSelectPanel;
-	[SerializeField] Text needCoinText;
+    public MapSelectPanel mapSelectPanel;
 	public NonePlayPanel nonePlayPanel;
-
-    // 0 = 맵 선택 , 1 = 튜토리얼 , 2 = 게임 시작
-    public int status = 0;
+	
+	// 0 = 맵 선택 , 1 = 튜토리얼 , 2 = 게임 시작
+	public int status = 0;
 
     // Start is called before the first frame update
     void Start()
@@ -28,7 +27,8 @@ public class InGameBottomController : MonoBehaviour
         {
             case 0:
                 mapSelectPanel.gameObject.SetActive(true);
-                break;
+				mapSelectPanel.SetData();
+				break;
             case 1:
                 nonePlayPanel.gameObject.SetActive(true);
                 nonePlayPanel.SetData();

@@ -4,14 +4,8 @@ using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
 using UniRx;
-using Unity.VisualScripting;
 using Unity.Mathematics;
 using UnityEngine.SceneManagement;
-using System;
-using System.Linq;
-using System.Reflection;
-using static Unity.Burst.Intrinsics.Arm;
-using static GameResultPopup;
 
 public class PlaySetPopup : MonoBehaviour
 {
@@ -111,7 +105,7 @@ public class PlaySetPopup : MonoBehaviour
     }
     private void AIToggleChangeOn(int index)
     {
-		SoundManager.Instance.PlaySe(SeEnum.Yes);
+		//SoundManager.Instance.PlaySe(SeEnum.Yes);
 
 		AILevel aiLevel = (AILevel)(index);
 
@@ -163,7 +157,7 @@ public class PlaySetPopup : MonoBehaviour
 
 	private void MapSizeToggleChangeOn(int index)
     {
-		SoundManager.Instance.PlaySe(SeEnum.Yes);
+		//SoundManager.Instance.PlaySe(SeEnum.Yes);
 
 		MapSizeEnum mapSizeEnum = (MapSizeEnum)index;
 
@@ -203,7 +197,7 @@ public class PlaySetPopup : MonoBehaviour
 
     private void PlayersCountToggleChangeOn(int index)
     {
-		SoundManager.Instance.PlaySe(SeEnum.Yes);
+		//SoundManager.Instance.PlaySe(SeEnum.Yes);
 
 		int playerMaxCnt = index + 2;
 

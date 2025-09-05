@@ -3,18 +3,15 @@ using UniRx;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using UniRx;
 
 public class GameResultPopup : MonoBehaviour
 {
     [SerializeField] Text titleText;
     [SerializeField] Text coinText;
-    //[SerializeField] RectTransform needCoinTextPanel;
-    //[SerializeField] Text needCoinText;
+	[SerializeField] PlayCoinBtn playCoinBtn;
 
-    //[SerializeField] RewardedAdsButton rewardedAdsButton;
-    //[SerializeField] RectTransform playButton;
-
-    private InGameControllerBase inGameController;
+	private InGameControllerBase inGameController;
     private GameResultEnum gameResultEnum;
 
     public enum GameResultEnum
@@ -29,7 +26,9 @@ public class GameResultPopup : MonoBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-		//AdsManager.Instance.SetRewardedAdsButton(rewardedAdsButton);
+		DataManager.Instance.userData.myCoin
+	        .Subscribe(_ => playCoinBtn.SetNeedCoinCheck())
+	        .AddTo(gameObject);
 	}
 
     // Update is called once per frame
@@ -43,17 +42,19 @@ public class GameResultPopup : MonoBehaviour
         this.inGameController = inGameController;
         this.gameResultEnum = gameResultEnum;
 
-        string titleTextStr = string.Empty;
+        int key = 0;
 
         switch (gameResultEnum)
         {
-            case GameResultEnum.Win: titleTextStr = "You Win"; break;
-			case GameResultEnum.Lose: titleTextStr = "You Lose"; break;
-			case GameResultEnum.GiveUp: titleTextStr = "Give Up"; break;
-			case GameResultEnum.LeaveEarly: titleTextStr = "Leave Early"; break;
+            case GameResultEnum.Win:        key = 16; break;
+			case GameResultEnum.Lose:       key = 17; break;
+			case GameResultEnum.GiveUp:     key = 11; break;
+			case GameResultEnum.LeaveEarly: key = 18; break;
 		}
 
-        titleText.text = titleTextStr;
+		string titleTextStr = LocalizeManager.Instance.GetStrData(LocalizeStatus.Game, key);
+
+		titleText.text = titleTextStr;
 
         DataManager.Instance.AddCoin(coinCount);
 
@@ -66,38 +67,7 @@ public class GameResultPopup : MonoBehaviour
                 .Repeat()
                 .Subscribe(_ => ServerManager.Instance.GameOutRequestOn())
                 .AddTo(this);
-
-  //      SetNeedCoinCheck();
-
-		//DataManager.Instance.userData.myCoin
-	 //       .Subscribe(_ => SetNeedCoinCheck())
-	 //       .AddTo(gameObject);
-
 	}
-
-	//void SetNeedCoinCheck()
-	//{
-	//	int needCoin = DataManager.Instance.GetNeedCoin();
-
-	//	bool needCoinOn = DataManager.Instance.userData.myCoin.Value < needCoin;
-
-	//	//needCoinBG.gameObject.SetActive(needCoinOn);
-	//	playButton.gameObject.SetActive(!needCoinOn);
-
- //       needCoinText.transform.parent.gameObject.SetActive(needCoinOn);
-
- //       if (DataManager.Instance.aiLevel == AILevel.Easy)
- //       {
- //           needCoinTextPanel.gameObject.SetActive(false);
- //       }
- //       else
- //       {
- //           needCoinTextPanel.gameObject.SetActive(true);
- //           needCoinText.text = $"-{needCoin}";
- //       }
-
- //       //needCoinText.text = $"-{needCoin}";
-	//}
 
 	public void GoMainBtnClickOn()
     {

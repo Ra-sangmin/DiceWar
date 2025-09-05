@@ -153,6 +153,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   canvasGroup: {fileID: 8812088861125877704}
+  maxAlphaValue: 0.85
 --- !u!114 &2042073626559956300
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -244,6 +245,7 @@ GameObject:
   - component: {fileID: 5029073234058115032}
   - component: {fileID: 5458245372515822915}
   - component: {fileID: 6790265957182519617}
+  - component: {fileID: 8410380954477645586}
   m_Layer: 0
   m_Name: Text
   m_TagString: Untagged
@@ -301,7 +303,7 @@ MonoBehaviour:
   m_FontData:
     m_Font: {fileID: 12800000, guid: 32e9b6df16a199446a5b7cf317716e39, type: 3}
     m_FontSize: 64
-    m_FontStyle: 0
+    m_FontStyle: 1
     m_BestFit: 0
     m_MinSize: 10
     m_MaxSize: 121
@@ -312,6 +314,20 @@ MonoBehaviour:
     m_VerticalOverflow: 0
     m_LineSpacing: 1
   m_Text: YOUR TURN
+--- !u!114 &8410380954477645586
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6039670396654842282}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 31457150c8eaef7498c8612bbd8541b7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  statusEnum: 8
+  key: 4
 --- !u!1 &8023114752675367706
 GameObject:
   m_ObjectHideFlags: 0

@@ -1,17 +1,35 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class TeamOfConditionsPopup : MonoBehaviour
 {
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
+	[SerializeField] Text contentsText;
 
-    // Update is called once per frame
-    void Update()
+	private string krStr = string.Empty;
+	private string enStr = string.Empty;
+
+	// Start is called before the first frame update
+	void Start()
+    {
+		SetStr();
+		SetContentsText();
+	}
+	void SetStr()
+	{
+		krStr = "게임을 다운로드하거나 사용하면 이러한 용어가 자동으로 적용되므로 게임을 사용하기 전에 주의 깊게 읽어야 합니다. 게임, 게임의 일부 또는 상표를 복사하거나 수정할 수 없습니다. 게임의 소스 코드를 추출하거나 다른 언어로 번역하거나 파생 버전을 만들려고 시도해서는 안 됩니다. 게임 자체와 관련된 모든 상표, 저작권, 데이터베이스 권리 및 기타 지적 재산권은 여전히 김재동의 소유입니다.\r\n\r\nDice and Deal 게임은 귀하가 제공한 개인 데이터를 저장하고 처리하여 제 서비스를 제공합니다. 귀하의 휴대폰과 게임에 대한 접근 권한을 안전하게 유지하는 것은 귀하의 책임입니다. 따라서 귀하의 기기 공식 운영 체제에서 부과하는 소프트웨어 제한과 제한을 제거하는 과정인 탈옥이나 루팅을 하지 않는 것이 좋습니다. 이는 휴대폰이 악성 소프트웨어, 바이러스, 악성 프로그램에 취약하게 만들고 휴대폰의 보안 기능을 손상시킬 수 있으며, 이는 Dice and Deal 게임이 제대로 작동하지 않거나 전혀 작동하지 않는다는 것을 의미할 수 있습니다.\r\n\r\n김재동이 책임지지 않을 특정 사항이 있다는 점을 유의해야 합니다. 게임의 특정 기능에는 게임이 활성 인터넷 연결 상태여야 합니다. Wi-Fi 연결은 모바일 네트워크 제공업체에서 제공할 수 있지만, Wi-Fi에 액세스할 수 없고 데이터 허용량이 남아 있지 않은 경우 게임이 제대로 작동하지 않는 것에 대해 김재동이 책임질 수 없습니다.\n\n\r\nWi-Fi가 있는 지역 외에서 게임을 사용하는 경우 모바일 네트워크 제공업체와의 계약 조건이 계속 적용된다는 점을 기억해야 합니다. 따라서 게임에 액세스하는 동안 모바일 제공업체가 연결 기간 동안 데이터 비용이나 기타 타사 요금을 청구할 수 있습니다. 게임을 사용할 때, 데이터 로밍을 끄지 않고 자국 영토(예: 지역 또는 국가) 밖에서 게임을 사용하는 경우 로밍 데이터 요금을 포함한 모든 요금에 대한 책임을 집니다. 게임을 사용하는 기기의 요금 납부자가 아닌 경우, 게임 사용에 대한 요금 납부자의 허가를 받은 것으로 간주한다는 점을 유의하시기 바랍니다.\n\n\r\n같은 맥락에서, 김재동은 게임을 사용하는 방식에 대해 항상 책임을 질 수 없습니다. 즉, 기기가 배터리가 부족해서 서비스를 이용하기 위해 전원을 켤 수 없는 경우, 김재동은 책임을 질 수 없습니다.\r\n\r\n게임 사용에 대한 김재동의 책임과 관련하여, 게임을 사용할 때 항상 업데이트되고 올바르게 유지되도록 노력하고 있지만, 사용자가 정보를 제공할 수 있도록 제3자에게 의존하고 있다는 점을 명심하는 것이 중요합니다.\n김재동은 직접적이든 간접적이든 어떤 손실에 대해서도 책임을 지지 않습니다. 게임의 이 기능에 전적으로 의존한 결과로 경험하게 됩니다.\r\n\r\n언젠가는 게임을 업데이트하고 싶을 수도 있습니다. 이 게임은 현재 Android 및 iOS에서 이용 가능합니다. 두 시스템(및 추가 시스템에 대해 게임의 가용성을 연장하기로 결정한 경우)에 대한 요구 사항이 변경될 수 있으며, 게임을 계속 플레이하려면 업데이트를 다운로드해야 합니다. 김재동은 게임이 항상 업데이트되어 사용자와 관련이 있거나 사용자가 기기에 설치한 Android & iOS 버전과 함께 작동할 것이라고 약속하지 않습니다. 그러나 게임에 대한 업데이트가 제공될 때 항상 수락할 것을 약속하며, 게임 제공을 중단할 수도 있으며, 종료 통지 없이 언제든지 게임 사용을 종료할 수도 있습니다. 별도의 통지를 하지 않는 한, 종료 시 (a) 이 조건에 따라 부여된 권리와 라이선스는 종료됩니다; (b) 게임 사용을 중단해야 하며, 필요한 경우 기기에서 삭제해야 합니다\r\n이 약관의 변경 사항\r\n\r\n약관을 수시로 업데이트할 수 있습니다. 따라서 이 페이지에서 변경 사항이 있는지 주기적으로 검토하는 것이 좋습니다. 변경 사항이 있으면 이 페이지에 새로운 약관을 게시하여 알려드리겠습니다. 이러한 변경 사항은 이 페이지에 게시된 후 즉시 적용됩니다.\r\n\r\n연락 주세요\r\n\r\n제 이용 약관에 대해 궁금한 점이나 제안이 있으시면 주저하지 말고 wyeth123@naver.com 으로 연락해 주세요.";
+		enStr = "By downloading or using the game, these terms will automatically apply to you – you should make sure therefore that you read them carefully before using the game. You’re not allowed to copy, or modify the game, any part of the game, or our trademarks in any way. You’re not allowed to attempt to extract the source code of the game, and you also shouldn’t try to translate the game into other languages, or make derivative versions. The game itself, and all the trade marks, copyright, database rights and other intellectual property rights related to it, still belong to Jaedong Kim.\r\n\r\nThe Dice and Deal game stores and processes personal data that you have provided to us, in order to provide my Service. It’s your responsibility to keep your phone and access to the game secure. We therefore recommend that you do not jailbreak or root your phone, which is the process of removing software restrictions and limitations imposed by the official operating system of your device. It could make your phone vulnerable to malware/viruses/malicious programs, compromise your phone’s security features and it could mean that the Dice and Deal game won’t work properly or at all.\r\n\r\nYou should be aware that there are certain things that Jaedong Kim will not take responsibility for. Certain functions of the game will require the game to have an active internet connection. The connection can be Wi-Fi, or provided by your mobile network provider, but Jaedong Kim cannot take responsibility for the game not working at full functionality if you don’t have access to Wi-Fi, and you don’t have any of your data allowance left.\r\n\r\nIf you’re using the game outside of an area with Wi-Fi, you should remember that your terms of the agreement with your mobile network provider will still apply. As a result, you may be charged by your mobile provider for the cost of data for the duration of the connection while accessing the game, or other third party charges. In using the game, you’re accepting responsibility for any such charges, including roaming data charges if you use the game outside of your home territory (i.e. region or country) without turning off data roaming. If you are not the bill payer for the device on which you’re using the game, please be aware that we assume that you have received permission from the bill payer for using the game.\r\n\r\nAlong the same lines, Jaedong Kim cannot always take responsibility for the way you use the game i.e. You need to make sure that your device stays charged – if it runs out of battery and you can’t turn it on to avail the Service, Jaedong Kim cannot accept responsibility.\r\n\r\nWith respect to Jaedong Kim’s responsibility for your use of the game, when you’re using the game, it’s important to bear in mind that although we endeavour to ensure that it is updated and correct at all times, we do rely on third parties to provide information to us so that we can make it available to you. Jaedong Kim accepts no liability for any loss, direct or indirect, you experience as a result of relying wholly on this functionality of the game.\r\n\r\nAt some point, we may wish to update the game. The game is currently available on Android & iOS – the requirements for both systems (and for any additional systems we decide to extend the availability of the game to) may change, and you’ll need to download the updates if you want to keep playing the game. Jaedong Kim does not promise that it will always update the game so that it is relevant to you and/or works with the Android & iOS version that you have installed on your device. However, you promise to always accept updates to the game when offered to you, We may also wish to stop providing the game, and may terminate use of it at any time without giving notice of termination to you. Unless we tell you otherwise, upon any termination, (a) the rights and licenses granted to you in these terms will end; (b) you must stop using the game, and (if needed) delete it from your device.\r\n\r\nChanges to This Terms and Conditions\r\n\r\nI may update our Terms and Conditions from time to time. Thus, you are advised to review this page periodically for any changes. I will notify you of any changes by posting the new Terms and Conditions on this page. These changes are effective immediately after they are posted on this page.\r\n\r\nContact Us\r\n\r\nIf you have any questions or suggestions about my Terms and Conditions, do not hesitate to contact me at wyeth123@naver.com.";
+	}
+
+	public void SetContentsText()
+	{
+		string text = LocalizeManager.Instance.language.Value == SystemLanguage.Korean ? krStr : enStr;
+		contentsText.text = text;
+	}
+
+	// Update is called once per frame
+	void Update()
     {
         
     }

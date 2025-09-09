@@ -1,16 +1,17 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.Purchasing;
+using UnityEngine.Purchasing.Extension;
 
-public class IAPManager : MonoSingleton<IAPManager>, IStoreListener
+public class IAPManager : MonoSingleton<IAPManager>, IDetailedStoreListener
 {
     [Header("Product ID")]
-    public readonly string productId_test_id = "coin_add_10";
-    public readonly string productId_test_id2 = "coin_add_30";
+    private const string coin_add_10 = "coin_add_10";
+    private const string coin_add_30 = "coin_add_30";
 
     [Header("Cache")]
-    private IStoreController storeController; //±¸¸Å °úÁ¤À» Á¦¾îÇÏ´Â ÇÔ¼ö Á¦°øÀÚ
-    private IExtensionProvider storeExtensionProvider; //¿©·¯ ÇÃ·§ÆûÀ» À§ÇÑ È®Àå Ã³¸® Á¦°øÀÚ
+    private IStoreController storeController; //êµ¬ë§¤ ê³¼ì •ì„ ì œì–´í•˜ëŠ” í•¨ìˆ˜ ì œê³µì
+    private IExtensionProvider extensionProvider; //ì—¬ëŸ¬ í”Œë«í¼ì„ ìœ„í•œ í™•ì¥ ì²˜ë¦¬ ì œê³µì
 
     public bool initOn = false;
 
@@ -18,81 +19,74 @@ public class IAPManager : MonoSingleton<IAPManager>, IStoreListener
 
     private void Start()
     {
-        //InitUnityIAP(); //Start ¹®¿¡¼­ ÃÊ±âÈ­ ÇÊ¼ö
+        InitUnityIAP(); //Start ë¬¸ì—ì„œ ì´ˆê¸°í™” í•„ìˆ˜
     }
 
-    /* Unity IAP¸¦ ÃÊ±âÈ­ÇÏ´Â ÇÔ¼ö */
+    /* Unity IAPë¥¼ ì´ˆê¸°í™”í•˜ëŠ” í•¨ìˆ˜ */
     public void InitUnityIAP()
     {
-        initOn = true;
+		if (IsInitialized())
+			return;
 
-        ConfigurationBuilder builder = ConfigurationBuilder.Instance(StandardPurchasingModule.Instance());
+#if UNITY_IOS
+        var builder = ConfigurationBuilder.Instance(StandardPurchasingModule.Instance(AppStore.AppleAppStore));
+#elif UNITY_ANDROID
+		var builder = ConfigurationBuilder.Instance(StandardPurchasingModule.Instance());
+#endif
+		builder.AddProduct(coin_add_10, ProductType.Consumable);
+		builder.AddProduct(coin_add_30, ProductType.Consumable);
 
-        /* ±¸±Û ÇÃ·¹ÀÌ »óÇ°µé Ãß°¡ */
-        builder.AddProduct(productId_test_id, ProductType.Consumable, new IDs() { { productId_test_id, GooglePlay.Name } });
-        builder.AddProduct(productId_test_id2, ProductType.Consumable, new IDs() { { productId_test_id2, GooglePlay.Name } });
+		UnityPurchasing.Initialize(this, builder);
+	}
 
-        UnityPurchasing.Initialize(this, builder);
-    }
-
-    /* ±¸¸ÅÇÏ´Â ÇÔ¼ö */
-    public void Purchase(string productId)
-    {
-        Product product = storeController.products.WithID(productId); //»óÇ° Á¤ÀÇ
-
-        if (product != null && product.availableToPurchase) //»óÇ°ÀÌ Á¸ÀçÇÏ¸é¼­ ±¸¸Å °¡´ÉÇÏ¸é
-        {
-            storeController.InitiatePurchase(product); //±¸¸Å°¡ °¡´ÉÇÏ¸é ÁøÇà
-        }
-        else //»óÇ°ÀÌ Á¸ÀçÇÏÁö ¾Ê°Å³ª ±¸¸Å ºÒ°¡´ÉÇÏ¸é
-        {
-            Debug.Log("»óÇ°ÀÌ ¾ø°Å³ª ÇöÀç ±¸¸Å°¡ ºÒ°¡´ÉÇÕ´Ï´Ù");
-        }
-    }
+	private bool IsInitialized()
+	{
+		return storeController != null && extensionProvider != null;
+	}
 
     #region Interface
-    /* ÃÊ±âÈ­ ¼º°ø ½Ã ½ÇÇàµÇ´Â ÇÔ¼ö */
+    /* ì´ˆê¸°í™” ì„±ê³µ ì‹œ ì‹¤í–‰ë˜ëŠ” í•¨ìˆ˜ */
     public void OnInitialized(IStoreController controller, IExtensionProvider extension)
     {
-        Debug.Log("ÃÊ±âÈ­¿¡ ¼º°øÇß½À´Ï´Ù");
+        Debug.Log("ì´ˆê¸°í™”ì— ì„±ê³µí–ˆìŠµë‹ˆë‹¤");
 
         storeController = controller;
-        storeExtensionProvider = extension;
+		extensionProvider = extension;
     }
 
-    /* ÃÊ±âÈ­ ½ÇÆĞ ½Ã ½ÇÇàµÇ´Â ÇÔ¼ö */
+    /* ì´ˆê¸°í™” ì‹¤íŒ¨ ì‹œ ì‹¤í–‰ë˜ëŠ” í•¨ìˆ˜ */
     public void OnInitializeFailed(InitializationFailureReason error)
     {
-        Debug.Log("ÃÊ±âÈ­¿¡ ½ÇÆĞÇß½À´Ï´Ù");
+        Debug.Log("ì´ˆê¸°í™”ì— ì‹¤íŒ¨í–ˆìŠµë‹ˆë‹¤");
     }
 
     public void OnInitializeFailed(InitializationFailureReason error, string message)
     {
-        Debug.Log("ÃÊ±âÈ­¿¡ ½ÇÆĞÇß½À´Ï´Ù");
+        Debug.Log("ì´ˆê¸°í™”ì— ì‹¤íŒ¨í–ˆìŠµë‹ˆë‹¤");
     }
 
-    /* ±¸¸Å¿¡ ½ÇÆĞÇßÀ» ¶§ ½ÇÇàµÇ´Â ÇÔ¼ö */
+    /* êµ¬ë§¤ì— ì‹¤íŒ¨í–ˆì„ ë•Œ ì‹¤í–‰ë˜ëŠ” í•¨ìˆ˜ */
     public void OnPurchaseFailed(Product product, PurchaseFailureReason reason)
     {
-        Debug.Log("±¸¸Å¿¡ ½ÇÆĞÇß½À´Ï´Ù");
+        Debug.Log("êµ¬ë§¤ì— ì‹¤íŒ¨í–ˆìŠµë‹ˆë‹¤");
     }
 
-    /* ±¸¸Å¸¦ Ã³¸®ÇÏ´Â ÇÔ¼ö */
+    /* êµ¬ë§¤ë¥¼ ì²˜ë¦¬í•˜ëŠ” í•¨ìˆ˜ */
     public PurchaseProcessingResult ProcessPurchase(PurchaseEventArgs args)
     {
-        Debug.Log("±¸¸Å¿¡ ¼º°øÇß½À´Ï´Ù");
+        Debug.Log("êµ¬ë§¤ì— ì„±ê³µí–ˆìŠµë‹ˆë‹¤");
 
         //int addCoin = 0;
 
         //if (args.purchasedProduct.definition.id == productId_test_id)
         //{
         //    addCoin = 10;
-        //    /* test_id ±¸¸Å Ã³¸® */
+        //    /* test_id êµ¬ë§¤ ì²˜ë¦¬ */
         //}
         //else if (args.purchasedProduct.definition.id == productId_test_id2)
         //{
         //    addCoin = 30;
-        //    /* test_id2 ±¸¸Å Ã³¸® */
+        //    /* test_id2 êµ¬ë§¤ ì²˜ë¦¬ */
         //}
 
         //DataManager.Instance.AddCoin(addCoin);
@@ -100,5 +94,10 @@ public class IAPManager : MonoSingleton<IAPManager>, IStoreListener
         return PurchaseProcessingResult.Complete;
     }
 
-    #endregion
+	public void OnPurchaseFailed(Product product, PurchaseFailureDescription failureDescription)
+	{
+		Debug.Log("êµ¬ë§¤ì— ì‹¤íŒ¨í–ˆìŠµë‹ˆë‹¤");
+	}
+
+	#endregion
 }

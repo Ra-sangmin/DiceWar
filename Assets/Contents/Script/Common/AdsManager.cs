@@ -22,7 +22,7 @@ public class AdsManager : MonoSingleton<AdsManager>, IUnityAdsInitializationList
     void InitializeAds()
     {
 #if UNITY_IOS
-    _gameId = "5857052";
+        _gameId = "5857052";
 #elif UNITY_ANDROID
         _gameId = "5857053";
 #endif

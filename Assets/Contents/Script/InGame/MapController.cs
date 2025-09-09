@@ -340,7 +340,7 @@ public class MapController : MonoBehaviour
 
     public async void HexagonClickOn(int index)
     {
-        if (attackEventOn)
+        if (attackEventOn || DataManager.Instance.gameStart.Value == false)
         {
             return;
         }

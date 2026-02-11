@@ -608,6 +608,7 @@ public class MapController : MonoBehaviour
 
         CreateMap();
 
+		playerIconController.SetIconTurnEffect();
 		inGameBottomController.nonePlayPanel.Init();
 	}
 

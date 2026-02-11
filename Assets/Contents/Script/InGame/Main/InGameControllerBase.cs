@@ -113,14 +113,14 @@ public class InGameControllerBase : MonoBehaviour
 	{
 		//PlayerEnum currentPlayerEnum = InGameDataManager.Instance.playerData.playerEnum;
 
-		////³» ¶¥À» ¼±ÅÃÇßÀ»¶§
+		////ë‚´ ë•…ì„ ì„ íƒí–ˆì„ë•Œ
 		//if (areaData.player == currentPlayerEnum) 
 		//{
-		//    Debug.LogWarning("³» ¶¥");
+		//    Debug.LogWarning("ë‚´ ë•…");
 		//}
 		//else 
 		//{
-		//    Debug.LogWarning("³²ÀÇ ¶¥");
+		//    Debug.LogWarning("ë‚¨ì˜ ë•…");
 		//}
 	}
 
@@ -280,6 +280,8 @@ public class InGameControllerBase : MonoBehaviour
 
 	public void NewGameOn()
 	{
+		TokenSourceInit();
+
 		DataManager.Instance.gameStart.SetValueAndForceNotify(false);
 		DataManager.Instance.playOn = false;
 		DataManager.Instance.AddCoin(-DataManager.Instance.GetNeedCoin());

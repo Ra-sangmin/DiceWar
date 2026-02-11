@@ -1,0 +1,535 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6b0be1e3cf1baca4d919e165849d6a50, type: 3}
+  m_Name: LocalizeDataTable
+  m_EditorClassIdentifier: Assembly-CSharp::LocalizeDataTable
+  list:
+  - statusStr: Common
+    statusEnum: 1
+    key: 0
+    korean: "\uC2DC\uC791"
+    english: Play
+  - statusStr: Common
+    statusEnum: 1
+    key: 1
+    korean: "\uCDE8\uC18C"
+    english: Cancel
+  - statusStr: Common
+    statusEnum: 1
+    key: 2
+    korean: "\uC2DC\uC791 (\uAD11\uACE0)"
+    english: Play (Ad)
+  - statusStr: TutorialPopup
+    statusEnum: 2
+    key: 0
+    korean: "\uAC8C\uC784 \uC2DC\uC791 \uC804 \uC2B9\uB9AC \uBCF4\uC0C1 \uBC0F \uC785\uC7A5\uB8CC\uAC00
+      \uD45C\uC2DC\uB429\uB2C8\uB2E4."
+    english: Before starting game, Victory Reward and Entrance fee\nare displayed.
+  - statusStr: TutorialPopup
+    statusEnum: 2
+    key: 1
+    korean: "\uC6D0\uD558\uB294 \uACBD\uC6B0 \uB9F5\uC744 \uBCC0\uACBD\uD560 \uC218
+      \uC788\uC2B5\uB2C8\uB2E4."
+    english: The map can be changed if not wanted.
+  - statusStr: TutorialPopup
+    statusEnum: 2
+    key: 2
+    korean: "\uB2F9\uC2E0\uC758 \uC601\uC5ED\uC744 \uC120\uD0DD\uD558\uACE0 \uC778\uC811\uD55C
+      \uC0C1\uB300 \uC601\uC5ED\uC744 \uC120\uD0DD\uD569\uB2C8\uB2E4."
+    english: Tap your zone and select adjecent opponent zone to\nattack.
+  - statusStr: TutorialPopup
+    statusEnum: 2
+    key: 3
+    korean: "\uC8FC\uC0AC\uC704\uB97C \uAD74\uB824 \uC2B9\uC790\uB97C \uACB0\uC815\uD569\uB2C8\uB2E4."
+    english: Dice are rolled to decide the winner.
+  - statusStr: TutorialPopup
+    statusEnum: 2
+    key: 4
+    korean: "\uC624\uB978\uCABD \uC22B\uC790\uB294 '\uD55C \uBC88\uC5D0' \uC5F0\uACB0\uB41C
+      \uAD6C\uC5ED\uC758 \uC218\uB97C \uB098\uD0C0\uB0C5\uB2C8\uB2E4."
+    english: "Right number shows how many zones linked \u201Cat once.\u201D"
+  - statusStr: TutorialPopup
+    statusEnum: 2
+    key: 5
+    korean: " '\uD134 \uC885\uB8CC'\uB97C \uB204\uB974\uBA74 \uB9CE\uC740 \uC8FC\uC0AC\uC704\uAC00
+      \uB2F9\uC2E0\uC758 \uC601\uD1A0\uC5D0 \uCD94\uAC00\uB429\uB2C8\uB2E4."
+    english: "When \u201CEnd Turn\u201D is pressed, that many dice are added\\nto
+      your territory."
+  - statusStr: TutorialPopup
+    statusEnum: 2
+    key: 6
+    korean: "\uB0A8\uC740 \uC8FC\uC0AC\uC704\uB294 '\uC800\uC7A5\uC18C'\uC5D0 \uD45C\uC2DC\uB429\uB2C8\uB2E4.\\n'\uC2F1\uAE00
+      \uD50C\uB808\uC774'\uC5D0\uC11C \uC2B9\uB9AC\uD558\uB824\uBA74 \uBAA8\uB4E0
+      \uB9F5\uC744 \uC815\uBCF5\uD558\uC138\uC694."
+    english: "Remaining dice are displayed next to \u201CStash.\u201D\\nTo win \u201CSingle
+      Player\u201D, conquer all map."
+  - statusStr: TutorialPopup
+    statusEnum: 2
+    key: 7
+    korean: " '\uBA40\uD2F0 \uD50C\uB808\uC774'\uC5D0\uC11C\uB294 \uC124\uC815\uACFC
+      \uC9C0\uB3C4\uB97C \uBCC0\uACBD\uD560 \uC218 \uC5C6\uC2B5\uB2C8\uB2E4."
+    english: "In \u201CMulti Player\u201D, settings and map cannot be changed."
+  - statusStr: TutorialPopup
+    statusEnum: 2
+    key: 8
+    korean: "\uBA40\uD2F0 \uD50C\uB808\uC774 \uC5D0\uC11C\uB294 '\uCE74\uB4DC'\uC640
+      '\uD0C0\uC774\uBA38'\uAC00 \uD558\uB2E8\uC5D0 \uCD94\uAC00\uB429\uB2C8\uB2E4.\\n\uD0C0\uC774\uBA38\uAC00
+      \uB05D\uB0A0 \uB54C\uAE4C\uC9C0 \uCC28\uB840\uB97C \uB9C8\uCE69\uB2C8\uB2E4."
+    english: "In multiplayer, \u201CCard\u201D and \u201CTimer\u201D are added at
+      bottom.\\nFinish your turn until Timer ends."
+  - statusStr: TutorialPopup
+    statusEnum: 2
+    key: 9
+    korean: "\uAC70\uB798\uB97C \uD558\uB824\uBA74 \uCE74\uB4DC\uB97C \uB204\uB985\uB2C8\uB2E4."
+    english: To make a deal, press Card.
+  - statusStr: TutorialPopup
+    statusEnum: 2
+    key: 10
+    korean: "\uB3D9\uB9F9 \uC81C\uC548: \uD50C\uB808\uC774\uC5B4\uB97C \uC120\uD0DD\uD558\uACE0
+      \uBCF4\uC0C1\uC744 \uC124\uC815\uD55C \uB2E4\uC74C \uC81C\uC548\uD569\uB2C8\uB2E4.\\n\uC624\uB978\uCABD
+      \uD558\uB2E8 \uC22B\uC790\uB294 \uC5EC\uBD84\uC758 \uCF54\uC778 \uB610\uB294
+      \uB204\uB77D\uB41C \uCF54\uC778\uC744 \uB098\uD0C0\uB0C5\uB2C8\uB2E4."
+    english: 'Alliance offer : select player, set reward, then propose.\nThe right-bottom
+      number shows extra or missing coin.'
+  - statusStr: TutorialPopup
+    statusEnum: 2
+    key: 11
+    korean: "\uD1A0\uC9C0 \uAC70\uB798: \uD1A0\uC9C0 \uC120\uD0DD, \uD50C\uB808\uC774\uC5B4
+      \uC120\uD0DD, \uAC00\uACA9\uC744 \uC120\uD0DD,\\n\uADF8\uB7F0 \uB2E4\uC74C
+      \uC81C\uC548\uD569\uB2C8\uB2E4."
+    english: 'Land trade : select land, select player, set price,\nthen propose.'
+  - statusStr: TutorialPopup
+    statusEnum: 2
+    key: 12
+    korean: "\uAC70\uB798\uAC00 \uC81C\uC548\uB418\uBA74 \uC218\uB77D\uD558\uAC70\uB098
+      \uAC70\uC808\uD560 \uC218 \uC788\uC2B5\uB2C8\uB2E4."
+    english: When a deal is offered, it can be accepted or refused.
+  - statusStr: TutorialPopup
+    statusEnum: 2
+    key: 13
+    korean: "\uB3D9\uB9F9\uC744 \uD0C8\uD1F4\uD558\uB824\uBA74 \uCE74\uB4DC\uB97C
+      \uC0AC\uC6A9\uD558\uC5EC '\uBC30\uC2E0'\uC744 \uD0ED\uD558\uC138\uC694.\\n\uBC8C\uAE08\uC740
+      \uD68C\uC6D0\uB2D8\uC758 \uB3D9\uB9F9 \uC9C0\uBD84\uACFC \uB3D9\uC77C\uD569\uB2C8\uB2E4."
+    english: "To leave your alliance, tap \u201CBetray\u201D using your card.\\nPenalty
+      will be same as your share in the alliance."
+  - statusStr: TutorialPopup
+    statusEnum: 2
+    key: 14
+    korean: " '\uBA40\uD2F0 \uD50C\uB808\uC774\uC5B4'\uC5D0\uC11C \uC2B9\uB9AC\uD558\uB824\uBA74,
+      \uB2F9\uC2E0\uC774\uB098 \uB2F9\uC2E0\uC758 \uB3D9\uB9F9\uC740 \uB2E4\uC74C\uACFC
+      \uAC19\uC774 \uD574\uC57C \uD569\uB2C8\uB2E4\uBAA8\uB4E0 \uC9C0\uB3C4\uB97C
+      \uC815\uBCF5\uD569\uB2C8\uB2E4."
+    english: "To win \u201CMulti Player\u201D, you or your alliance should\\nconquer
+      all map."
+  - statusStr: TutorialPopup
+    statusEnum: 2
+    key: 15
+    korean: "\uD29C\uD1A0\uB9AC\uC5BC"
+    english: Tutorial
+  - statusStr: TutorialPopup
+    statusEnum: 2
+    key: 16
+    korean: "\uC885\uB8CC"
+    english: End
+  - statusStr: MainSettingPopup
+    statusEnum: 3
+    key: 0
+    korean: "\uC124\uC815"
+    english: Settings
+  - statusStr: MainSettingPopup
+    statusEnum: 3
+    key: 1
+    korean: "\uC0AC\uC6B4\uB4DC"
+    english: Sound
+  - statusStr: MainSettingPopup
+    statusEnum: 3
+    key: 2
+    korean: "\uB9F5 \uBCF4\uC815"
+    english: Map Compensation
+  - statusStr: MainSettingPopup
+    statusEnum: 3
+    key: 3
+    korean: "\uD6C4 \uC21C\uC778 \uD50C\uB808\uC774\uC5B4\uB294 \uC2DC\uC791\uC2DC
+      \uC8FC\uC0AC\uC704\uB97C \uB354 \uD68D\uB4DD\uD569\uB2C8\uB2E4"
+    english: Later players get more start up dices
+  - statusStr: MainSettingPopup
+    statusEnum: 3
+    key: 4
+    korean: "\uC5B8\uC5B4"
+    english: Language
+  - statusStr: MainSettingPopup
+    statusEnum: 3
+    key: 5
+    korean: "\uB85C\uADF8 \uC544\uC6C3"
+    english: Log Out
+  - statusStr: MainInfoPopup
+    statusEnum: 4
+    key: 0
+    korean: "\uC815\uBCF4"
+    english: Information
+  - statusStr: MainInfoPopup
+    statusEnum: 4
+    key: 1
+    korean: "\uBB38\uC758 \uD558\uAE30"
+    english: Contact Us
+  - statusStr: MainInfoPopup
+    statusEnum: 4
+    key: 2
+    korean: "\uAC1C\uBC1C\uC790 \uC815\uBCF4"
+    english: Terms Of Conditions
+  - statusStr: MainInfoPopup
+    statusEnum: 4
+    key: 3
+    korean: "\uAC1C\uC778\uC815\uBCF4 \uBCF4\uD638\uC815\uCC45"
+    english: Private Policy
+  - statusStr: MainInfoPopup
+    statusEnum: 4
+    key: 4
+    korean: "\uD3C9\uAC00\uD558\uAE30"
+    english: Rate Us
+  - statusStr: BuyCoinPopup
+    statusEnum: 5
+    key: 0
+    korean: "\uCF54\uC778 \uAD6C\uB9E4"
+    english: Purchase Coin
+  - statusStr: BuyCoinPopup
+    statusEnum: 5
+    key: 1
+    korean: "\uCF54\uC778 \uD68D\uB4DD"
+    english: Free Coin
+  - statusStr: BuyCoinPopup
+    statusEnum: 5
+    key: 2
+    korean: "\uAD11\uACE0 \uBCF4\uAE30"
+    english: Watch Ads
+  - statusStr: BuyCoinPopup
+    statusEnum: 5
+    key: 3
+    korean: "\uCF54\uC778 \uD68D\uB4DD"
+    english: Get Coin
+  - statusStr: BuyCoinPopup
+    statusEnum: 5
+    key: 4
+    korean: "\uB0B4 \uCF54\uC778"
+    english: My Coin
+  - statusStr: BuyCoinPopup
+    statusEnum: 5
+    key: 5
+    korean: "30\uCD08"
+    english: 30sec
+  - statusStr: BuyCoinPopup
+    statusEnum: 5
+    key: 6
+    korean: " +10 \uCF54\uC778"
+    english: ' +10 coins'
+  - statusStr: BuyCoinPopup
+    statusEnum: 5
+    key: 7
+    korean: " +30 \uCF54\uC778"
+    english: ' +30 coins'
+  - statusStr: BuyCoinPopup
+    statusEnum: 5
+    key: 8
+    korean: " +10 \uCF54\uC778"
+    english: ' +10 coins'
+  - statusStr: PlaySetPopup
+    statusEnum: 6
+    key: 0
+    korean: "\uAC8C\uC784 \uC124\uC815"
+    english: Game Settings
+  - statusStr: PlaySetPopup
+    statusEnum: 6
+    key: 1
+    korean: "AI \uB09C\uC774\uB3C4"
+    english: AI Difficulty
+  - statusStr: PlaySetPopup
+    statusEnum: 6
+    key: 2
+    korean: "\uC601\uD1A0 \uD06C\uAE30"
+    english: Territory Size
+  - statusStr: PlaySetPopup
+    statusEnum: 6
+    key: 3
+    korean: "\uD50C\uB808\uC774\uC5B4"
+    english: Players
+  - statusStr: PlaySetPopup
+    statusEnum: 6
+    key: 4
+    korean: "\uC2B9\uB9AC \uBCF4\uC0C1 :"
+    english: 'Victory Reward :'
+  - statusStr: PlaySetPopup
+    statusEnum: 6
+    key: 5
+    korean: "\uC26C\uC6C0"
+    english: Easy
+  - statusStr: PlaySetPopup
+    statusEnum: 6
+    key: 6
+    korean: "\uBCF4\uD1B5"
+    english: Normal
+  - statusStr: PlaySetPopup
+    statusEnum: 6
+    key: 7
+    korean: "\uC5B4\uB824\uC6C0"
+    english: Hard
+  - statusStr: PlaySetPopup
+    statusEnum: 6
+    key: 8
+    korean: "\uC791\uC740"
+    english: Small
+  - statusStr: PlaySetPopup
+    statusEnum: 6
+    key: 9
+    korean: "\uC911\uAC04"
+    english: Medium
+  - statusStr: PlaySetPopup
+    statusEnum: 6
+    key: 10
+    korean: "\uD070"
+    english: Large
+  - statusStr: PlaySetPopup
+    statusEnum: 6
+    key: 11
+    korean: "\uB0B4 \uC0C9\uC0C1"
+    english: My Color
+  - statusStr: PlaySetPopup
+    statusEnum: 6
+    key: 12
+    korean: "\uBB34\uC791\uC704 \uC0C9\uC0C1 \uC120\uD0DD"
+    english: Random color selection
+  - statusStr: Loading
+    statusEnum: 7
+    key: 0
+    korean: "\uD50C\uB808\uC774\uC5B4 \uCC3E\uB294\uC911.."
+    english: Finding Players...
+  - statusStr: Loading
+    statusEnum: 7
+    key: 1
+    korean: "\uB9E4\uCE6D \uC644\uB8CC"
+    english: Matching Complated
+  - statusStr: Loading
+    statusEnum: 7
+    key: 2
+    korean: "\uB85C\uB529\uC911.."
+    english: Loading..
+  - statusStr: Loading
+    statusEnum: 7
+    key: 3
+    korean: "\uB300\uAE30 \uC2DC\uAC04"
+    english: waiting time
+  - statusStr: Game
+    statusEnum: 8
+    key: 0
+    korean: "\uC774 \uB9F5\uC73C\uB85C \uD50C\uB808\uC774 \uD558\uC2DC\uACA0\uC2B5\uB2C8\uAE4C?"
+    english: Play this Map?
+  - statusStr: Game
+    statusEnum: 8
+    key: 1
+    korean: "\uBCC0\uACBD"
+    english: Change
+  - statusStr: Game
+    statusEnum: 8
+    key: 2
+    korean: "\uB2F9\uC2E0\uC758 \uC601\uC5ED\uC744 \uD130\uCE58\uD6C4 \uC0C1\uB300
+      \uC601\uC5ED\uC744 \uC120\uD0DD\uD558\uC5EC \uACF5\uACA9\uD569\uB2C8\uB2E4"
+    english: Tap your zone and Select opponent zone to attack
+  - statusStr: Game
+    statusEnum: 8
+    key: 3
+    korean: "\uD134 \uC885\uB8CC"
+    english: End Turn
+  - statusStr: Game
+    statusEnum: 8
+    key: 4
+    korean: "\uB2F9\uC2E0\uC758 \uD134\uC785\uB2C8\uB2E4"
+    english: YOUR TURN
+  - statusStr: Game
+    statusEnum: 8
+    key: 5
+    korean: "\uC2DC\uAC04 \uCD08\uACFC"
+    english: Time Over
+  - statusStr: Game
+    statusEnum: 8
+    key: 6
+    korean: "\uBA54\uB274"
+    english: Menu
+  - statusStr: Game
+    statusEnum: 8
+    key: 7
+    korean: "\uC7AC\uC2DC\uC791"
+    english: Restart
+  - statusStr: Game
+    statusEnum: 8
+    key: 8
+    korean: "\uC0C8\uAC8C\uC784"
+    english: New Game
+  - statusStr: Game
+    statusEnum: 8
+    key: 9
+    korean: "\uB3C4\uC6C0\uB9D0"
+    english: Help
+  - statusStr: Game
+    statusEnum: 8
+    key: 10
+    korean: "\uC774\uC5B4\uD558\uAE30"
+    english: Continue
+  - statusStr: Game
+    statusEnum: 8
+    key: 11
+    korean: "\uD3EC\uAE30\uD558\uAE30"
+    english: Give Up
+  - statusStr: Game
+    statusEnum: 8
+    key: 12
+    korean: "\uB2F9\uC2E0\uC758 \uCF54\uC778 \uD68D\uB4DD \uAE30\uD68C\uB294 \uC0AC\uB77C\uC9C8
+      \uAC83\uC774\uACE0, \uD398\uB110\uD2F0\uB294 \uB2E4\uC74C\uACFC \uAC19\uC2B5\uB2C8\uB2E4:"
+    english: 'Your chance will be lost, and your penalty will be :'
+  - statusStr: Game
+    statusEnum: 8
+    key: 13
+    korean: "\uD648\uC73C\uB85C"
+    english: Home
+  - statusStr: Game
+    statusEnum: 8
+    key: 14
+    korean: "\uB3CC\uC544\uAC00\uAE30"
+    english: Return
+  - statusStr: Game
+    statusEnum: 8
+    key: 15
+    korean: "\uD55C\uBC88\uB354"
+    english: Play Again
+  - statusStr: Game
+    statusEnum: 8
+    key: 16
+    korean: "\uC2B9\uB9AC"
+    english: You Win
+  - statusStr: Game
+    statusEnum: 8
+    key: 17
+    korean: "\uD328\uBC30"
+    english: You Lose
+  - statusStr: Game
+    statusEnum: 8
+    key: 18
+    korean: "\uC911\uB3C4\uD558\uCC28"
+    english: Leave Early
+  - statusStr: Game
+    statusEnum: 8
+    key: 19
+    korean: "\uC911\uB3C4\uD558\uCC28\uC2DC 80%"
+    english: Finish Early & Claim 80%
+  - statusStr: Game
+    statusEnum: 8
+    key: 20
+    korean: "\uB05D\uB0B4\uAE30"
+    english: Finish
+  - statusStr: Game
+    statusEnum: 8
+    key: 21
+    korean: "\uAC70\uC808"
+    english: Refuse
+  - statusStr: Game
+    statusEnum: 8
+    key: 22
+    korean: "\uC2B9\uB099"
+    english: Accept
+  - statusStr: Game
+    statusEnum: 8
+    key: 23
+    korean: "\uB3D9\uB9F9"
+    english: Alliance
+  - statusStr: Game
+    statusEnum: 8
+    key: 24
+    korean: "\uB2F9\uC2E0\uC758 \uBAAB"
+    english: Your Share
+  - statusStr: Game
+    statusEnum: 8
+    key: 25
+    korean: "\uC601\uD1A0 \uAD6C\uB9E4"
+    english: Buy land
+  - statusStr: Game
+    statusEnum: 8
+    key: 26
+    korean: "\uC601\uD1A0 \uD310\uB9E4"
+    english: Sell land
+  - statusStr: Game
+    statusEnum: 8
+    key: 27
+    korean: "\uC81C\uC548 \uAC00\uACA9"
+    english: Offer Price
+  - statusStr: Game
+    statusEnum: 8
+    key: 28
+    korean: "\uBC30\uC2E0"
+    english: Betray
+  - statusStr: Game
+    statusEnum: 8
+    key: 29
+    korean: "\uD310\uB9E4"
+    english: Sell
+  - statusStr: Game
+    statusEnum: 8
+    key: 30
+    korean: "\uAD6C\uB9E4"
+    english: Buy
+  - statusStr: Game
+    statusEnum: 8
+    key: 31
+    korean: "\uB3D9\uB9F9"
+    english: Ally
+  - statusStr: Game
+    statusEnum: 8
+    key: 32
+    korean: "\uB3D9\uB9F9 \uC81C\uC548"
+    english: Alliance Offer
+  - statusStr: Game
+    statusEnum: 8
+    key: 33
+    korean: "\uD50C\uB808\uC774\uC5B4\uB97C \uC120\uD0DD\uD558\uC138\uC694."
+    english: Select Players and input penalty on time
+  - statusStr: Game
+    statusEnum: 8
+    key: 34
+    korean: "\uC81C\uC548\uD558\uB2E4"
+    english: Propose
+  - statusStr: Game
+    statusEnum: 8
+    key: 35
+    korean: "Coin\uC744 \uD3EC\uAE30 \uD558\uACA0\uC2B5\uB2C8\uAE4C?"
+    english: Give up coins?
+  - statusStr: Game
+    statusEnum: 8
+    key: 36
+    korean: "\uBC30\uC2E0\uD558\uAE30"
+    english: Betray
+  - statusStr: Game
+    statusEnum: 8
+    key: 37
+    korean: "\uB098"
+    english: My
+  - statusStr: Game
+    statusEnum: 8
+    key: 38
+    korean: "\uC800\uC7A5\uC18C"
+    english: Stash
+  - statusStr: Main
+    statusEnum: 9
+    key: 0
+    korean: "\uC2F1\uAE00 \uD50C\uB808\uC774"
+    english: Single Player
+  - statusStr: Main
+    statusEnum: 9
+    key: 1
+    korean: "\uBA40\uD2F0 \uD50C\uB808\uC774"
+    english: Multi Players

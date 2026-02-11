@@ -11,8 +11,13 @@ using UnityEngine.Networking;
 /// </summary>
 public class BaseRequest
 {
-    protected string baseUri = "ec2-52-78-148-28.ap-northeast-2.compute.amazonaws.com:8002/";
-    protected string classValue = string.Empty;
+	//protected string baseUri = "ec2-52-78-148-28.ap-northeast-2.compute.amazonaws.com:8002/";
+	//protected string baseUri = "www.dicendeal.com:8002/";
+	protected string baseUri = "ec2-52-78-148-28.ap-northeast-2.compute.amazonaws.com:8002/";
+	//protected string baseUri = "https://ec2-52-78-148-28.ap-northeast-2.compute.amazonaws.com:8002/";
+	//protected string baseUri = "dicendeal.com:8002/";
+	//protected string baseUri = "52.78.148.28:8002/";
+	protected string classValue = string.Empty;
     protected Dictionary<string, object> getValueDic = new Dictionary<string, object>();
     protected Dictionary<string, object> headerDic = new Dictionary<string, object>();
     protected string getValue = string.Empty;

@@ -1,14 +1,14 @@
-using TMPro;
+ï»¿using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 using UniRx;
 
 public class LocalizeText : MonoBehaviour
 {
-	/// <summary> ÇöÁöÈ­ ¾ğ¾î key°ª </summary>
+	/// <summary> í˜„ì§€í™” ì–¸ì–´ keyê°’ </summary>
 	[SerializeField] LocalizeStatus statusEnum = LocalizeStatus.None;
 
-	/// <summary> ÇöÁöÈ­ ¾ğ¾î key°ª </summary>
+	/// <summary> í˜„ì§€í™” ì–¸ì–´ keyê°’ </summary>
 	[SerializeField] int key = -1;
 
 	private Text text;
@@ -30,7 +30,7 @@ public class LocalizeText : MonoBehaviour
 		if (statusEnum == LocalizeStatus.None || key == -1)
 			return;
 
-		//ÇöÀç ¿ÀºêÁ§Æ® Å°°ª¿¡ ¸Â´Â ÇöÁöÈ­ ¾ğ¾î Ãëµæ
+		//í˜„ì¬ ì˜¤ë¸Œì íŠ¸ í‚¤ê°’ì— ë§ëŠ” í˜„ì§€í™” ì–¸ì–´ ì·¨ë“
 		string resultStr = LocalizeManager.Instance.GetStrData(statusEnum, key);
 
 		if (text != null)

@@ -18,10 +18,6 @@ public class TcpClientExample : MonoBehaviour
 
 	public void Connect(string ip, int port)
 	{
-
-		//string IP = "ec2-52-78-148-28.ap-northeast-2.compute.amazonaws.com";
-
-
 		string IP = "52.78.148.28";
 		int PORT = 8000;
 

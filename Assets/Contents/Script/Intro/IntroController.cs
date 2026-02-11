@@ -1,15 +1,8 @@
-using AppleAuth.Enums;
-using AppleAuth;
+﻿using AppleAuth;
 using Assets.SimpleSignIn.Google.Scripts;
 using Cysharp.Threading.Tasks;
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
-using UnityEngine.Networking;
 using UnityEngine.SceneManagement;
-using AppleAuth.Native;
 
 public class IntroController : MonoBehaviour
 {
@@ -54,6 +47,9 @@ public class IntroController : MonoBehaviour
 
     public void GetAccessToken()
     {
+#if  UNITY_EDITOR
+	    SceneManager.LoadScene("Main");
+#else
         if (Application.platform == RuntimePlatform.WindowsPlayer) 
         {
             SceneManager.LoadScene("Main");
@@ -62,9 +58,10 @@ public class IntroController : MonoBehaviour
         {
             GoogleAuth.GetTokenResponse(OnGetTokenResponse);
         }
-    }
+#endif        
+	}
 
-    public void AppleLogin()
+	public void AppleLogin()
     {
 		appleLogin.SigninWithApple(data => LoginClear(data));
 	}

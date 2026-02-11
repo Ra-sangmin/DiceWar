@@ -126,7 +126,7 @@ public class DataManager : MonoSingleton<DataManager>
 	public void UserDataSave(UserDataRespons data)
     {
 #if UNITY_STANDALONE
-        data.coin = 100;
+        data.freeCoin = 100;
 #endif
 
 		userData = new UserData(data.email, data.snsType, data.freeCoin , data.chargeCoin);
@@ -134,7 +134,8 @@ public class DataManager : MonoSingleton<DataManager>
 
     public void InitMapData()
     {
-        SetPlayerColor();
+		GameDataClearOn();
+		SetPlayerColor();
     }
 
     void SetPlayerColor() 
@@ -776,7 +777,7 @@ public class DataManager : MonoSingleton<DataManager>
                IsMyTurn() &&          // 내턴
                mapSizeEnum == MapSizeEnum.Large && // Large 맵
                leaveEarlyPopupReadyOn &&           // 조기 종료 준비 Flag
-               pic.GetPlayerIcon(currentPlayer).connectedCount >= 30; // 연결된 영토가 30개 이상인지
+               pic.GetPlayerIcon(currentPlayer).connectedCount >= 20; // 연결된 영토가 20개 이상인지
 	}
 
 

@@ -28,15 +28,21 @@ public class IAPManager : MonoSingleton<IAPManager>, IDetailedStoreListener
 		if (IsInitialized())
 			return;
 
+		ConfigurationBuilder builder = null;
+		
 #if UNITY_IOS
         var builder = ConfigurationBuilder.Instance(StandardPurchasingModule.Instance(AppStore.AppleAppStore));
 #elif UNITY_ANDROID
 		var builder = ConfigurationBuilder.Instance(StandardPurchasingModule.Instance());
 #endif
-		builder.AddProduct(coin_add_10, ProductType.Consumable);
-		builder.AddProduct(coin_add_30, ProductType.Consumable);
 
-		UnityPurchasing.Initialize(this, builder);
+	    if (builder != null)
+	    {
+		    builder.AddProduct(coin_add_10, ProductType.Consumable);
+		    builder.AddProduct(coin_add_30, ProductType.Consumable);
+
+		    UnityPurchasing.Initialize(this, builder);    
+	    }
 	}
 
 	private bool IsInitialized()

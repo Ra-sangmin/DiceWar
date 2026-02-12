@@ -31,9 +31,9 @@ public class IAPManager : MonoSingleton<IAPManager>, IDetailedStoreListener
 		ConfigurationBuilder builder = null;
 		
 #if UNITY_IOS
-        var builder = ConfigurationBuilder.Instance(StandardPurchasingModule.Instance(AppStore.AppleAppStore));
+        builder = ConfigurationBuilder.Instance(StandardPurchasingModule.Instance(AppStore.AppleAppStore));
 #elif UNITY_ANDROID
-		var builder = ConfigurationBuilder.Instance(StandardPurchasingModule.Instance());
+		builder = ConfigurationBuilder.Instance(StandardPurchasingModule.Instance());
 #endif
 
 	    if (builder != null)

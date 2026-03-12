@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "176126443286",
+    "project_id": "dicewar-58bae",
+    "storage_bucket": "dicewar-58bae.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:176126443286:android:5572ee8b0e675e68f55a37",
+        "android_client_info": {
+          "package_name": "com.JaedongKim.DiceandDeal"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "176126443286-b5dvbo4h5cms7vcinb6rlraldalv54nd.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.JaedongKim.DiceandDeal",
+            "certificate_hash": "9e907f3496cb017420a8b98d856c8f333123688f"
+          }
+        },
+        {
+          "client_id": "176126443286-blbv7kagtc2thpdl9ebfbo4ad29asda5.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBtmFtCUhRuhqdlUUrqOoTPuEie_UstWzs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "176126443286-blbv7kagtc2thpdl9ebfbo4ad29asda5.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

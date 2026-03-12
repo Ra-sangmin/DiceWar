@@ -11,13 +11,16 @@ using UnityEngine.Events;
 
 public class ServerManager : MonoSingleton<ServerManager>
 {
-    //private TcpClient tcpClient;
-    //private NetworkStream stream;
+	//private TcpClient tcpClient;
+	//private NetworkStream stream;
 
-    //private Socket _socket = null;
-    //byte[] _recvBuffer = new byte[10240];
+	//private Socket _socket = null;
+	//byte[] _recvBuffer = new byte[10240];
 
-    private Queue<string> sendQueue = new Queue<string>();
+	private float heartbeatInterval = 20f; // 20초마다 전송
+	private float heartbeatTimer = 0f;
+
+	private Queue<string> sendQueue = new Queue<string>();
 
     private Queue<BaseTCPRequest> queue = new Queue<BaseTCPRequest>();
 
@@ -193,7 +196,15 @@ public class ServerManager : MonoSingleton<ServerManager>
         SendQueueListCheck();
         QueueListCheck();
         ReceiveListDataCheck();
-    }
+
+		// 하트비트 타이머 체크
+		heartbeatTimer += Time.deltaTime;
+		if (heartbeatTimer >= heartbeatInterval)
+		{
+			SendHeartbeat();
+			heartbeatTimer = 0f;
+		}
+	}
 
     void QueueListCheck()
     {
@@ -263,6 +274,18 @@ public class ServerManager : MonoSingleton<ServerManager>
     {
         GameOutRequestOn();
     }
+
+	// --- 하트비트 전송 함수 추가 ---
+	private void SendHeartbeat()
+	{
+		HeartbeatRequest heartbeat = new HeartbeatRequest();
+		// 큐를 거치지 않고 직접 쏘거나, SendMessageOn을 통해 큐에 넣을 수 있습니다.
+		// 여기서는 안전하게 큐에 넣는 방식을 사용합니다.
+		SendMessageOn(heartbeat);
+
+		// 디버깅이 필요하다면 아래 주석을 해제하세요.
+		// Debug.Log("[TCP] Heartbeat sent to server.");
+	}
 }
 
 [System.Serializable]
@@ -443,6 +466,14 @@ public class SkillCardRequest : BaseTCPRequest
     }
 }
 
+[System.Serializable]
+public class HeartbeatRequest : BaseTCPRequest
+{
+	public HeartbeatRequest()
+	{
+		base.requestProtocal = RequestProtocal.Heartbeat;
+	}
+}
 
 //[System.Serializable]
 //public class GameEndOnRequest : BaseTCPRequest
@@ -472,6 +503,7 @@ public enum RequestProtocal
     AllianceResultRequest,
     AllianceBetrayRequest,
     SkillCardRequest,
+	Heartbeat = 99
 }
 
 [System.Serializable]

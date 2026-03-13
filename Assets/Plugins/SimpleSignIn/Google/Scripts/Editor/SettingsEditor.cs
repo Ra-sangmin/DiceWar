@@ -1,4 +1,4 @@
-using UnityEditor;
+﻿using UnityEditor;
 using UnityEngine;
 
 namespace Assets.SimpleSignIn.Google.Scripts.Editor

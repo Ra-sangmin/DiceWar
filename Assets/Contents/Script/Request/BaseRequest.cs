@@ -13,7 +13,8 @@ public class BaseRequest
 {
 	//protected string baseUri = "ec2-52-78-148-28.ap-northeast-2.compute.amazonaws.com:8002/";
 	//protected string baseUri = "www.dicendeal.com:8002/";
-	protected string baseUri = "ec2-52-78-148-28.ap-northeast-2.compute.amazonaws.com:8002/";
+	//protected string baseUri = "ec2-52-78-148-28.ap-northeast-2.compute.amazonaws.com:8002/";
+	protected string baseUri = "http://ec2-52-78-148-28.ap-northeast-2.compute.amazonaws.com:8002/";
 	//protected string baseUri = "https://ec2-52-78-148-28.ap-northeast-2.compute.amazonaws.com:8002/";
 	//protected string baseUri = "dicendeal.com:8002/";
 	//protected string baseUri = "52.78.148.28:8002/";

@@ -1,4 +1,4 @@
-using AppleAuth.Interfaces;
+﻿using AppleAuth.Interfaces;
 using System;
 using UnityEngine;
 

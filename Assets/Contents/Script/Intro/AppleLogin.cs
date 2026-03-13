@@ -1,4 +1,4 @@
-using AppleAuth;
+﻿using AppleAuth;
 using AppleAuth.Interfaces;
 using AppleAuth.Native;
 using Assets.SimpleSignIn.Google.Scripts;
@@ -42,7 +42,8 @@ public class AppleLogin : MonoBehaviour
 				{
 					UserData userData = new UserData()
 					{
-						email = appleIdCredential.Email,
+						// 💥 미쿠짱의 아이디어: email 그릇에 이메일 대신 '고유 User ID'를 담아버림!
+						email = appleIdCredential.User,
 						snsType = 1,
 					};
 
@@ -51,15 +52,12 @@ public class AppleLogin : MonoBehaviour
 						loginClear(userData);
 					}
 
-					//sonPortraitLoginController.SetApple(appleIdCredential);
-					Debug.Log("apple signin");
+					Debug.Log("apple signin: ID를 email 필드에 담아서 전송함 -> " + appleIdCredential.User);
 				}
 			},
 			error =>
 			{
 				Debug.Log("Apple Signin Error");
 			});
-
-
 	}
 }

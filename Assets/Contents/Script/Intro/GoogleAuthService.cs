@@ -1,16 +1,16 @@
-using Google;
+ï»¿using Google;
 using Cysharp.Threading.Tasks;
 using System;
 
 public class GoogleAuthService
 {
-	// [º¯°æ] ¼­ºñ½º ³»ºÎ¿¡¼­ Á÷Á¢ ID¸¦ °ü¸®ÇÕ´Ï´Ù.
+	// [ï¿½ï¿½ï¿½ï¿½] ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Î¿ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ IDï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Õ´Ï´ï¿½.
 	private const string WebClientId = "176126443286-blbv7kagtc2thpdl9ebfbo4ad29asda5.apps.googleusercontent.com";
 	private readonly GoogleSignInConfiguration _configuration;
 
 	public GoogleAuthService()
 	{
-		// ³»ºÎ »ó¼ö¸¦ »ç¿ëÇÏ¿© ¼³Á¤À» ÃÊ±âÈ­ÇÕ´Ï´Ù.
+		// ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½Ï¿ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ê±ï¿½È­ï¿½Õ´Ï´ï¿½.
 		_configuration = new GoogleSignInConfiguration
 		{
 			WebClientId = WebClientId,
@@ -26,10 +26,10 @@ public class GoogleAuthService
 		{
 			GoogleSignIn.Configuration = _configuration;
 
-			// ±¸±Û ·Î±×ÀÎÀ» ½ÇÇàÇÏ°í °á°ú¸¦ ±â´Ù¸³´Ï´Ù.
+			// ï¿½ï¿½ï¿½ï¿½ ï¿½Î±ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ï°ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Ù¸ï¿½ï¿½Ï´ï¿½.
 			var user = await GoogleSignIn.DefaultInstance.SignIn().AsUniTask();
 
-			// À¯´ÏÆ¼ API(UI µî)¸¦ ¾ÈÀüÇÏ°Ô ¾²±â À§ÇØ ¸ÞÀÎ ½º·¹µå º¹±Í¸¦ º¸ÀåÇÕ´Ï´Ù.
+			// ï¿½ï¿½ï¿½ï¿½Æ¼ API(UI ï¿½ï¿½)ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ï°ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Í¸ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Õ´Ï´ï¿½.
 			await UniTask.SwitchToMainThread();
 
 			return user;
@@ -37,7 +37,7 @@ public class GoogleAuthService
 		catch (Exception)
 		{
 			await UniTask.SwitchToMainThread();
-			throw; // ¿¡·¯¸¦ »óÀ§(Controller)·Î Àü´ÞÇÕ´Ï´Ù.
+			throw; // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½(Controller)ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Õ´Ï´ï¿½.
 		}
 	}
 

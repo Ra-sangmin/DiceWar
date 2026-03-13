@@ -1,4 +1,4 @@
-namespace AppleAuth.Enums
+﻿namespace AppleAuth.Enums
 {
     /// <summary>
     /// ASUserDetectionStatus

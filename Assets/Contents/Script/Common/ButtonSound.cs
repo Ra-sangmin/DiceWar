@@ -1,4 +1,4 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -20,7 +20,7 @@ public class ButtonSound : MonoBehaviour
 
     public void ButtonClickOn()
     {
-		//SoundManager.Instance.PlaySe("À¯¾ÆÀÌÅ¬¸¯¿­±â");
+		//SoundManager.Instance.PlaySe("ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Å¬ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½");
 		//SoundManager.Instance.PlaySe("YES");
 		SoundManager.Instance.PlaySe(SeEnum.Yes);
 	}

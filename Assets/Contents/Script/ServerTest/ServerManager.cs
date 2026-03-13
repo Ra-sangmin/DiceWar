@@ -43,24 +43,36 @@ public class ServerManager : MonoSingleton<ServerManager>
 	// 수신 버퍼
 	private List<byte> receiveBuffer = new List<byte>();
 
+	private bool isAppQuitting = false;
 
 	void Start()
     {
         ConnectToServer();
     }
 
-    public void ConnectToServer()
-    {
-		string IP = "52.78.148.28";
-		int PORT = 8000;
+	public void ConnectToServer()
+	{
+		try
+		{
+			// [추가] 기존에 남아있는 찌꺼기 연결 확실히 치우기
+			if (stream != null) { stream.Close(); stream = null; }
+			if (client != null) { client.Close(); client = null; }
 
-		client = new TcpClient();
-		client.Connect(IPAddress.Parse(IP), PORT);
-		stream = client.GetStream();
+			string IP = "52.78.148.28";
+			int PORT = 8000;
 
-		receiveThread = new Thread(ReceiveLoop);
-		receiveThread.IsBackground = true;
-		receiveThread.Start();
+			client = new TcpClient();
+			client.Connect(IPAddress.Parse(IP), PORT);
+			stream = client.GetStream();
+
+			receiveThread = new Thread(ReceiveLoop);
+			receiveThread.IsBackground = true;
+			receiveThread.Start();
+		}
+		catch (Exception e)
+		{
+			Debug.LogWarning($"[TCP] 서버 접속 실패: {e.Message}");
+		}
 	}
 
 	private void ReceiveLoop()
@@ -122,19 +134,53 @@ public class ServerManager : MonoSingleton<ServerManager>
 
 	public void SendMessageOn(string jsonUserString)
 	{
-		if (stream == null) return;
+		try
+		{
+			// 1. 이미 연결이 끊어졌다고 유니티가 알고 있다면 선제적으로 재연결
+			if (client == null || !client.Connected || stream == null)
+			{
+				Debug.Log("[TCP] 연결이 없어서 다시 뚫습니다.");
+				ConnectToServer();
+			}
 
-		byte[] data = Encoding.UTF8.GetBytes(jsonUserString);
-		byte[] length = BitConverter.GetBytes(data.Length);
+			// 2. 패킷 전송
+			byte[] data = Encoding.UTF8.GetBytes(jsonUserString);
+			byte[] length = BitConverter.GetBytes(data.Length);
+			byte[] packet = new byte[length.Length + data.Length];
+			Buffer.BlockCopy(length, 0, packet, 0, 4); // int는 4바이트
+			Buffer.BlockCopy(data, 0, packet, 4, data.Length);
 
-		byte[] packet = new byte[length.Length + data.Length];
-		Buffer.BlockCopy(length, 0, packet, 0, length.Length);
-		Buffer.BlockCopy(data, 0, packet, length.Length, data.Length);
+			stream.Write(packet, 0, packet.Length);
+			stream.Flush();
+		}
+		catch (System.IO.IOException e) // <--- 미쿠짱이 본 그 에러를 여기서 잡습니다!
+		{
+			Debug.LogWarning($"[TCP] 통신 끊김 감지! 재연결 시도 중... : {e.Message}");
 
-		stream.Write(packet, 0, packet.Length);
+			// 3. 강제 재연결
+			ConnectToServer();
+
+			// 4. 재연결에 성공했다면, 아까 못 보낸 패킷 다시 쏘기
+			if (client != null && client.Connected && stream != null)
+			{
+				byte[] data = Encoding.UTF8.GetBytes(jsonUserString);
+				byte[] length = BitConverter.GetBytes(data.Length);
+				byte[] packet = new byte[length.Length + data.Length];
+				Buffer.BlockCopy(length, 0, packet, 0, 4);
+				Buffer.BlockCopy(data, 0, packet, 4, data.Length);
+
+				stream.Write(packet, 0, packet.Length);
+				stream.Flush();
+				Debug.Log("[TCP] 자동 재연결 및 패킷 복구 완벽 성공!");
+			}
+		}
+		catch (Exception e)
+		{
+			Debug.LogError($"[TCP] 치명적 전송 에러: {e.Message}");
+		}
 	}
 
-    public void GameReadyRequestOn(int maxPlayerCnt , int userCnt)
+	public void GameReadyRequestOn(int maxPlayerCnt , int userCnt)
     {
         GameReadyRequest gameReadyRequest = new GameReadyRequest()
         {
@@ -146,22 +192,7 @@ public class ServerManager : MonoSingleton<ServerManager>
         SendMessageOn(gameReadyRequest);
     }
 
-    public void GameOutRequestOn()
-    {
-        if (roomDataIndex != -1)
-        {
-            GameOutRequest gameOutRequest = new GameOutRequest()
-            {
-                outPlayerEnum = DataManager.Instance.playerData.pe,
-            };
-
-            SendMessageOn(gameOutRequest);
-
-            roomDataIndex = -1;
-        }
-    }
-
-    public void MapCreateRequestOn()
+	public void MapCreateRequestOn()
     {
         MapCreateRequestOn mapCreateRequestOn = new MapCreateRequestOn()
         {
@@ -270,11 +301,6 @@ public class ServerManager : MonoSingleton<ServerManager>
         return JsonUtility.FromJson<T>(jsonString);
     }
 
-    private void OnDisable()
-    {
-        GameOutRequestOn();
-    }
-
 	// --- 하트비트 전송 함수 추가 ---
 	private void SendHeartbeat()
 	{
@@ -285,6 +311,64 @@ public class ServerManager : MonoSingleton<ServerManager>
 
 		// 디버깅이 필요하다면 아래 주석을 해제하세요.
 		// Debug.Log("[TCP] Heartbeat sent to server.");
+	}
+
+	protected override void OnApplicationQuit()
+	{
+		isAppQuitting = true;
+
+		// 1. 서버에 나간다고 즉시 패킷 전송
+		GameOutRequestOn();
+
+		// 2. [핵심] 소켓 강제 종료 (서버가 연결 끊김을 즉시 알아차리게 함)
+		if (stream != null)
+		{
+			stream.Close();
+			stream = null;
+		}
+		if (client != null)
+		{
+			client.Close();
+			client = null;
+		}
+
+		// 3. 싱글톤 잠금
+		base.OnApplicationQuit();
+	}
+
+	private void OnDisable()
+	{
+		if (!isAppQuitting)
+		{
+			GameOutRequestOn();
+		}
+	}
+
+	public void GameOutRequestOn()
+	{
+		DataManager dataMgr = UnityEngine.Object.FindFirstObjectByType<DataManager>();
+
+		// 씬에 DataManager가 있고 방에 들어가 있는 상태라면
+		if (roomDataIndex != -1 && dataMgr != null && dataMgr.playerData != null)
+		{
+			GameOutRequest gameOutRequest = new GameOutRequest()
+			{
+				outPlayerEnum = dataMgr.playerData.pe,
+				roomDataIndex = this.roomDataIndex // [추가] 방 번호도 확실히 세팅
+			};
+
+			// 1. JSON 문자열로 변환
+			string jsonStr = JsonUtility.ToJson(gameOutRequest);
+
+			// 2. [핵심] 큐에 넣는 오버로딩 함수 대신, 즉시 전송하는 함수를 직접 호출!
+			SendMessageOn(jsonStr);
+
+			// 3. 남은 버퍼 밀어내기
+			if (stream != null) stream.Flush();
+
+			roomDataIndex = -1;
+			Debug.Log("[TCP] 종료 패킷 즉시 전송 완료!");
+		}
 	}
 }
 

@@ -1,4 +1,4 @@
-namespace AppleAuth
+﻿namespace AppleAuth
 {
     public struct AppleAuthQuickLoginArgs
     {

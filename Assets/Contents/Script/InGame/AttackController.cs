@@ -1,4 +1,4 @@
-using Cysharp.Threading.Tasks;
+ï»¿using Cysharp.Threading.Tasks;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -65,7 +65,7 @@ public class AttackController
 	{
 		bool notAttackOn = false;
 
-		if (checkArea.player != attackArea.player &&  //°ø°Ý Area¿Í ¹æ¾î Area °¡ °°Àº ÇÃ·¹ÀÌ¶ó¸é
+		if (checkArea.player != attackArea.player &&  //ï¿½ï¿½ï¿½ï¿½ Areaï¿½ï¿½ ï¿½ï¿½ï¿½ Area ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ã·ï¿½ï¿½Ì¶ï¿½ï¿½
 			DataManager.Instance.IsAllAlliance(new List<PlayerEnum>() { attackArea.player, checkArea.player }) == false)
 		{
 			notAttackOn = true;
@@ -75,7 +75,7 @@ public class AttackController
 	}
 
 	/// <summary>
-	/// ÀÎÁ¢ÇÑ ¿µÅäµé Áß, ÁÖ»çÀ§ °³¼ö°¡ ´õ ÀÛÀº °ÍÀÌ ÀÖÀ¸¸é, °ø°Ý
+	/// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½, ï¿½Ö»ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½, ï¿½ï¿½ï¿½ï¿½
 	/// </summary>
 	/// <param name="playerEnum"></param>
 	/// <param name="attackAreaList"></param>
@@ -165,7 +165,7 @@ public class AttackController
 	}
 
 	/// <summary>
-	/// ³ë¸» °ø°Ý
+	/// ï¿½ë¸» ï¿½ï¿½ï¿½ï¿½
 	/// </summary>
 	/// <param name="playerEnum"></param>
 	/// <param name="attackAreaList"></param>
@@ -205,7 +205,7 @@ public class AttackController
 
 
 	///// <summary>
-	///// °¡Àå Å« µ¢¾î¸®¡¯¿Í ÀÎÁ¢ÇÑ ¿µÅä¿¡¼­, ´Ù¸¥ µ¢¾î¸®¿Í ÀÌ¾îÁÙ ¼ö ÀÖ´Â ¿µÅä Ã£±â ¡æ ¡®±× ÁÖ»çÀ§ °³¼ö ÀÌ»ó¡¯ÀÌ¸é, °ø°Ý ex) ÁÖ»çÀ§ 3°³·Î 3°³¸¦ °ø°ÝÇÒ ¼ö ÀÖÀ½.
+	///// ï¿½ï¿½ï¿½ï¿½ Å« ï¿½ï¿½ï¿½î¸®ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ä¿¡ï¿½ï¿½, ï¿½Ù¸ï¿½ ï¿½ï¿½ï¿½î¸®ï¿½ï¿½ ï¿½Ì¾ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½Ö´ï¿½ ï¿½ï¿½ï¿½ï¿½ Ã£ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ö»ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ì»ï¿½ï¿½Ì¸ï¿½, ï¿½ï¿½ï¿½ï¿½ ex) ï¿½Ö»ï¿½ï¿½ï¿½ 3ï¿½ï¿½ï¿½ï¿½ 3ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½.
 	///// </summary>
 	///// <param name="playerEnum"></param>
 	///// <param name="attackAreaList"></param>
@@ -259,16 +259,16 @@ public class AttackController
 	//}
 
 	/// <summary>
-	/// °¡Àå Å« ¿µÅä¿Í ÀÌ¾îÁö´Â ¿µÅä Ã£±â
+	/// ï¿½ï¿½ï¿½ï¿½ Å« ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ì¾ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ Ã£ï¿½ï¿½
 	/// </summary>
 	/// <param name="playerEnum"></param>
 	/// <returns></returns>
 	private async UniTask<List<AttackData>> GetAdjTarget()
 	{
-		//°¡Àå Å« µ¢¾î¸®
+		//ï¿½ï¿½ï¿½ï¿½ Å« ï¿½ï¿½ï¿½î¸®
 		List<AreaData> bigAreaDataList = DataManager.Instance.SetBundleKey(currentPlayerEnum);
 
-		//´Ù¸¥ µ¢¾î¸®µé
+		//ï¿½Ù¸ï¿½ ï¿½ï¿½ï¿½î¸®ï¿½ï¿½
 		List<AreaData> otherAreaList = DataManager.Instance.areaDataList.Where(data => data.player == currentPlayerEnum && bigAreaDataList.Any(bigData => bigData.id == data.id) == false).ToList();
 
 		List<AreaData> enemyList = new List<AreaData>();
@@ -315,11 +315,11 @@ public class AttackController
 
 		//foreach (var playerIcon in playerIconList)
 		//{
-		//	//Ã¼Å© ´ë»óÀÌ º»ÀÎÀÌ¶ó¸é
+		//	//Ã¼Å© ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ì¶ï¿½ï¿½
 		//	if (playerIcon.playerEnum == playerEnum)
 		//		continue;
 
-		//	//µ¿¸ÍÀÌ¶ó¸é
+		//	//ï¿½ï¿½ï¿½ï¿½ï¿½Ì¶ï¿½ï¿½
 		//	if (DataManager.Instance.IsAllAlliance(new List<PlayerEnum>() { playerEnum, playerIcon.playerEnum }))
 		//		continue;
 
@@ -335,13 +335,13 @@ public class AttackController
 
 	private int GetMoreDice(PlayerEnum playerEnum)
 	{
-		//°¡Àå Å« ¿µÅä °¹¼ö
+		//ï¿½ï¿½ï¿½ï¿½ Å« ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 		int bigAreaCount = DataManager.Instance.SetBundleKey(playerEnum).Count;
 
-		//Stash ¼ö
+		//Stash ï¿½ï¿½
 		int stashCount = DataManager.Instance.GetStashCount(playerEnum);
 
-		//ÅÏÀÌ ³¡³­ÈÄ Ãß°¡ µÇ´Â ÁÖ»çÀ§ ¼ö
+		//ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ß°ï¿½ ï¿½Ç´ï¿½ ï¿½Ö»ï¿½ï¿½ï¿½ ï¿½ï¿½
 		int addDiceCount = stashCount + bigAreaCount;
 
 		List<AreaData> myAllAreaDataList = DataManager.Instance.areaDataList.Where(data => data.player == playerEnum).ToList();
@@ -349,7 +349,7 @@ public class AttackController
 		int nowDiceCount = myAllAreaDataList.Sum(data => data.dice);
 		int maxDiceCount = myAllAreaDataList.Count * 6;
 
-		//ÇöÀç ¸ðµç ÁÖ»çÀ§ ¼ö - ÃÖ´ë ÁÖ»çÀ§ ¼ö + Ã¤¿öÁú ÁÖ»çÀ§ ¼ö 
+		//ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ ï¿½Ö»ï¿½ï¿½ï¿½ ï¿½ï¿½ - ï¿½Ö´ï¿½ ï¿½Ö»ï¿½ï¿½ï¿½ ï¿½ï¿½ + Ã¤ï¿½ï¿½ï¿½ï¿½ ï¿½Ö»ï¿½ï¿½ï¿½ ï¿½ï¿½ 
 		int moreDice = nowDiceCount - maxDiceCount + addDiceCount;
 
 		return moreDice;
@@ -357,16 +357,16 @@ public class AttackController
 
 	public async UniTask HardAttackOn(CancellationTokenSource source)
 	{
-		//³» ÀüÃ¼ ¿µÅä ¼ö
+		//ï¿½ï¿½ ï¿½ï¿½Ã¼ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½
 		int allAreaCount = DataManager.Instance.areaDataList.Where(data => data.player == currentPlayerEnum).Count();
 
-		//°¡Àå Å« ¿µÅä ¼ö
+		//ï¿½ï¿½ï¿½ï¿½ Å« ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½
 		int bigAreaCount = DataManager.Instance.SetBundleKey(currentPlayerEnum).Count;
 
-		//¸ðµç¿µÅäÀÇ ÁÖ»çÀ§°¡ Max ÀÎÁö
+		//ï¿½ï¿½ç¿µï¿½ï¿½ï¿½ï¿½ ï¿½Ö»ï¿½ï¿½ï¿½ï¿½ï¿½ Max ï¿½ï¿½ï¿½ï¿½
 		bool allDiceMaxOn = DataManager.Instance.areaDataList.Where(data => data.player == currentPlayerEnum).All(data => data.IsDiceMax());
 
-		//¸ðµç¶¥ÀÌ ÇÑµ¢¾î¸® ÀÌ°Å³ª ÁÖ»çÀ§ ¼ö°¡ ¸ðµÎ max ¶ó¸é
+		//ï¿½ï¿½ç¶¥ï¿½ï¿½ ï¿½Ñµï¿½ï¿½î¸® ï¿½Ì°Å³ï¿½ ï¿½Ö»ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ max ï¿½ï¿½ï¿½
 		if (allAreaCount == bigAreaCount || allDiceMaxOn)
 		{
 			int moreDice = Mathf.Max(GetMoreDice(currentPlayerEnum), 0);
@@ -382,7 +382,7 @@ public class AttackController
 			await Scenario_1(attackCount , source);
 		}
 
-		//»ó´ë¹æ °¡Àå Å« ¿µÅä °ø°Ý
+		//ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ Å« ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 		//attackCount = await EnemyBigAreaAttack(playerEnum, attackAreaList, attackCount);
 	}
 
@@ -390,12 +390,12 @@ public class AttackController
 	{
 		while (attackCount > 0)
 		{
-			//°¡Àå Å« ¿µÅä¿Í ÀÌ¾îÁö´Â ¿µÅä Ã£±â
+			//ï¿½ï¿½ï¿½ï¿½ Å« ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ì¾ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ Ã£ï¿½ï¿½
 			List<AttackData> attackDataList = await GetAdjTarget();
 
 			if (attackDataList.Count == 0)
 			{
-				//°¡Àå Å« µ¢¾î¸®
+				//ï¿½ï¿½ï¿½ï¿½ Å« ï¿½ï¿½ï¿½î¸®
 				List<AreaData> bigAreaDataList = DataManager.Instance.SetBundleKey(currentPlayerEnum).Where(data => data.dice > 1).ToList();
 
 				attackDataList = GetAttackData(bigAreaDataList, 0);
@@ -443,12 +443,12 @@ public class AttackController
 	{
 		while (attackCount > 0)
 		{
-			//°¡Àå Å« ¿µÅä¿Í ÀÌ¾îÁö´Â ¿µÅä Ã£±â
+			//ï¿½ï¿½ï¿½ï¿½ Å« ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ì¾ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ Ã£ï¿½ï¿½
 			List<AttackData> attackDataList = await GetAdjTarget();
 
 			if (attackDataList.Count == 0)
 			{
-				//°¡Àå Å« µ¢¾î¸®
+				//ï¿½ï¿½ï¿½ï¿½ Å« ï¿½ï¿½ï¿½î¸®
 				List<AreaData> bigAreaDataList = DataManager.Instance.SetBundleKey(currentPlayerEnum).Where(data => data.dice > 1).ToList();
 
 				attackDataList = GetAttackData(bigAreaDataList, 0);
@@ -456,17 +456,17 @@ public class AttackController
 
 			if (attackDataList.Count == 0)
 			{
-				//°¡Àå Å« µ¢¾î¸®
+				//ï¿½ï¿½ï¿½ï¿½ Å« ï¿½ï¿½ï¿½î¸®
 				List<AreaData> bigAreaDataList = DataManager.Instance.SetBundleKey(currentPlayerEnum).Where(data => data.dice > 1).ToList();
 
 				PlayerEnum playerEnum = playerIconController.BestBigPlayer();
 
-				//'°¡Àå Å« ¿µÅä¿¡' ÀÎÁ¢ÇÑ ¿µÅä Áß ÁÖ»çÀ§ °³¼ö°¡ °°À¸¸é¼­, °¡Àå ¿À¸¥ÂÊ ¼ýÀÚ°¡ Å« ÇÃ·¹ÀÌ¾î¿¡ ¼ÓÇÑ ¿µÅä
+				//'ï¿½ï¿½ï¿½ï¿½ Å« ï¿½ï¿½ï¿½ä¿¡' ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½Ö»ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½é¼­, ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ú°ï¿½ Å« ï¿½Ã·ï¿½ï¿½Ì¾î¿¡ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 				attackDataList = GetAttackDataToPlayer(bigAreaDataList, 1, playerEnum);
 
 				if (attackDataList.Count == 0)
 				{
-					//'°¡Àå Å« ¿µÅä¿¡' ÀÎÁ¢ÇÑ ¿µÅä Áß ÁÖ»çÀ§ °³¼ö°¡ °°Àº ³ª¸ÓÁö ¿µÅä
+					//'ï¿½ï¿½ï¿½ï¿½ Å« ï¿½ï¿½ï¿½ä¿¡' ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½Ö»ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 					attackDataList.AddRange(GetAttackData(bigAreaDataList, 1));
 
 					if (attackDataList.Count == 0)
@@ -510,15 +510,15 @@ public class AttackController
 
 	//public async UniTask HardAttackOn_old(List<AreaData> attackAreaList)
 	//{
-	//	//³» ÀüÃ¼ ¿µÅä ¼ö
+	//	//ï¿½ï¿½ ï¿½ï¿½Ã¼ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½
 	//	int allAreaCount = DataManager.Instance.areaDataList.Where(data => data.player == currentPlayerEnum).Count();
 
-	//	//°¡Àå Å« ¿µÅä ¼ö
+	//	//ï¿½ï¿½ï¿½ï¿½ Å« ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½
 	//	int bigAreaCount = DataManager.Instance.SetBundleKey(currentPlayerEnum).Count;
 
 	//	int attackCount = allAreaCount - bigAreaCount;
 
-	//	//¸ðµç¶¥ÀÌ ÇÑµ¢¾î¸® ¶ó¸é
+	//	//ï¿½ï¿½ç¶¥ï¿½ï¿½ ï¿½Ñµï¿½ï¿½î¸® ï¿½ï¿½ï¿½
 	//	if (attackCount == 0)
 	//	{
 	//		int moreDice = Mathf.Max(GetMoreDice(currentPlayerEnum), 0);
@@ -527,11 +527,11 @@ public class AttackController
 	//	}
 	//	else 
 	//	{
-	//		//°¡Àå Å« ¿µÅä¿Í ÀÌ¾îÁö´Â ¿µÅä Ã£±â
+	//		//ï¿½ï¿½ï¿½ï¿½ Å« ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ì¾ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ Ã£ï¿½ï¿½
 	//		attackCount = await MyBigAreaContinueAttack(attackCount);
 	//	}
 
-	//	//»ó´ë¹æ °¡Àå Å« ¿µÅä °ø°Ý
+	//	//ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ Å« ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 	//	attackCount = await EnemyBigAreaAttack(attackAreaList, attackCount);
 	//}
 
@@ -587,7 +587,7 @@ public class AttackController
 	//		return 0;
 	//	}
 
-	//	//°¡Àå Å« ¿µÅä¿Í ÀÌ¾îÁö´Â ¿µÅä Ã£±â
+	//	//ï¿½ï¿½ï¿½ï¿½ Å« ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ì¾ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ Ã£ï¿½ï¿½
 	//	List<AttackData> attackDataList = await GetAdjTarget();
 
 	//	if (attackDataList.Count != 0)
@@ -628,16 +628,16 @@ public class AttackController
 
 	//	Dictionary<PlayerEnum, List<AreaData>> areaDataDic = new Dictionary<PlayerEnum, List<AreaData>>();
 
-	//	//º»ÀÎ Á¦¿Ü Å« µ¢¾î¸®µé ¿µÅäÁ¤º¸ Ãëµæ
+	//	//ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ Å« ï¿½ï¿½ï¿½î¸®ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½
 	//	List<AreaData> bigAreaDataList = new List<AreaData>();
 
 	//	foreach (var playerIcon in playerIconList)
 	//	{
-	//		//Ã¼Å© ´ë»óÀÌ º»ÀÎÀÌ¶ó¸é
+	//		//Ã¼Å© ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ì¶ï¿½ï¿½
 	//		if (playerIcon.playerEnum == playerEnum)
 	//			continue;
 
-	//		//µ¿¸ÍÀÌ¶ó¸é
+	//		//ï¿½ï¿½ï¿½ï¿½ï¿½Ì¶ï¿½ï¿½
 	//		if (DataManager.Instance.IsAllAlliance(new List<PlayerEnum>() { playerEnum, playerIcon.playerEnum }))
 	//			continue;
 
@@ -707,7 +707,7 @@ public class AttackController
 
 		await inGameBottomController.nonePlayPanel.AttackOn(myDiceWarData, enemyDiceWarData , source);
 
-		//Á¡·É¿¡ ¼º°øÇÏ¿´´Ù¸é
+		//ï¿½ï¿½ï¿½É¿ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ï¿ï¿½ï¿½Ù¸ï¿½
 
 		bool win = myDiceWarData.diceSum > enemyDiceWarData.diceSum;
 

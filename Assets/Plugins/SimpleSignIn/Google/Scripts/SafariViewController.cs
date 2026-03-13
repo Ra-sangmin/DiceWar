@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using UnityEngine;
 
 #if UNITY_IOS && !UNITY_EDITOR

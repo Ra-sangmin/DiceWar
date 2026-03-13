@@ -1,4 +1,4 @@
-namespace AppleAuth.Interfaces
+﻿namespace AppleAuth.Interfaces
 {
     public interface IPasswordCredential : ICredential
     {

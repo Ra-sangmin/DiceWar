@@ -1,4 +1,4 @@
-// WARNING: Do not modify! Generated file.
+﻿// WARNING: Do not modify! Generated file.
 
 namespace UnityEngine.Purchasing.Security {
     public class GooglePlayTangle

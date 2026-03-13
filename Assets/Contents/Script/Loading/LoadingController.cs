@@ -70,15 +70,22 @@ public class LoadingController : MonoBehaviour
 
         SetData();
     }
-    private void OnDestroy()
-    {
-        if (DataManager.Instance.isMultiOn)
-        {
-            ServerManager.Instance.receiveDataOn -= ReceiveDataOn;
-        }
-    }
+	private void OnDestroy()
+	{
+		// 1. DataManager가 아직 메모리에 존재하는지 먼저 확인
+		var dataManager = DataManager.Instance;
+		if (dataManager != null && dataManager.isMultiOn)
+		{
+			// 2. ServerManager도 살아있는지 확인 후 이벤트 해제
+			var serverManager = ServerManager.Instance;
+			if (serverManager != null)
+			{
+				serverManager.receiveDataOn -= ReceiveDataOn;
+			}
+		}
+	}
 
-    private void ResetData()
+	private void ResetData()
     {
         //ResetText();
         ResetToggleIndex();

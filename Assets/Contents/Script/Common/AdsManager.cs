@@ -1,4 +1,4 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 using UnityEngine.Advertisements;
 
 public class AdsManager : MonoSingleton<AdsManager>, IUnityAdsInitializationListener
@@ -51,7 +51,7 @@ public class AdsManager : MonoSingleton<AdsManager>, IUnityAdsInitializationList
 
     void ShowCompletOn(UnityAdsShowCompletionState state)
     {
-        //±¤°í ½ÃÃ»À» ¿Ï·áÇÏ¿´´Ù¸é
+        //ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Ã»ï¿½ï¿½ ï¿½Ï·ï¿½ï¿½Ï¿ï¿½ï¿½Ù¸ï¿½
         if (state.Equals(UnityAdsShowCompletionState.COMPLETED))
         {
             DataManager.Instance.AddCoin(addCoinCount);

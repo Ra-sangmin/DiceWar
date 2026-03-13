@@ -1,4 +1,4 @@
-using NUnit.Framework;
+ï»¿using NUnit.Framework;
 using UnityEngine;
 using System;
 using System.Collections.Generic;
@@ -202,17 +202,17 @@ public class ApproveController : MonoBehaviour
 
 		if (approveOn)
 		{
-			//µ¿¸Í Á¦¾È ¼ö¶ôÀ» Çß´Ù¸é, ´Ù¸¥ µ¿¸Í Á¦¾È »èÁ¦
+			//ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ß´Ù¸ï¿½, ï¿½Ù¸ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 			if (approveData.isAlliance)
 			{
 				approveDataList = approveDataList.Where(data => data.isAlliance == false).ToList();
 			}
-			//¿µÅä °Å·¡ ¼ö¶ôÀ» Çß´Ù¸é
+			//ï¿½ï¿½ï¿½ï¿½ ï¿½Å·ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ß´Ù¸ï¿½
 			else 
 			{
 				bool buyOn = approveData.landTradeRequest.buyOn;
 
-				//¿µÅä ±¸¸Å Á¦¾È ÀÌ¾ú´Ù¸é
+				//ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ì¾ï¿½ï¿½Ù¸ï¿½
 				if (buyOn)
 				{
 					int areaIndex = approveData.landTradeRequest.areaData.id;

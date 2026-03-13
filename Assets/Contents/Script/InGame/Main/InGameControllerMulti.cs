@@ -1,4 +1,4 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -108,7 +108,11 @@ public class InGameControllerMulti : InGameControllerBase
 
 	private void OnDestroy()
 	{
-		ServerManager.Instance.receiveDataOn -= ReceiveDataOn;
+		// [ìˆ˜ì •] ServerManager ì¸ìŠ¤í„´ìŠ¤ê°€ íŒŒê´´ë˜ì§€ ì•Šê³  ì‚´ì•„ìˆì„ ë•Œë§Œ ì´ë²¤íŠ¸ë¥¼ í•´ì œí•©ë‹ˆë‹¤.
+		if (ServerManager.Instance != null)
+		{
+			ServerManager.Instance.receiveDataOn -= ReceiveDataOn;
+		}
 	}
 
 	protected override void GameStartOn()
@@ -197,7 +201,7 @@ public class InGameControllerMulti : InGameControllerBase
 
 				AttackRequest attackRequest = (AttackRequest)baseRequest;
 
-				//³»°¡ °ø°İÇÑ Á¤º¸°¡ ¾Æ´Ï¶ó¸é
+				//ë‚´ê°€ ê³µê²©í•œ ì •ë³´ê°€ ì•„ë‹ˆë¼ë©´
 				if (attackRequest.fromAreaData.player != DataManager.Instance.playerData.pe)
 				{
 					PlayerData player = DataManager.Instance.GetPlayerData(attackRequest.fromAreaData.player);
@@ -251,7 +255,7 @@ public class InGameControllerMulti : InGameControllerBase
 					currentAreaData.PlayerChangeOn(changePlayerEnum);
 					mapController.playerIconController.SetBundleKeyuAll();
 
-					// ³»°¡ °Å·¡ ´ë»óÀÌ¶ó¸é
+					// ë‚´ê°€ ê±°ë˜ ëŒ€ìƒì´ë¼ë©´
 					if (tradeData.fromPlayerEnum == myPlayer || tradeData.toPlayerEnum == myPlayer)
 					{
 						//if (tradeData.fromPlayerEnum == myPlayer)
@@ -261,7 +265,7 @@ public class InGameControllerMulti : InGameControllerBase
 
 						int coinCount = tradeData.coinCount;
 
-						//³»°¡ ¶¥À» »ò°Å³ª, »ó´ë¹æÀÌ ³ª¿¡°Ô ¶¥À» ÆÈ¾Ò´Ù¸é
+						//ë‚´ê°€ ë•…ì„ ìƒ€ê±°ë‚˜, ìƒëŒ€ë°©ì´ ë‚˜ì—ê²Œ ë•…ì„ íŒ”ì•˜ë‹¤ë©´
 						if (tradeData.fromPlayerEnum == myPlayer && tradeData.buyOn ||
 							tradeData.toPlayerEnum == myPlayer && tradeData.buyOn == false)
 						{
@@ -278,7 +282,7 @@ public class InGameControllerMulti : InGameControllerBase
 
 				AllianceRequest allianceRequest = (AllianceRequest)baseRequest;
 
-				//º»ÀÎÀÌ ¿À´õ ÇÃ·¹ÀÌ¾î ¶ó¸é
+				//ë³¸ì¸ì´ ì˜¤ë” í”Œë ˆì´ì–´ ë¼ë©´
 				if (allianceRequest.orderData.playerEnum == myPlayer)
 				{
 					allianceRequestData = allianceRequest;
@@ -305,7 +309,7 @@ public class InGameControllerMulti : InGameControllerBase
 
 				AllianceApproveRequest allianceApproveRequest = (AllianceApproveRequest)baseRequest;
 
-				//º»ÀÎÀÌ ¿À´õ ÇÃ·¹ÀÌ¾î ¶ó¸é
+				//ë³¸ì¸ì´ ì˜¤ë” í”Œë ˆì´ì–´ ë¼ë©´
 				if (allianceApproveRequest.orderData.playerEnum == myPlayer)
 				{
 					if (allianceRequestData == null)
@@ -314,7 +318,7 @@ public class InGameControllerMulti : InGameControllerBase
 					if (allianceApproveRequest.approveOn == false)
 					{
 						allianceRequestData = null;
-						//½ÇÆĞ ¸Ş½ÃÁö Ç¥½Ã
+						//ì‹¤íŒ¨ ë©”ì‹œì§€ í‘œì‹œ
 						break;
 					}
 
@@ -360,7 +364,7 @@ public class InGameControllerMulti : InGameControllerBase
 
 				nonePlayPanel.AllianceClearOn(allianceBetrayRequest.allianceDataList);
 
-				//³»°¡ ¹è½ÅÇÑ°ÍÀÌ¶ó¸é
+				//ë‚´ê°€ ë°°ì‹ í•œê²ƒì´ë¼ë©´
 				if (allianceBetrayRequest.betrayPlayerEnum == myPlayer)
 				{
 					mapController.inGameBottomController.nonePlayPanel.SkillUseOn();
@@ -369,7 +373,7 @@ public class InGameControllerMulti : InGameControllerBase
 					DataManager.Instance.AddCoin(-addCoin);
 				}
 
-				//³²Àº µ¿¸ÍÀÌ 1¸í»ÓÀÎÁö Ã¼Å©
+				//ë‚¨ì€ ë™ë§¹ì´ 1ëª…ë¿ì¸ì§€ ì²´í¬
 				DataManager.Instance.AllianceClearCheckOn(mapController.playerIconController);
 
 				nonePlayPanel.SetNoneBtn();
@@ -400,7 +404,7 @@ public class InGameControllerMulti : InGameControllerBase
 
 				int currentIndex = DataManager.Instance.currentTurnIndex;
 
-				//³»°¡ ¿À³Ê ÇÃ·¹ÀÌ¾î°¡ µÇ¾ú´Ù¸é
+				//ë‚´ê°€ ì˜¤ë„ˆ í”Œë ˆì´ì–´ê°€ ë˜ì—ˆë‹¤ë©´
 				if (DataManager.Instance.isOwner)
 				{
 					PlayerData playerData = DataManager.Instance.playerDataList[currentIndex];

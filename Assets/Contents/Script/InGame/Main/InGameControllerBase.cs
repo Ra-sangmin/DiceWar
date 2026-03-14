@@ -198,7 +198,7 @@ public class InGameControllerBase : MonoBehaviour
 			}
 			catch (OperationCanceledException)
 			{
-				Debug.LogWarning("cancleOn");
+				//Debug.LogWarning("cancleOn");
 			}
 			
 		}
@@ -280,27 +280,49 @@ public class InGameControllerBase : MonoBehaviour
 
 	public void NewGameOn()
 	{
+		NewGameProcessAsync().Forget();
+	}
+	private async UniTaskVoid NewGameProcessAsync()
+	{
 		TokenSourceInit();
 
 		DataManager.Instance.gameStart.SetValueAndForceNotify(false);
 		DataManager.Instance.playOn = false;
 		DataManager.Instance.AddCoin(-DataManager.Instance.GetNeedCoin());
 
+		DataManager.Instance.GameDataClearOn();
+
 		if (DataManager.Instance.isMultiOn)
 		{
+			// 1. 매너 있게 종료 패킷 발송
 			ServerManager.Instance.GameOutRequestOn();
+
+			// 2. 패킷이 서버에 도착할 시간 아주 잠깐(0.5초) 대기
+			await UniTask.Delay(100);
+
+			// 3. 🚀 [핵심] 낡은 통로를 아예 박살내고 버립니다. (재연결은 여기서 안 함!)
+			if (ServerManager.Instance != null)
+			{
+				ServerManager.Instance.DisconnectServer();
+				ServerManager.Instance.roomDataIndex = -1;
+			}
+
+			// 4. 기존 백그라운드 스레드가 확실히 죽고 서버가 청소할 시간 1초 대기
+			await UniTask.Delay(300);
+
+			// 5. 로딩 씬 진입 -> 여기서 GameReady를 쏠 때 알아서 '새 통로'가 뚫립니다!
 			SceneManager.LoadScene("Loading");
 		}
 		else
 		{
 			mapController.NewGameOn();
-
 			if (DataManager.Instance.mapSelectionOn == false)
 			{
 				GameStartOn();
 			}
 		}
 	}
+
 	public void ReStartOn()
 	{
 		RestartOnPlay().Forget();

@@ -65,8 +65,12 @@ public class LoadingController : MonoBehaviour
 
 		if (DataManager.Instance.isMultiOn)
         {
-            ServerManager.Instance.receiveDataOn += ReceiveDataOn;
-        }
+			ServerManager.Instance.ClearQueue();
+
+			ServerManager.Instance.receiveDataOn += ReceiveDataOn;
+
+			ServerManager.Instance.receiveOn = true;
+		}
 
         SetData();
     }
@@ -93,7 +97,7 @@ public class LoadingController : MonoBehaviour
 
     private void ReceiveDataOn(BaseTCPRequest baseRequest)
     {
-        //Debug.LogWarning(baseRequest.requestProtocal);
+        //Debug.LogWarning("Protocal = " + baseRequest.requestProtocal);
 
         switch (baseRequest.requestProtocal)
         {
@@ -275,6 +279,8 @@ public class LoadingController : MonoBehaviour
 
 		if (DataManager.Instance.isMultiOn)
         {
+            //Debug.LogWarning(" isOwner = " + DataManager.Instance.isOwner);
+
             //오너 플레이어 라면 맵 생성 진행 ( 1명이 맵을 생성후 배포 한다 )
             if (DataManager.Instance.isOwner)
             {

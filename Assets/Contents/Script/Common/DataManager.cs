@@ -964,6 +964,17 @@ public class DataManager : MonoSingleton<DataManager>
 		AllianceClearOn();
         StashCountClearOn();
         SetCurrentTurnIndex(0);
+
+		// [추가] 새 게임 시 이전 게임의 상태값들을 완벽하게 초기화합니다.
+		myTurnCount = 0;
+		playOn = false;
+		turnPosition = -1;
+
+		// [핵심] 이전 방에서 날아오던 패킷 찌꺼기를 완전히 비워줍니다.
+		if (isMultiOn && ServerManager.Instance != null)
+		{
+			ServerManager.Instance.ClearQueue();
+		}
 	}
 
     void PlayerDataClearOn()

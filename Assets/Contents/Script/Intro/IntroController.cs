@@ -81,6 +81,8 @@ public class IntroController : MonoBehaviour
 
 	private void LoginClear(UserData tempUserData)
     {
+		Debug.LogWarning("tempUserData.email = " + tempUserData.email);
+
 		UserDataRequest request = new UserDataRequest()
         {
             requestStatus = 0,

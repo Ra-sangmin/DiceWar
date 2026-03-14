@@ -4,42 +4,76 @@ using UnityEditor;
 using UnityEditor.Callbacks;
 using UnityEditor.iOS.Xcode;
 using System.IO;
+using System.Text.RegularExpressions;
 
 public class GoogleAuthXcodePostProcess
 {
-    // 빌드가 끝난 직후(999번째 순서로) 자동으로 실행되는 함수입니다.
     [PostProcessBuild(999)]
     public static void OnPostProcessBuild(BuildTarget buildTarget, string path)
     {
         if (buildTarget == BuildTarget.iOS)
         {
-            Debug.Log("🚀 [Google Sign-In] Xcode 자동 수술을 시작합니다...");
+            Debug.Log("🚀 [Google Sign-In] Xcode 100% 자동 수술 및 파일 배달을 시작합니다...");
 
-			// 1. Info.plist 수정 (URL Scheme 및 HTTP 허용 자동 추가)
-			string plistPath = Path.Combine(path, "Info.plist");
-			PlistDocument plist = new PlistDocument();
-			plist.ReadFromString(File.ReadAllText(plistPath));
+            // --- [추가] 0. GoogleService-Info.plist 강제 등록 로직 ---
+            string googleConfigName = "GoogleService-Info.plist";
+            // 💥 주의: 현재 유니티 프로젝트 내 실제 파일 이름이 .plist가 없다면 
+            // 아래 sourcePath의 파일명을 실제 파일명과 똑같이 맞춰주세요.
+            string sourcePath = Path.Combine(Application.dataPath, "Plugins/iOS/GoogleService-Info"); 
+            
+            // 만약 파일명을 이미 .plist로 바꾸셨다면 위 줄 대신 아래 줄을 쓰세요.
+            if (!File.Exists(sourcePath)) sourcePath += ".plist";
 
-			// --- (기존에 넣었던 URL Scheme 코드) ---
-			string reversedClientId = "com.googleusercontent.apps.미쿠짱의아이디를여기에넣으세요";
-			PlistElementArray urlTypes = plist.root.values.ContainsKey("CFBundleURLTypes")
-				? plist.root["CFBundleURLTypes"].AsArray()
-				: plist.root.CreateArray("CFBundleURLTypes");
-			PlistElementDict urlDict = urlTypes.AddDict();
-			urlDict.SetString("CFBundleTypeRole", "Editor");
-			urlDict.SetString("CFBundleURLName", "google_sign_in");
-			urlDict.CreateArray("CFBundleURLSchemes").AddString(reversedClientId);
+            string destPath = Path.Combine(path, googleConfigName);
 
-			// 💥 [여기에 HTTP 통신 허용 코드 추가!] 💥
-			PlistElementDict atsDict = plist.root.values.ContainsKey("NSAppTransportSecurity")
-				? plist.root["NSAppTransportSecurity"].AsDict()
-				: plist.root.CreateDict("NSAppTransportSecurity");
-			atsDict.SetBoolean("NSAllowsArbitraryLoads", true); // http 통신 강제 허용!
+            if (File.Exists(sourcePath))
+            {
+                // Xcode 빌드 폴더로 파일 복사
+                File.Copy(sourcePath, destPath, true);
 
-			File.WriteAllText(plistPath, plist.WriteToString());
+                // 프로젝트 설정 열기
+                string projPath = PBXProject.GetPBXProjectPath(path);
+                PBXProject proj = new PBXProject();
+                proj.ReadFromString(File.ReadAllText(projPath));
 
-			// 2. Podfile 수정 (Firebase 자동 추가)
-			string podfilePath = Path.Combine(path, "Podfile");
+                // 빌드 타겟(Unity-iPhone) 가져오기
+                string targetGuid = proj.GetUnityMainTargetGuid();
+
+                // 파일 등록 및 빌드 타겟에 추가
+                string fileGuid = proj.AddFile(googleConfigName, googleConfigName, PBXSourceTree.Source);
+                proj.AddFileToBuild(targetGuid, fileGuid);
+
+                proj.WriteToFile(projPath);
+                Debug.Log("✅ [Google Config] GoogleService-Info.plist 배달 완료!");
+            }
+            else
+            {
+                Debug.LogError($"❌ [Google Config] 파일을 찾을 수 없습니다! 경로 확인 필수: {sourcePath}");
+            }
+
+            // --- 1. Info.plist 수정 ---
+            string plistPath = Path.Combine(path, "Info.plist");
+            PlistDocument plist = new PlistDocument();
+            plist.ReadFromString(File.ReadAllText(plistPath));
+
+            string reversedClientId = "com.googleusercontent.apps.176126443286-8baeh3vp2ppjtt6t0sc2q97fs30n6hul";
+            PlistElementArray urlTypes = plist.root.values.ContainsKey("CFBundleURLTypes")
+                ? plist.root["CFBundleURLTypes"].AsArray()
+                : plist.root.CreateArray("CFBundleURLTypes");
+            PlistElementDict urlDict = urlTypes.AddDict();
+            urlDict.SetString("CFBundleTypeRole", "Editor");
+            urlDict.SetString("CFBundleURLName", "google_sign_in");
+            urlDict.CreateArray("CFBundleURLSchemes").AddString(reversedClientId);
+
+            PlistElementDict atsDict = plist.root.values.ContainsKey("NSAppTransportSecurity")
+                ? plist.root["NSAppTransportSecurity"].AsDict()
+                : plist.root.CreateDict("NSAppTransportSecurity");
+            atsDict.SetBoolean("NSAllowsArbitraryLoads", true); 
+
+            File.WriteAllText(plistPath, plist.WriteToString());
+
+            // --- 2. Podfile 수정 ---
+            string podfilePath = Path.Combine(path, "Podfile");
             if (File.Exists(podfilePath))
             {
                 string podfileContent = File.ReadAllText(podfilePath);
@@ -51,24 +85,33 @@ public class GoogleAuthXcodePostProcess
                 }
             }
 
-            // 3. C++ 코드 자동 수술
-            // 프로젝트 내의 모든 .mm 파일을 뒤져서 해당 파일을 찾아냅니다.
-            string[] allFiles = Directory.GetFiles(path, "*.mm", SearchOption.AllDirectories);
+            // --- 3. C++ 및 헤더 코드 자동 수술 ---
+            string[] allFiles = Directory.GetFiles(path, "*.*", SearchOption.AllDirectories);
             foreach (string filePath in allFiles)
             {
-                // [수술 1] GoogleSignInAppController.mm
+                if (!filePath.EndsWith(".mm") && !filePath.EndsWith(".h")) continue;
+
+                string code = File.ReadAllText(filePath);
+                bool isChanged = false;
+
+                if (Regex.IsMatch(code, @"\,\s*GIDSignInUIDelegate"))
+                {
+                    code = Regex.Replace(code, @"\,\s*GIDSignInUIDelegate", "");
+                    isChanged = true;
+                }
+                if (Regex.IsMatch(code, @"signIn\.uiDelegate\s*=\s*gsiHandler;"))
+                {
+                    code = Regex.Replace(code, @"signIn\.uiDelegate\s*=\s*gsiHandler;", "// signIn.uiDelegate = gsiHandler;");
+                    isChanged = true;
+                }
+
                 if (filePath.EndsWith("GoogleSignInAppController.mm"))
                 {
-                    string code = File.ReadAllText(filePath);
-                    
-                    // 옛날 코드 주석 처리 및 삭제
-                    code = code.Replace("<GIDSignInDelegate, GIDSignInUIDelegate>", "<GIDSignInDelegate>");
-                    code = code.Replace("signIn.uiDelegate = gsiHandler;", "// signIn.uiDelegate = gsiHandler;");
-                    
-                    // init 추가
-                    code = code.Replace("gsiHandler = [GoogleSignInHandler alloc];", "gsiHandler = [[GoogleSignInHandler alloc] init];");
+                    if (code.Contains("gsiHandler = [GoogleSignInHandler alloc];")) {
+                        code = code.Replace("gsiHandler = [GoogleSignInHandler alloc];", "gsiHandler = [[GoogleSignInHandler alloc] init];");
+                        isChanged = true;
+                    }
 
-                    // 바닥(화면) 지정 및 사파리 직통 알림망 설치
                     if (!code.Contains("kUnityOnOpenURL"))
                     {
                         string injection = @"signIn.delegate = gsiHandler;
@@ -82,39 +125,49 @@ public class GoogleAuthXcodePostProcess
       if (url) { [[GIDSignIn sharedInstance] handleURL:url]; }
   }];";
                         code = code.Replace("signIn.delegate = gsiHandler;", injection);
+                        isChanged = true;
                     }
 
-                    // handleURL 매개변수 축소
-                    code = code.Replace("return [[GIDSignIn sharedInstance] handleURL:url\n                             sourceApplication:sourceApplication\n                                    annotation:annotation];", "return [[GIDSignIn sharedInstance] handleURL:url];");
-                    
-                    File.WriteAllText(filePath, code);
-                    Debug.Log("💉 GoogleSignInAppController.mm 수술 완료!");
+                    string pattern1 = @"handleURL:url\s*sourceApplication:sourceApplication\s*annotation:annotation";
+                    if (Regex.IsMatch(code, pattern1, RegexOptions.Singleline)) {
+                        code = Regex.Replace(code, pattern1, "handleURL:url", RegexOptions.Singleline);
+                        isChanged = true;
+                    }
+
+                    string pattern2 = @"handleURL:url\s*sourceApplication:\s*options\[UIApplicationOpenURLOptionsSourceApplicationKey\]\s*annotation:\s*options\[UIApplicationOpenURLOptionsAnnotationKey\]";
+                    if (Regex.IsMatch(code, pattern2, RegexOptions.Singleline)) {
+                        code = Regex.Replace(code, pattern2, "handleURL:url", RegexOptions.Singleline);
+                        isChanged = true;
+                    }
                 }
 
-                // [수술 2] GoogleSignIn.mm
                 if (filePath.EndsWith("GoogleSignIn.mm"))
                 {
-                    string code = File.ReadAllText(filePath);
+                    if (code.Contains("[[GIDSignIn sharedInstance] signInSilently];")) {
+                        code = code.Replace("[[GIDSignIn sharedInstance] signInSilently];", "[[GIDSignIn sharedInstance] restorePreviousSignIn];");
+                        isChanged = true;
+                    }
                     
-                    // 이름 바뀐 함수 적용
-                    code = code.Replace("[[GIDSignIn sharedInstance] signInSilently];", "[[GIDSignIn sharedInstance] restorePreviousSignIn];");
-                    
-                    // signIn 호출 전 바탕화면 강제 지정
-                    if (!code.Contains("keyWindow.rootViewController"))
+                    if (!code.Contains("keyWindow.rootViewController") && code.Contains("[[GIDSignIn sharedInstance] signIn];"))
                     {
                         code = code.Replace("[[GIDSignIn sharedInstance] signIn];", 
                             "[GIDSignIn sharedInstance].presentingViewController = [UIApplication sharedApplication].keyWindow.rootViewController;\n    [[GIDSignIn sharedInstance] signIn];");
+                        isChanged = true;
                     }
 
-                    // 없는 에러코드 주석처리
-                    code = code.Replace("case kGIDSignInErrorCodeNoSignInHandlersInstalled:", "// case kGIDSignInErrorCodeNoSignInHandlersInstalled:");
+                    if (code.Contains("case kGIDSignInErrorCodeNoSignInHandlersInstalled:")) {
+                        code = code.Replace("case kGIDSignInErrorCodeNoSignInHandlersInstalled:", "// case kGIDSignInErrorCodeNoSignInHandlersInstalled:");
+                        isChanged = true;
+                    }
+                }
 
+                if (isChanged)
+                {
                     File.WriteAllText(filePath, code);
-                    Debug.Log("💉 GoogleSignIn.mm 수술 완료!");
                 }
             }
             
-            Debug.Log("✨ [Google Sign-In] Xcode 자동화 세팅이 완벽하게 끝났습니다!");
+            Debug.Log("✨ [Google Sign-In] 모든 자동화 작업이 성공적으로 끝났습니다!");
         }
     }
 }

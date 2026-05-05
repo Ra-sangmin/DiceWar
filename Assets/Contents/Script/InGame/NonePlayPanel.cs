@@ -210,17 +210,30 @@ public class NonePlayPanel : MonoBehaviour
         return DataManager.Instance.GetMyPlayerData().sc <= 0;
     }
 
+    public void SkillCardAddOn(List<PlayerEnum> playerList)
+    {
+        foreach (PlayerEnum playerEnum in playerList)
+        {
+			DataManager.Instance.SkillCardCountAddOn(playerEnum);
+		}
+	}
+
     public void SkillUseOn(int addCount = -1)
     {
         DataManager.Instance.SkillCardCountAdd(addCount);
 
-        skillCard.SetCountIcon(DataManager.Instance.GetMyPlayerData().pe);
+        SkillCardReset();
+	}
 
-        if (SkillAlreadyUseCheck())
-        {
-            SkillCardPanelActiveOn(false);
-        }
-    }
+    public void SkillCardReset()
+    {
+		skillCard.SetCountIcon(DataManager.Instance.GetMyPlayerData().pe);
+
+		if (SkillAlreadyUseCheck())
+		{
+			SkillCardPanelActiveOn(false);
+		}
+	}
 
     public void SetStashText()
     {

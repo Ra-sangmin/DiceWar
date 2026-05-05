@@ -5024,6 +5024,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   playerImage: {fileID: 6575057659729000428}
+  playerRandomSprite: {fileID: 21300000, guid: 8c88cc16c8680f749b0ea89b73e7cda6, type: 3}
   playerSpriteList:
   - {fileID: 21300000, guid: 56e12fdbcda204b4bad80e6f75fdd451, type: 3}
   - {fileID: 21300000, guid: 2bb729be88f9267459cf55ea7a2c32b2, type: 3}

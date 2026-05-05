@@ -60,7 +60,12 @@ public class PlayerIconController : MonoBehaviour
 
     public void SetMyEffect()
     {
-        PlayerEnum myPlayerEnum = DataManager.Instance.playerData.pe;
+		for (int i = 0; i < playerIconList.Count; i++)
+		{
+			playerIconList[i].SetMyTurnEffectOff();
+		}
+
+		PlayerEnum myPlayerEnum = DataManager.Instance.playerData.pe;
 
         PlayerIcon myPlayerIcon = playerIconList.FirstOrDefault(data => data.playerEnum == myPlayerEnum);
 
@@ -130,8 +135,26 @@ public class PlayerIconController : MonoBehaviour
         return playerIconList.Where(data => data.gameObject.activeSelf).ToList();
     }
 
-    //각 플레이어 별로 연결된 영토 확인
-    public void SetBundleKey(PlayerIcon checkPlayerIcon)
+    public List<PlayerEnum> GetActiveDiceLowerList()
+    {
+        //연결된 영토가 작은 순으로 취득
+        List<PlayerEnum> allActiveList = GetActiveList().OrderBy(data => data.connectedCount).Select(data => data.playerEnum).ToList();
+
+        //하위 순위권 플레이어 숫자 취득
+        int listCount = (int)Math.Round(allActiveList.Count / 2.0f);
+
+        List<PlayerEnum> resultList = new List<PlayerEnum>();
+
+        for (int i = 0; i < listCount; i++)
+        {
+            resultList.Add(allActiveList[i]);
+		}
+
+		return resultList;
+	}
+
+	//각 플레이어 별로 연결된 영토 확인
+	public void SetBundleKey(PlayerIcon checkPlayerIcon)
     {
         PlayerEnum checkEnum = checkPlayerIcon.playerEnum;
 

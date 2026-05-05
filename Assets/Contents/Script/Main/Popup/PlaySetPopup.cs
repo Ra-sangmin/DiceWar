@@ -10,8 +10,9 @@ using UnityEngine.SceneManagement;
 public class PlaySetPopup : MonoBehaviour
 {
     [SerializeField] Image playerImage;
-    [SerializeField] List<Sprite> playerSpriteList = new List<Sprite>();
-    [SerializeField] List<SMToggle> aIToggleList = new List<SMToggle>();
+	[SerializeField] Sprite playerRandomSprite;
+	[SerializeField] List<Sprite> playerSpriteList = new List<Sprite>();
+	[SerializeField] List<SMToggle> aIToggleList = new List<SMToggle>();
     [SerializeField] List<SMToggle> mapSizeToggleList = new List<SMToggle>();
     [SerializeField] List<SMToggle> playersCountToggleList = new List<SMToggle>();
 	[SerializeField] List<RectTransform> colorPanelList = new List<RectTransform>();
@@ -64,7 +65,10 @@ public class PlaySetPopup : MonoBehaviour
 
 		if (multiOn)
 		{
-            SetMultiToggle();
+			DataManager.Instance.randomPositionOn = false;
+			playerImage.sprite = playerRandomSprite;
+			playerImage.SetNativeSize();
+			SetMultiToggle();
 		}
         else
         {
@@ -133,7 +137,7 @@ public class PlaySetPopup : MonoBehaviour
 
         switch (aiLevel)
         {
-            case AILevel.Easy: activeCount = 0;
+            case AILevel.Easy: activeCount = 1;
 				break;
 			case AILevel.Normal: activeCount = 1;
 				break;
@@ -209,12 +213,16 @@ public class PlaySetPopup : MonoBehaviour
 
 
 		DataManager.Instance.SetPlayerMaxCnt(playerMaxCnt);
-        SetTurnPosition(DataManager.Instance.turnPosition);
 
-        if (playerColorIndex >= DataManager.Instance.num_player)
+        if (DataManager.Instance.randomPositionOn == false)
         {
-            playerColorIndex = DataManager.Instance.num_player - 1;
-			SetColorData();
+			SetTurnPosition(DataManager.Instance.turnPosition);
+
+			if (playerColorIndex >= DataManager.Instance.num_player)
+			{
+				playerColorIndex = DataManager.Instance.num_player - 1;
+				SetColorData();
+			}
 		}
 
         SetVictoryRewardText();
@@ -253,14 +261,14 @@ public class PlaySetPopup : MonoBehaviour
 			//if (playerColorIndex >= playerSpriteList.Count)
 			if (playerColorIndex >= DataManager.Instance.num_player)
 			{
-                playerColorIndex = 0;
+                playerColorIndex = -1;
             }
         }
         else
         {
             playerColorIndex--;
 
-            if (playerColorIndex < 0)
+            if (playerColorIndex < -1)
             {
                 playerColorIndex = DataManager.Instance.num_player - 1;
             }
@@ -271,10 +279,19 @@ public class PlaySetPopup : MonoBehaviour
 
     void SetColorData()
     {
-        playerImage.sprite = playerSpriteList[playerColorIndex];
-        playerImage.SetNativeSize();
-
-        DataManager.Instance.SetCurrentPlayerColor(playerColorIndex);
+        if (playerColorIndex == -1)
+        {
+			playerImage.sprite = playerRandomSprite;
+			playerImage.SetNativeSize();
+            DataManager.Instance.randomPositionOn = true;
+		}
+        else
+        {
+			playerImage.sprite = playerSpriteList[playerColorIndex];
+			playerImage.SetNativeSize();
+			DataManager.Instance.SetCurrentPlayerColor(playerColorIndex);
+			DataManager.Instance.randomPositionOn = false;
+		}
     }
 
     public void PlayBtnClickOn()

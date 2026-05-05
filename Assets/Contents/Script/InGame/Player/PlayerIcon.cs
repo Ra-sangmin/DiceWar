@@ -73,7 +73,12 @@ public class PlayerIcon : MonoBehaviour
         selectIconImage.gameObject.SetActive(activeOn);
     }
 
-    public void BtnClickOn()
+	public void SetMyTurnEffectOff()
+	{
+		selectIconImage.gameObject.SetActive(false);
+	}
+
+	public void BtnClickOn()
     {
         playerClickOn(this);
     }

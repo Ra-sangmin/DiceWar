@@ -3,6 +3,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using UniRx;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -32,6 +33,8 @@ public class DataManager : MonoSingleton<DataManager>
     public bool choosePositionOn = false;
     public bool mapSelectionOn = true;
     public bool diceCompensationOn = false;
+
+    public bool randomPositionOn = false;
 
     //-1 = random , 0 ~ 6 selectPosition 
     public int turnPosition = -1;
@@ -100,7 +103,9 @@ public class DataManager : MonoSingleton<DataManager>
     {
 		soundOn = PlayerPrefs.GetInt(soundOnKey, 1) == 1;
 		SoundManager.Instance.SoundOffOn(!soundOn);
-		mapCompensation = PlayerPrefs.GetInt(mapCompensationKey , 1) == 1;
+
+        mapCompensation = false;
+		mapCompensation = PlayerPrefs.GetInt(mapCompensationKey , 0) == 1;
 	}
 
 
@@ -119,6 +124,7 @@ public class DataManager : MonoSingleton<DataManager>
 		if (userData == null)
 		{
             UserDataRespons data = new UserDataRespons() { email = "fktkdals1@gmail.com" };
+			data.freeCoin = 1000;
 			UserDataSave(data);
 		}
 	}
@@ -126,7 +132,7 @@ public class DataManager : MonoSingleton<DataManager>
 	public void UserDataSave(UserDataRespons data)
     {
 #if UNITY_STANDALONE
-        data.freeCoin = 100;
+        data.freeCoin = 1000;
 #endif
 
 		userData = new UserData(data.email, data.snsType, data.freeCoin , data.chargeCoin);
@@ -143,9 +149,13 @@ public class DataManager : MonoSingleton<DataManager>
         List<int> colorList = new List<int>() { 0,1,2,3,4,5,6};
         //colorList.Shuffle();
 
-        int index = colorList.IndexOf(playerData.ci);
+        
 
-        int playerEnumIndex = (int)playerData.pe;
+        
+
+        //int index = colorList.IndexOf(playerData.ci);
+
+        //int playerEnumIndex = (int)playerData.pe;
 
         //int temp = colorList[playerEnumIndex];
         //colorList[playerEnumIndex] = playerData.colorIndex;
@@ -266,12 +276,70 @@ public class DataManager : MonoSingleton<DataManager>
 
 			foreach (var area in GetAreaDtaList(playerDataList[i].pe))
 			{
-                bool lastOn = mapCompensation && i >= (num_player - 3);
+                int addMinCount = GetAddMinCount(i);
+				int addMaxCount = GetAddMaxCount(i);
 
-				area.SetDice(GetDiceCount(isAI, lastOn));
-			}
-		}
+				int diceCount = GetDiceCount(isAI, addMinCount , addMaxCount);
+
+				area.SetDice(diceCount);
+
+                //if (playerData.pe == (PlayerEnum)i)
+                //{
+                    //Debug.LogWarning($"{area.player} , min = {addMinCount} , max = {addMaxCount} , result = {diceCount} ");
+                //}
+
+
+            }
+        }
     }
+	int GetAddMinCount(int index)
+	{
+        int minAddCount = 0;
+
+		////맵 보정 기능 사용 중 일때 1개 증가
+		//if (mapCompensation && index >= (num_player - 3))
+  //      {
+  //          minAddCount++;
+		//}
+
+		return minAddCount;
+	}
+
+	int GetAddMaxCount(int index)
+	{
+        if (isMultiOn == false && mapCompensation == false)
+        {
+            return 0;
+        }
+
+		switch (num_player)
+		{
+			case 3:
+				if (index == 1 || index == 2) return 1;
+				break;
+
+			case 4:
+				if (index == 2 || index == 3) return 1;
+				break;
+
+			case 5:
+				if (index == 2 || index == 3) return 1;
+				if (index == 4) return 2;
+				break;
+
+			case 6:
+				if (index == 2 || index == 3 || index == 4) return 1;
+				if (index == 5) return 2;
+				break;
+
+			case 7:
+				if (index == 3 || index == 4 || index == 5) return 1;
+				if (index == 6) return 2;
+				break;
+		}
+
+		return 0;
+	}
 
 	List<AreaData> GetAreaDtaList(PlayerEnum playerEnum)
     {
@@ -283,14 +351,15 @@ public class DataManager : MonoSingleton<DataManager>
     /// </summary>
     /// <param name="isAi"></param>
     /// <returns></returns>
-    int GetDiceCount(bool isAi ,bool lastOn)
+    int GetDiceCount(bool isAi ,int addMinCount, int addMaxCount)
     {
 		//DiceCountData data = Resources.Load<DiceCount>("DiceCount").GetData(isAi, aiLevel);
 		DiceCountData data = DiceCountManager.Instance.GetData(isAi, aiLevel);
 
-        int diceCount = isAi == false && lastOn ?
-                        Random.Range(data.minCount+1, data.maxCount + 1):
-			            Random.Range(data.minCount, data.maxCount + 1);
+        int minCount = data.minCount + addMinCount;
+		int maxCount = data.maxCount + addMaxCount;
+
+        int diceCount = Random.Range(minCount, maxCount+1);
 
 		//int dice = ;
 
@@ -802,6 +871,7 @@ public class DataManager : MonoSingleton<DataManager>
         {
             if (playerData.pe == playerEnum) 
             {
+                //Debug.LogWarning($"{playerData.pe} , {skillCount}");
                 playerData.sc = skillCount;
             }   
         }
@@ -958,7 +1028,21 @@ public class DataManager : MonoSingleton<DataManager>
         }
     }
 
-    public void GameDataClearOn()
+    public void SkillCardCountAddOn(PlayerEnum playerEnum)
+    {
+		PlayerData p_data = GetPlayerData(playerEnum);
+        p_data.sc += 1;
+
+		SkillCardRequest request = new SkillCardRequest()
+		{
+			playerEnum = p_data.pe,
+			skillCardCount = p_data.sc,
+		};
+
+		ServerManager.Instance.SendMessageOn(request);
+	}
+
+	public void GameDataClearOn()
     {
 		PlayerDataClearOn();
 		AllianceClearOn();
@@ -975,7 +1059,16 @@ public class DataManager : MonoSingleton<DataManager>
 		{
 			ServerManager.Instance.ClearQueue();
 		}
-	}
+
+        if (randomPositionOn)
+        {
+            turnPosition = Random.Range(0, num_player);
+
+            //Debug.LogWarning($"{turnPosition} , {num_player}");
+
+            playerData.ci = turnPosition;
+        }
+    }
 
     void PlayerDataClearOn()
     {

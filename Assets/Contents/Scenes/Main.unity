@@ -4587,7 +4587,7 @@ GameObject:
   - component: {fileID: 733030621}
   - component: {fileID: 733030620}
   m_Layer: 5
-  m_Name: DataPanel_0 (1)
+  m_Name: DataPanel_Normal_Player
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -6996,7 +6996,7 @@ GameObject:
   - component: {fileID: 1021378455}
   - component: {fileID: 1021378454}
   m_Layer: 5
-  m_Name: DataPanel_0 (3)
+  m_Name: DataPanel_Easy_AI
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -7063,7 +7063,7 @@ GameObject:
   - component: {fileID: 1041426409}
   - component: {fileID: 1041426408}
   m_Layer: 5
-  m_Name: DataPanel_0 (4)
+  m_Name: DataPanel_Noraml_AI
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -10341,7 +10341,7 @@ GameObject:
   - component: {fileID: 1416378717}
   - component: {fileID: 1416378716}
   m_Layer: 5
-  m_Name: DataPanel_0 (5)
+  m_Name: DataPanel_Hard_AI
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -13310,7 +13310,7 @@ GameObject:
   - component: {fileID: 1846703618}
   - component: {fileID: 1846703617}
   m_Layer: 5
-  m_Name: DataPanel_0
+  m_Name: DataPanel_Easy_Player
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -13798,7 +13798,7 @@ GameObject:
   - component: {fileID: 2050966452}
   - component: {fileID: 2050966451}
   m_Layer: 5
-  m_Name: DataPanel_0 (2)
+  m_Name: DataPanel_Hard_Player
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -15275,12 +15275,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 41182c9b0f0b44d4f8ed45bf54f79e23, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  easyMinInput: {fileID: 0}
-  easyMaxInput: {fileID: 0}
-  normalMinInput: {fileID: 0}
-  normalMaxInput: {fileID: 0}
-  hardMinInput: {fileID: 0}
-  hardMaxInput: {fileID: 0}
 --- !u!224 &5734773351437837176
 RectTransform:
   m_ObjectHideFlags: 0

@@ -35,12 +35,12 @@ public class DiceCountManager : MonoSingleton<DiceCountManager>
 
 		diceCountListData.diceCountDataList = new List<DiceCountData>()
 		{
-			new DiceCountData(false, AILevel.Easy,1,3),
-			new DiceCountData(false, AILevel.Normal,1,3),
-			new DiceCountData(false, AILevel.Hard,1,3),
-			new DiceCountData(true,  AILevel.Easy,1,3),
+			new DiceCountData(false, AILevel.Easy,	3,4),
+			new DiceCountData(false, AILevel.Normal,1,4),
+			new DiceCountData(false, AILevel.Hard,	1,4),
+			new DiceCountData(true,  AILevel.Easy,	1,4),
 			new DiceCountData(true,  AILevel.Normal,1,4),
-			new DiceCountData(true,  AILevel.Hard,1,3),
+			new DiceCountData(true,  AILevel.Hard,	1,4),
 		};
 	}
 

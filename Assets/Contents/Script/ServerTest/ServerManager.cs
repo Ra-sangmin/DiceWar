@@ -507,6 +507,7 @@ public class TurnRequest : BaseTCPRequest
 	public PlayerEnum playerEnum = PlayerEnum.Player_0;
 	public bool turnStartOn = false;
 	public List<SendAreaData> areaDataList = new List<SendAreaData>();
+	public int turnCount = 0;
 
 	public TurnRequest()
 	{

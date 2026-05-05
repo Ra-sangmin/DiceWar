@@ -67,12 +67,15 @@ public class InGameControllerMulti : InGameControllerBase
 
 	protected override void MyTurnPlayOn()
 	{
-		int myTurnCount = DataManager.Instance.MyTurnAddOn();
+		//int myTurnCount = DataManager.Instance.MyTurnAddOn();
 
-		if (myTurnCount > 5)
+		//Debug.LogWarning(myTurnCount);
+
+		//if (myTurnCount > 2 && DataManager.Instance.isOwner)
 		{
-			DataManager.Instance.myTurnCount = 0;
-			mapController.inGameBottomController.nonePlayPanel.SkillUseOn(1);
+			//;Debug.LogWarning("카드 On!");
+			//DataManager.Instance.myTurnCount = 0;
+			//mapController.inGameBottomController.nonePlayPanel.SkillUseOn(1);
 		}
 	}
 
@@ -185,6 +188,19 @@ public class InGameControllerMulti : InGameControllerBase
 					}
 					else
 					{
+						bool myTurn = DataManager.Instance.IsMyTurn();
+
+						if (myTurn && DataManager.Instance.isOwner)
+						{
+							int myTurnCount = DataManager.Instance.MyTurnAddOn();
+
+							if (myTurnCount > 1)
+							{
+								DataManager.Instance.myTurnCount = 0;
+								mapController.SkillCardAddOn();
+							}
+						}
+
 						TurnCheck();
 					}
 
@@ -421,9 +437,11 @@ public class InGameControllerMulti : InGameControllerBase
 
 				SkillCardRequest skillCardRequest = (SkillCardRequest)baseRequest;
 
-				if (skillCardRequest.playerEnum != myPlayer)
+				DataManager.Instance.SetPlayerSkillData(skillCardRequest.playerEnum, skillCardRequest.skillCardCount);
+
+				if (skillCardRequest.playerEnum == myPlayer)
 				{
-					DataManager.Instance.SetPlayerSkillData(skillCardRequest.playerEnum, skillCardRequest.skillCardCount);
+					mapController.inGameBottomController.nonePlayPanel.SkillCardReset();
 				}
 
 				break;

@@ -9,15 +9,11 @@ public class DiceSetData : MonoBehaviour
 	[SerializeField] InputField minInput;
 	[SerializeField] InputField maxInput;
 
-	private DiceCount diceCount;
 	private DiceCountData diceCountData;
 
 	// Start is called once before the first execution of Update after the MonoBehaviour is created
 	void Start()
     {
-		//diceCount = Resources.Load<DiceCount>("DiceCount");
-		//diceCountData = diceCount.GetData(isAI, aiLevel);
-
 		diceCountData = DiceCountManager.Instance.GetData(isAI, aiLevel);
 
 		minInput.text = diceCountData.minCount.ToString();

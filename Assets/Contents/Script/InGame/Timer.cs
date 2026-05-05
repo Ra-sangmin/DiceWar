@@ -11,7 +11,7 @@ public class Timer : MonoBehaviour
     private bool timerOn = false;
 
     public float timerCurrentDelay;
-    private float timerMaxDelay = 10;
+    private float timerMaxDelay = 20;
 
     public UnityAction timerOverOn = () => { };
 

@@ -23,18 +23,8 @@ public class InGameControllerSingle : InGameControllerBase
 	protected override void Update()
 	{
 		base.Update();
-
-		if (Input.GetKeyDown(KeyCode.Alpha1))
-		{
-			
-		}
-		if (Input.GetKeyDown(KeyCode.Alpha2))
-		{
-		}
-		if (Input.GetKeyDown(KeyCode.Alpha3))
-		{
-		}
 	}
+
 	protected override void MyTurnPlayOn()
 	{
 		endTurnBtn.interactable = true;

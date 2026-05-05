@@ -416,7 +416,14 @@ public class MapController : MonoBehaviour
 		}
 	}
 
-    private void AttackRequestOn(AreaData fromAreaData , AreaData toAreaData , DiceWarData fromDiceWarData, DiceWarData toDiceWarData)
+    public void SkillCardAddOn()
+    {
+        List<PlayerEnum> addOnPlayerList = playerIconController.GetActiveDiceLowerList();
+
+		inGameBottomController.nonePlayPanel.SkillCardAddOn(addOnPlayerList);   
+	}
+
+	private void AttackRequestOn(AreaData fromAreaData , AreaData toAreaData , DiceWarData fromDiceWarData, DiceWarData toDiceWarData)
     {
         AttackRequest request = new AttackRequest()
         {
@@ -608,7 +615,8 @@ public class MapController : MonoBehaviour
 
         CreateMap();
 
-		playerIconController.SetIconTurnEffect();
+		//playerIconController.SetIconTurnEffect();
+		playerIconController.SetMyEffect();
 		inGameBottomController.nonePlayPanel.Init();
 	}
 

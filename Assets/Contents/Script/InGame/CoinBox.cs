@@ -24,7 +24,7 @@ public class CoinBox : MonoBehaviour
 
     }
 
-    public void SelectOn(bool selectOn , int coinCount = 3)
+    public void SelectOn(bool selectOn , int coinCount = 1)
     {
         //toggle.isOn = selectOn;
 

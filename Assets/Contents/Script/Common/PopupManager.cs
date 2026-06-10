@@ -89,6 +89,17 @@ public class PopupManager : MonoSingleton<PopupManager>
         }
     }
 
+    public void InGameWarningPopupOn(string text)
+	{
+		ToastPopup popup = Instantiate(Resources.Load<ToastPopup>("Popup/InGame/InGameWarningPopup"), parantTranform);
+
+		if (popup != null)
+		{
+            popup.SetText(text);
+			popup.ActiveOn();
+		}
+	}
+
 	public void NeedCoinPopupOn(int needCoin)
 	{
 		NeedCoinPopup needCoinPopup = Instantiate(Resources.Load<NeedCoinPopup>("Popup/InGame/NeedCoinPopup"), parantTranform);
@@ -134,10 +145,10 @@ public class PopupManager : MonoSingleton<PopupManager>
         GameResultPopup gameResultPopup = Instantiate(Resources.Load<GameResultPopup>("Popup/InGame/GameResultPopup"), parantTranform);
         gameResultPopup.DataInit(inGameController, gameResultEnum, coinCount);
     }
-	public void GiveUpPopupOn(InGameControllerBase inGameController, int coinCount = 0)
+	public void GiveUpPopupOn(InGameControllerBase inGameController, bool newGameOn = false, int coinCount = 0)
 	{
 		GiveUpPopup giveUpPopup = Instantiate(Resources.Load<GiveUpPopup>("Popup/InGame/GiveUpPopup"), parantTranform);
-		giveUpPopup.DataInit(inGameController, coinCount);
+		giveUpPopup.DataInit(inGameController, newGameOn , coinCount);
 	}
 
 	public LandTradePopup LandTradePopupOn()

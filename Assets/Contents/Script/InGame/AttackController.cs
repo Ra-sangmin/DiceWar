@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 public class AttackController
 {
@@ -748,6 +749,26 @@ public class AttackController
 		ServerManager.Instance.receiveOn = true;
 
 		return win;
+	}
+
+	public void ForceGetAreaOn(AreaData areaData)
+	{
+		if (DataManager.Instance.areaGetPlayerEnum != PlayerEnum.Player_None)
+		{
+			PlayerEnum myPlayerEnum = DataManager.Instance.areaGetPlayerEnum;
+			areaData.PlayerChangeOn(myPlayerEnum);
+			playerIconController.SetBundleKeyuAll();
+		}
+
+		if (DataManager.Instance.diceGetCount != 0)
+		{
+			areaData.SetDice(DataManager.Instance.diceGetCount);
+		}
+
+		if (DataManager.Instance.isMultiOn)
+		{
+			ServerManager.Instance.ForceGetAreaRequestOn(areaData);
+		}
 	}
 
 	List<int> GetReseultDiceCount(int dice)

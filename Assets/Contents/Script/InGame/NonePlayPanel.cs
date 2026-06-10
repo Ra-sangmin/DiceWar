@@ -182,7 +182,9 @@ public class NonePlayPanel : MonoBehaviour
 
     public void AllianceClearOn(List<AllianceData> allianceDataList)
     {
-        DataManager.Instance.SetAllianceList(allianceDataList);
+		AllianceAllData allianceAllData = new AllianceAllData() { allianceDataList = allianceDataList };
+
+		DataManager.Instance.SetAllianceList(allianceAllData);
 
         SetNoneBtn();
 

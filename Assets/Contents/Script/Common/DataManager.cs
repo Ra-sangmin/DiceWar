@@ -52,9 +52,10 @@ public class DataManager : MonoSingleton<DataManager>
 
     public bool playOn = false;
 
-    private List<AllianceData> allianceDataList = new List<AllianceData>();
+    private List<AllianceAllData> allianceAllDataList = new List<AllianceAllData>();
+	//private List<List<AllianceData>> allianceDataList = new List<List<AllianceData>>();
 
-    public List<AreaData> areaDataList = new List<AreaData>();
+	public List<AreaData> areaDataList = new List<AreaData>();
     public MapCreateRequestOn testData;
 
 	public List<int> stashCountList = new List<int>();
@@ -75,6 +76,11 @@ public class DataManager : MonoSingleton<DataManager>
 
 	public bool leaveEarlyPopupReadyOn = false;
 	public bool leaveEarlyPopupOpenOn = false;
+
+    public bool myBetrayWaitOn = false;
+
+    public PlayerEnum areaGetPlayerEnum = PlayerEnum.Player_None;
+	public int diceGetCount = 0;
 
 	public override void Init()
     {
@@ -755,10 +761,104 @@ public class DataManager : MonoSingleton<DataManager>
 
     public int GetNeedBetrayCoin()
     {
-        return 6;
+		//내 동맹 정보중 받을 몫 의 절반 값으로 취득
+		return Mathf.RoundToInt(GetMyAllianceData().coinCount / 2.0f);
     }
 
-    public int GetNeedCoin()
+	public async UniTask MyBetrayOn(PlayerIconController playerIconController)
+	{
+        myBetrayWaitOn = true;
+
+		AllianceBetrayRequest request = new AllianceBetrayRequest()
+		{
+			betrayPlayerEnum = playerData.pe,
+			needBetrayCoin = GetNeedBetrayCoin(),
+			allianceDataList = GetNewAllianceData(playerIconController),
+		};
+
+		ServerManager.Instance.SendMessageOn(request);
+
+        await UniTask.WhenAny(
+            UniTask.WaitUntil(() => !myBetrayWaitOn),
+            UniTask.Delay(2000) // 1000ms = 1초
+        );
+	}
+
+	public async UniTask OrderBetrayOn(PlayerEnum playerEnum)
+	{
+		myBetrayWaitOn = true;
+
+        int needBetrayCoin = Mathf.RoundToInt(GetAllianceData(playerEnum).coinCount / 2.0f);
+
+		AllianceBetrayRequest request = new AllianceBetrayRequest()
+		{
+			betrayPlayerEnum = playerEnum,
+			needBetrayCoin = needBetrayCoin,
+			//allianceDataList = GetNewAllianceData(playerIconController),
+		};
+
+		ServerManager.Instance.SendMessageOn(request);
+
+		await UniTask.Delay(2000);
+	}
+
+	List<AllianceData> GetNewAllianceData(PlayerIconController playerIconController)
+	{
+		List<AllianceData> resultAllianceDataList = new List<AllianceData>();
+
+		PlayerEnum myPlayer = playerData.pe;
+
+		//나를 제외한 동맹 정보
+		List<AllianceData> allOriginDataList = GetAllAlliance(myPlayer).allianceDataList.Where(data => data.playerEnum != myPlayer).ToList();
+
+		List<AllianceData> allDataList = new List<AllianceData>();
+
+		if (playerIconController != null)
+		{
+			var playerIconList = playerIconController.GetActiveList().OrderByDescending(data => data.connectedCount);
+
+			foreach (var playerIcon in playerIconList)
+			{
+				var data = allOriginDataList.FirstOrDefault(data => data.playerEnum == playerIcon.playerEnum);
+
+				if (data != null)
+				{
+					allDataList.Add(data);
+				}
+			}
+		}
+
+		//내 동맹 정보
+		AllianceData myAllianceData = GetMyAllianceData();
+
+		//총 획득 코인
+		int maxCoinCount = GetNeedCoin() * num_player;
+
+		//한명당 나눠질 코인 정보
+		int oneManCoinCount = Mathf.RoundToInt(myAllianceData.coinCount / (float)allDataList.Count);
+
+		foreach (AllianceData data in allDataList)
+		{
+			//유저 정보에 코인 추가
+			data.coinCount += oneManCoinCount;
+
+			data.coinCount = Mathf.Min(data.coinCount, maxCoinCount);
+
+			maxCoinCount -= data.coinCount;
+
+			if (maxCoinCount < 0)
+			{
+				maxCoinCount = 0;
+			}
+
+			resultAllianceDataList.Add(data);
+		}
+
+		return resultAllianceDataList;
+
+	}
+
+	public int GetNeedCoin()
     {
         int needCoin = 0;
 
@@ -877,7 +977,66 @@ public class DataManager : MonoSingleton<DataManager>
         }
     }
 
-    public bool IsAITurn()
+    public List<AllianceData> GetAllianceDefaultData(PlayerEnum orderPlayer, List<PlayerEnum> playerList , PlayerIconController playerIconController)
+    {
+	    int maxCoinCount = GetNeedCoin() * num_player;
+		int oneManCoinCount = maxCoinCount / playerList.Count;
+
+		List<AllianceData> allianceDataList = new List<AllianceData>();
+
+		foreach (var playerData in playerList)
+		{
+			AllianceData orderData = new AllianceData()
+			{
+				playerEnum = playerData,
+				coinCount = oneManCoinCount
+			};
+
+			allianceDataList.Add(orderData);
+
+			maxCoinCount -= oneManCoinCount;
+		}
+
+		AllianceData orderPlayerData = allianceDataList.FirstOrDefault(data => data.playerEnum == orderPlayer);
+
+		//동맹 제안할 플레이어 추출
+		List<AllianceData> otherPlayerList = allianceDataList.Where(data => data.playerEnum != orderPlayer).ToList();
+		List<PlayerIcon> connectedHigherList = playerIconController.GetActiveDiceHigherList(otherPlayerList);
+
+		while (true) 
+        {
+			//공평하게 나누고 maxCoinCount 가 0 보다 크다면
+			if (maxCoinCount > 0)
+			{
+				orderPlayerData.coinCount += 1;
+				maxCoinCount -= 1;
+			}
+
+			if (maxCoinCount > 0)
+			{
+				foreach (var playerIcon in connectedHigherList)
+				{
+					var allianceData = otherPlayerList.FirstOrDefault(data => data.playerEnum.Equals(playerIcon.playerEnum));
+
+					if (allianceData != null)
+					{
+						allianceData.coinCount += 1;
+						maxCoinCount -= 1;
+					}
+				}
+			}
+
+			if (maxCoinCount <= 0)
+			{
+				break;
+			}
+		}
+
+        return allianceDataList;
+	}
+
+
+	public bool IsAITurn()
     {
         bool isAiOn = false;
 
@@ -899,37 +1058,83 @@ public class DataManager : MonoSingleton<DataManager>
         return isAiOn;
     }
 
-    public void SetAllianceList(List<AllianceData> allianceDataList)
+    public void SetAllianceList(AllianceAllData allianceAllData)
     {
-        this.allianceDataList = allianceDataList;
+        this.allianceAllDataList.Add(allianceAllData);
     }
 
-    /// <summary>
-    /// 이미 동맹이 되어있는지 체크
-    /// </summary>
-    /// <param name="playerEnum"></param>
-    /// <returns></returns>
-    public bool IsAlliance(PlayerEnum playerEnum) 
+	public int GetAllianceCount()
+	{
+		return this.allianceAllDataList.Count;
+	}
+
+	/// <summary>
+	/// 이미 동맹이 되어있는지 체크
+	/// </summary>
+	/// <param name="playerEnum"></param>
+	/// <returns></returns>
+	public bool IsAlliance(PlayerEnum playerEnum) 
     {
-        return allianceDataList.Any(data => data.playerEnum == playerEnum);
+        bool IsAlliance = false;
+
+		foreach (var allianceData in allianceAllDataList)
+        {
+            if (allianceData.allianceDataList.Any(data => data.playerEnum == playerEnum))
+            {
+                IsAlliance = true;
+			}
+		}
+
+        return IsAlliance;
     }
 
     public AllianceData GetMyAllianceData()
     {
-        return allianceDataList.FirstOrDefault(data => data.playerEnum == playerData.pe);
-    }
+        return GetAllianceData(playerData.pe);
 
-    public bool IsAllAlliance(List<PlayerEnum> checkPlayerEnumList)
+		//return allianceDataList.FirstOrDefault(data => data.playerEnum == playerData.pe);
+	}
+
+	public AllianceData GetAllianceData(PlayerEnum playerEnum)
+	{
+		AllianceData resultData = null;
+
+		foreach (var allianceData in allianceAllDataList)
+		{
+			var data = allianceData.allianceDataList.FirstOrDefault(data => data.playerEnum == playerEnum);
+
+			if (data != null)
+			{
+				resultData = data;
+			}
+		}
+
+		return resultData;
+
+		//return allianceDataList.FirstOrDefault(data => data.playerEnum == playerEnum);
+	}
+
+	public bool IsAllAlliance(List<PlayerEnum> checkPlayerEnumList)
     {
-        bool isAllAlliance = true;
+        bool isAllAlliance = false;
 
-        foreach (PlayerEnum playerEnum in checkPlayerEnumList)
-        {
-            if (IsAlliance(playerEnum) == false)
+		foreach (var allianceData in allianceAllDataList)
+		{
+			isAllAlliance = allianceData.allianceDataList.All(data => checkPlayerEnumList.Contains(data.playerEnum));
+
+            if (isAllAlliance)
             {
-                isAllAlliance = false;
+                break;
             }
-        }
+		}
+
+		//foreach (PlayerEnum playerEnum in checkPlayerEnumList)
+  //      {
+  //          if (IsAlliance(playerEnum) == false)
+  //          {
+  //              isAllAlliance = false;
+  //          }
+  //      }
 
         return isAllAlliance;
     }
@@ -950,19 +1155,28 @@ public class DataManager : MonoSingleton<DataManager>
         return IsAllAlliance(checkPlayerEnumList);
     }
 
-    public List<AllianceData> GetAllAlliance(PlayerEnum playerEnum)
+    public AllianceAllData GetAllAlliance(PlayerEnum playerEnum)
     {
-        List<AllianceData> resultData = new List<AllianceData>();
+        AllianceAllData resultData = null;
 
         if (IsAlliance(playerEnum))
         {
-            resultData = allianceDataList;
+            foreach (var allianceData in allianceAllDataList)
+            {
+				var data = allianceData.allianceDataList.FirstOrDefault(data => data.playerEnum == playerEnum);
+
+				if (allianceData.allianceDataList.Any(data => data.playerEnum == playerEnum))
+				{
+                    resultData = allianceData;
+				}
+			}
         }
         else 
         {
             int maxCoin = 3 * num_player;
 
-            resultData.Add(new AllianceData(playerEnum, maxCoin));
+            resultData = new AllianceAllData();
+			resultData.allianceDataList.Add(new AllianceData(playerEnum, maxCoin));
         }
 
         return resultData;
@@ -972,30 +1186,51 @@ public class DataManager : MonoSingleton<DataManager>
 	{
         bool clearOn = false;
 
-        if (allianceDataList.Count <= 1)
+		AllianceAllData removeTarget = null;
+
+		foreach (var allianceData in allianceAllDataList)
 		{
-            playerIconController.SetBetrayPlayerIcon(allianceDataList[0].playerEnum);
-			AllianceClearOn();
-            clearOn = true;
+			if (allianceData.allianceDataList.Count <= 1)
+			{
+				playerIconController.SetBetrayPlayerIcon(allianceData.allianceDataList[0].playerEnum);
+				//AllianceClearOn();
+				clearOn = true;
+
+                removeTarget = allianceData;
+			}
+		}
+
+        if (removeTarget != null)
+        {
+			allianceAllDataList.Remove(removeTarget);
 		}
 
         return clearOn;
 	}
 
+    public void AllianceRemoveOn(AllianceAllData removeTarget)
+    {
+		allianceAllDataList.Remove(removeTarget);
+	}
+
 	public void AllianceClearOn() 
     {
-        allianceDataList = new List<AllianceData>();
-    }
+		//allianceDataList = new List<List<AllianceData>>();
+		allianceAllDataList.Clear();
+	}
 
     public void BetrayOn(PlayerEnum playerEnum)
     {
-        foreach (var allianceData in allianceDataList)
+        foreach (var allianceData in allianceAllDataList)
         {
-            if (allianceData.playerEnum == playerEnum)
-            {
-                allianceDataList.Remove(allianceData);
-				break;
-            }
+			foreach (var listData in allianceData.allianceDataList)
+			{
+				if (listData.playerEnum == playerEnum)
+				{
+					allianceData.allianceDataList.Remove(listData);
+					break;
+				}
+			}
         }
     }
 
@@ -1028,10 +1263,10 @@ public class DataManager : MonoSingleton<DataManager>
         }
     }
 
-    public void SkillCardCountAddOn(PlayerEnum playerEnum)
+    public void SkillCardCountAddOn(PlayerEnum playerEnum , int addCount = 1)
     {
 		PlayerData p_data = GetPlayerData(playerEnum);
-        p_data.sc += 1;
+        p_data.sc += addCount;
 
 		SkillCardRequest request = new SkillCardRequest()
 		{
@@ -1161,6 +1396,12 @@ public class PlayerData
         this.sc = skillCardCount;
         this.isAI = isAI;
     }
+}
+
+[System.Serializable]
+public class AllianceAllData
+{
+    public List<AllianceData> allianceDataList = new List<AllianceData>();
 }
 
 [System.Serializable]

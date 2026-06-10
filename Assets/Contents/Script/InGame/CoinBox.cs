@@ -55,6 +55,11 @@ public class CoinBox : MonoBehaviour
         else
         {
             coinCount.Value--;
+
+            if (coinCount.Value <= 0)
+            {
+                coinCount.Value = 1;
+			}
         }
 
         coinText.text = coinCount.ToString();

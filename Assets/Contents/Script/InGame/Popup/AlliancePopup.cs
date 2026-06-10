@@ -22,10 +22,14 @@ public class AlliancePopup : MonoBehaviour
 
     private int maxCoinCount;
 
-    private void Awake()
+    private PlayerIconController playerIconController;
+
+	private void Awake()
     {
         CreatePlayerToggleIcon();
-    }
+
+		playerIconController = FindFirstObjectByType<PlayerIconController>();
+	}
     void CreatePlayerToggleIcon()
     {
         PlayerEnum myPlayerEnum = DataManager.Instance.playerData.pe;
@@ -81,42 +85,38 @@ public class AlliancePopup : MonoBehaviour
         SetCointCount();
     }
 
+    /// <summary>
+    /// 토글이 On 된 플레이어들에게 코인 배분
+    /// </summary>
     private void SetCointCount()
     {
         PlayerEnum myPlayerEnum = DataManager.Instance.playerData.pe;
 
         int maxCoinCount = this.maxCoinCount;
 
-        int allianceCount = playerToggleIconList.Count(data => data.toggle.isOn);
+        List<PlayerToggleIcon> toggleOnPlayerList = playerToggleIconList.Where(data => data.toggle.isOn).ToList();
 
-        float oneManCoinCount = maxCoinCount / (float)allianceCount;
+		List<PlayerEnum> playerEnumList = toggleOnPlayerList.Select(data => data.playerEnum).ToList();
 
-        foreach (var playerToggleIcon in playerToggleIconList)
+		List<AllianceData> allianceDataList = DataManager.Instance.GetAllianceDefaultData(myPlayerEnum, playerEnumList, playerIconController);
+
+        foreach (var toggleOnPlayer in toggleOnPlayerList)
         {
-            int tempCount = 0;
+            var data = allianceDataList.FirstOrDefault(data => data.playerEnum == toggleOnPlayer.playerEnum);
 
-            if (playerToggleIcon.toggle.isOn == false)
+            if (data != null)
             {
-                continue;
-            }
+                toggleOnPlayer.playerEnum = data.playerEnum;
+				toggleOnPlayer.coinBox.SetCoinCount(data.coinCount);
+			}
+		}
 
-            tempCount = Mathf.CeilToInt(oneManCoinCount);
-
-            tempCount = Mathf.Min(tempCount, maxCoinCount);
-
-            playerToggleIcon.coinBox.SetCoinCount(tempCount);
-
-            maxCoinCount -= tempCount;
-
-            if (maxCoinCount < 0)
-            {
-                maxCoinCount = 0;
-            }
-        }
-
-        SetLeftCoint();
+		SetLeftCoint();
     }
 
+    /// <summary>
+    /// 전체 코인에서 현재 분배된 코인을 뺀 나머지 코인수
+    /// </summary>
     void SetLeftCoint()
     {
         int leftCoin = maxCoinCount;
@@ -200,20 +200,8 @@ public class AlliancePopup : MonoBehaviour
             allianceDataList = allianceDataList,
         };
 
-        //List<AllianceData> allianceDataList = new List<AllianceData>()
-        //{
-        //    new AllianceData()
-        //    {
-        //        playerEnum = PlayerEnum.Player_1,
-        //        coinCount = 5
-        //    }
-        //};
-
         ServerManager.Instance.SendMessageOn(request);
         gameObject.SetActive(false);
-
-        //AllianceRequestOn(allianceRequestData);
-
     }
     
     public void AllianceRequestOn(AllianceRequestData allianceRequestData)

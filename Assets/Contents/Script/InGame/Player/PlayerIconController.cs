@@ -92,7 +92,7 @@ public class PlayerIconController : MonoBehaviour
             SetBundleKey(checkList[i]);
         }
 
-        PlayerEnum myPlayerEnum = DataManager.Instance.playerData.pe;
+		PlayerEnum myPlayerEnum = DataManager.Instance.playerData.pe;
 
         //남은 인원 체크
         var resultList = GetActiveList();
@@ -121,8 +121,19 @@ public class PlayerIconController : MonoBehaviour
         }
         else
         {
-            var playerEnumList = resultList.Select(data => data.playerEnum).ToList();
-            if (DataManager.Instance.IsAllAlliance(playerEnumList))
+            int allianceCount = DataManager.Instance.GetAllianceCount();
+
+            //동맹이 1개 이상이라면
+            if (allianceCount > 1)
+            {
+                return;
+            }
+
+			var playerEnumList = resultList.Select(data => data.playerEnum).ToList();
+            var allianceList = DataManager.Instance.GetAllAlliance(myPlayerEnum).allianceDataList;
+
+			//남은 인원이 모두 같은 동맹 인원이라면
+			if (playerEnumList.Count == allianceList.Count)
             {
                 gameWinOn();
                 //gameEndOn(InGameDataManager.Instance.playerData.playerEnum);
@@ -153,6 +164,44 @@ public class PlayerIconController : MonoBehaviour
 		return resultList;
 	}
 
+	public List<PlayerIcon> GetActiveDiceHigherList(List<PlayerToggleIcon>  playerList)
+	{
+        List<PlayerIcon> newCheckList = new List<PlayerIcon>();
+
+        foreach (var item in GetActiveList())
+        {
+            if (playerList.Any(data => data.playerEnum == item.playerEnum))
+            {
+                newCheckList.Add(item);
+			}
+		}
+
+		//연결된 영토가 큰 순으로 취득
+		List<PlayerIcon> resultList = newCheckList.OrderByDescending(data => data.connectedCount).ToList();
+
+		return resultList;
+	}
+
+	public List<PlayerIcon> GetActiveDiceHigherList(List<AllianceData> playerList)
+	{
+		List<PlayerIcon> newCheckList = new List<PlayerIcon>();
+
+		foreach (var item in GetActiveList())
+		{
+			if (playerList.Any(data => data.playerEnum == item.playerEnum))
+			{
+				newCheckList.Add(item);
+			}
+		}
+
+		//연결된 영토가 큰 순으로 취득
+		List<PlayerIcon> resultList = newCheckList.OrderByDescending(data => data.connectedCount).ToList();
+
+		return resultList;
+	}
+
+	
+
 	//각 플레이어 별로 연결된 영토 확인
 	public void SetBundleKey(PlayerIcon checkPlayerIcon)
     {
@@ -163,13 +212,37 @@ public class PlayerIconController : MonoBehaviour
 
         if (maxCount <= 0)
         {
-            checkPlayerIcon.gameObject.SetActive(false);
-        }
-        else 
-        {
-            checkPlayerIcon.SetConnectedCount(maxCount);
-        }
-    }
+			// 넘겨 받은 플레이어가 동맹 상태가 아니라면
+			if (DataManager.Instance.IsAlliance(checkPlayerIcon.playerEnum) == false)
+            {
+				checkPlayerIcon.gameObject.SetActive(false);
+            }
+            else
+            {
+                //나머지 동맹원들이 모두 영토가 0인지 체크
+                var allianceAllData = DataManager.Instance.GetAllAlliance(checkEnum);
+
+				bool allLoseOn = allianceAllData.allianceDataList.All(data => DataManager.Instance.SetBundleKey(data.playerEnum).Count == 0);
+
+                if (allLoseOn) 
+                {
+                    DataManager.Instance.AllianceRemoveOn(allianceAllData);
+
+                    foreach (var allianceData in allianceAllData.allianceDataList)
+                    {
+                        var playerIcon = GetPlayerIcon(allianceData.playerEnum);
+
+                        if (playerIcon != null)
+						{
+							playerIcon.gameObject.SetActive(false);
+						}
+					}
+				}
+			}
+		}
+
+		checkPlayerIcon.SetConnectedCount(maxCount);
+	}
 
     public List<PlayerIcon> GetPlayerIconList()
     {
@@ -181,7 +254,61 @@ public class PlayerIconController : MonoBehaviour
         return GetActiveList().FirstOrDefault(data => data.playerEnum == playerEnum);
     }
 
-    public void SetAlliancePlayerIcon(AllianceResultRequest allianceResultRequest)
+    public List<PlayerIcon> CheckAIAllianceOn(PlayerEnum fromAIEnum)
+    {
+		int maxAreaCount = DataManager.Instance.areaDataList.Count;
+
+		maxAreaCount = Mathf.RoundToInt(maxAreaCount / 3.0f);
+
+		List<PlayerIcon> resultList = new List<PlayerIcon>();
+
+		//단일 세력으로 영토 / 3 보다 큰 세력이 없는지 체크
+		List<PlayerIcon> overPlayerList = GetActiveList().Where(data => data.connectedCount > maxAreaCount).ToList();
+
+		List<PlayerIcon> alliancePlayerList = GetActiveList().Where(data => DataManager.Instance.IsAlliance(data.playerEnum)).ToList();
+
+        int allianceSumCount = alliancePlayerList.Sum(data => data.connectedCount);
+
+		//단일 세력으로 체크 최대 영토 이상인 유저가 없거나, 동맹세력 합이 체크 최대 영토 가 아니라면
+		if (overPlayerList.Count == 0 && allianceSumCount < maxAreaCount)
+        {
+            return resultList;
+		}
+
+        //Debug.LogWarning($"동맹 세력 합 = {allianceSumCount} , {maxAreaCount}");
+
+        //foreach (var overPlayer in overPlayerList)
+        //{
+        //    Debug.LogWarning($"큰 세력 존재 {overPlayer.playerEnum} , {maxAreaCount} , {overPlayer.connectedCount}");
+        //}
+
+		int connectedCount = GetPlayerIcon(fromAIEnum).connectedCount;
+
+        //내 세력이 최대 영토 보다 적다면
+        if (connectedCount < maxAreaCount)
+        {
+            List<PlayerIcon> checkList = GetActiveList()
+                                            .Where(data => data.playerEnum != fromAIEnum && //체크 상대가 당사자가 아니고
+                                                           !DataManager.Instance.IsAlliance(data.playerEnum) && // 동맹이 없다면
+														   GetPlayerIcon(data.playerEnum).connectedCount < maxAreaCount) // 세력수가 최대 영토수보다 작다면
+											.ToList();
+
+
+            foreach (var playerIcon in checkList)
+            {
+				// AI 라면 (임시로 AI만 적용)
+				//if (DataManager.Instance.GetPlayerData(playerIcon.playerEnum).isAI)
+				{
+					resultList.Add(playerIcon);
+				}
+			}
+		}
+
+        return resultList;
+	}
+
+
+	public void SetAlliancePlayerIcon(AllianceResultRequest allianceResultRequest)
     {
         PlayerEnum orderPlayer = allianceResultRequest.orderData.playerEnum;
 

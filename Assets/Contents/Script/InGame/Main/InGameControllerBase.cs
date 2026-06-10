@@ -18,6 +18,8 @@ public class InGameControllerBase : MonoBehaviour
 	public MapController mapController;
 	public Button endTurnBtn;
 
+	public InGameAreaEditor areaEditor;
+
 	protected bool gameEndOn = false;
 
 	protected CancellationTokenSource source = new CancellationTokenSource();
@@ -25,6 +27,11 @@ public class InGameControllerBase : MonoBehaviour
 	protected virtual void Awake()
 	{
 		SetEvent();
+
+		if (areaEditor != null)
+		{
+			areaEditor.SetData(this);
+		}
 	}
 
 	protected virtual void SetEvent()
@@ -162,6 +169,11 @@ public class InGameControllerBase : MonoBehaviour
 
 		bool myTurn = DataManager.Instance.IsMyTurn();
 
+		if (areaEditor != null)
+		{
+			areaEditor.ActiveOn(myTurn);
+		}
+
 		if (myTurn)
 		{
 			PopupManager.Instance.YourTurnPopupOn();
@@ -176,8 +188,6 @@ public class InGameControllerBase : MonoBehaviour
 		}
 
 		//SetEndTurnBtn();
-
-		
 	}
 
 	protected virtual void MyTurnPlayOn(){}
@@ -365,4 +375,14 @@ public class InGameControllerBase : MonoBehaviour
 	{
 		PopupManager.Instance.TutorialPopupOn();
 	}
+
+	public bool IsAIOn(PlayerEnum playerEnum)
+	{
+		return DataManager.Instance.GetPlayerData(playerEnum).isAI;
+	}
+	public PlayerEnum GetMyPlayer()
+	{
+		return DataManager.Instance.playerData.pe;
+	}
+
 }

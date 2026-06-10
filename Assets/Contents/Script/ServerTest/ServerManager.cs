@@ -202,6 +202,16 @@ public class ServerManager : MonoSingleton<ServerManager>
 		SendMessageOn(mapCreateRequestOn);
 	}
 
+	public void ForceGetAreaRequestOn(AreaData areaData)
+	{
+		ForceGetAreaRequest request = new ForceGetAreaRequest()
+		{
+			areaData = areaData.GetSendAreaData(),
+		};
+
+		SendMessageOn(request);
+	}
+
 	public void SendMessageOn(BaseTCPRequest request)
 	{
 		request.roomDataIndex = roomDataIndex;
@@ -323,6 +333,7 @@ public class ServerManager : MonoSingleton<ServerManager>
 			case RequestProtocal.AllianceApproveRequest: baseRequest = JsonParser<AllianceApproveRequest>(str); break;
 			case RequestProtocal.AllianceResultRequest: baseRequest = JsonParser<AllianceResultRequest>(str); break;
 			case RequestProtocal.AllianceBetrayRequest: baseRequest = JsonParser<AllianceBetrayRequest>(str); break;
+			case RequestProtocal.ForceGetArea: baseRequest = JsonParser<ForceGetAreaRequest>(str); break;
 			case RequestProtocal.SkillCardRequest: baseRequest = JsonParser<SkillCardRequest>(str); break;
 		}
 
@@ -531,6 +542,17 @@ public class AttackRequest : BaseTCPRequest
 }
 
 [System.Serializable]
+public class ForceGetAreaRequest : BaseTCPRequest
+{
+	public SendAreaData areaData;
+
+	public ForceGetAreaRequest()
+	{
+		base.requestProtocal = RequestProtocal.ForceGetArea;
+	}
+}
+
+[System.Serializable]
 public class LandTradeRequest : BaseTCPRequest
 {
 	public PlayerEnum fromPlayerEnum;
@@ -604,6 +626,8 @@ public class AllianceBetrayRequest : BaseTCPRequest
 
 	public PlayerEnum betrayPlayerEnum;
 
+	public int needBetrayCoin;
+
 	public AllianceBetrayRequest()
 	{
 		base.requestProtocal = RequestProtocal.AllianceBetrayRequest;
@@ -647,6 +671,7 @@ public enum RequestProtocal
 	AllianceResultRequest,
 	AllianceBetrayRequest,
 	SkillCardRequest,
+	ForceGetArea,
 	Heartbeat = 99
 }
 

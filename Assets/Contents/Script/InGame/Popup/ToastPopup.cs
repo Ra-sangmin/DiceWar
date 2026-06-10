@@ -8,9 +8,10 @@ using UnityEngine.Events;
 public class ToastPopup : MonoBehaviour
 {
     [SerializeField] CanvasGroup canvasGroup;
-    //[SerializeField] List<Image> haxagonImageList = new List<Image>();
+	[SerializeField] Text textObj;
+	//[SerializeField] List<Image> haxagonImageList = new List<Image>();
 
-    private Tween fadeTween;
+	private Tween fadeTween;
 
     public float maxAlphaValue = 0.85f;
 
@@ -24,7 +25,12 @@ public class ToastPopup : MonoBehaviour
         //}
     }
 
-    public void ActiveOn()
+	public void SetText(string text)
+	{
+		textObj.text = text;
+	}
+
+	public void ActiveOn()
     {
         if (fadeTween != null)
         {

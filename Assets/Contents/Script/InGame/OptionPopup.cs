@@ -50,32 +50,44 @@ public class OptionPopup : MonoBehaviour
 
 	public void NewGameBtnClickOn()
 	{
-        if (DataManager.Instance.CheckNewGame())
-        {
-			inGameController.NewGameOn();
-			CloseBtnClickOn();
+		if (DataManager.Instance.isMultiOn)
+		{
+			GiveUpPopupOn(true);
+		}
+		else
+		{
+			if (DataManager.Instance.CheckNewGame())
+			{
+				inGameController.NewGameOn();
+				CloseBtnClickOn();
+			}
 		}
 	}
 
 	public void GoMainBtnClickOn()
 	{
-        int coinCount = 0;
-
         if (DataManager.Instance.isMultiOn)
         {
-			AllianceData allianceData = DataManager.Instance.GetMyAllianceData();
-
-            if (allianceData != null)
-            {
-                coinCount = -allianceData.coinCount;
-			}
-
-			PopupManager.Instance.GiveUpPopupOn(inGameController, coinCount);
+			GiveUpPopupOn(false);
 		}
         else 
         {
 			inGameController.GoMainOn();
 		}
+	}
+
+	private void GiveUpPopupOn(bool newGameOn)
+	{
+		int coinCount = 0;
+
+		AllianceData allianceData = DataManager.Instance.GetMyAllianceData();
+
+		if (allianceData != null)
+		{
+			coinCount = -allianceData.coinCount;
+		}
+
+		PopupManager.Instance.GiveUpPopupOn(inGameController, newGameOn, coinCount);
 	}
 
     public void TutorialBtnClickOn()

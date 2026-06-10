@@ -28,7 +28,8 @@ public class MapController : MonoBehaviour
 
     public PlayerIconController playerIconController;
     public InGameBottomController inGameBottomController;
-    public UnityAction gameWinOn;
+	public Timer timer;
+	public UnityAction gameWinOn;
     public UnityAction gameLoseOn;
     public UnityAction turnOffOn;
     public UnityAction<AreaData> selectAreaOn;
@@ -38,8 +39,6 @@ public class MapController : MonoBehaviour
     private InGameButtonStatus selectBtnStatus = InGameButtonStatus.None;
 
     private AttackController attackController = new AttackController();
-
-    private Timer timer;
 
     private void Awake()
     {
@@ -351,7 +350,7 @@ public class MapController : MonoBehaviour
 
         PlayerEnum currentPlayerEnum = DataManager.Instance.playerData.pe;
 
-        bool isMyTurn = DataManager.Instance.IsMyTurn();
+		bool isMyTurn = DataManager.Instance.IsMyTurn();
 
         if (selectBtnStatus == InGameButtonStatus.Buy || selectBtnStatus == InGameButtonStatus.Sell)
         {
@@ -362,7 +361,13 @@ public class MapController : MonoBehaviour
 		if (isMyTurn == false)
 			return;
 
-        if (DataManager.Instance.isMultiOn && timer != null && timer.timerCurrentDelay < 1)
+		if (DataManager.Instance.areaGetPlayerEnum != PlayerEnum.Player_None || DataManager.Instance.diceGetCount != 0)
+		{
+			attackController.ForceGetAreaOn(areaData);
+			return;
+		}
+
+		if (DataManager.Instance.isMultiOn && timer != null && timer.timerCurrentDelay < 1)
         {
             return;
         }
@@ -441,7 +446,7 @@ public class MapController : MonoBehaviour
         await attackController.AttackReceiveDataOn(attackRequest);
     }
 
-    void SelectOn(AreaData areaData)
+	void SelectOn(AreaData areaData)
     {
 		attackController.SetChoisIndex(areaData.id);
 		areaData.ChoisEventOn(true);

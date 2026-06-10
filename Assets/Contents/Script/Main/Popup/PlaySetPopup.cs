@@ -11,6 +11,7 @@ public class PlaySetPopup : MonoBehaviour
 {
     [SerializeField] Image playerImage;
 	[SerializeField] Sprite playerRandomSprite;
+	[SerializeField] Text playerRandomText;
 	[SerializeField] List<Sprite> playerSpriteList = new List<Sprite>();
 	[SerializeField] List<SMToggle> aIToggleList = new List<SMToggle>();
     [SerializeField] List<SMToggle> mapSizeToggleList = new List<SMToggle>();
@@ -292,7 +293,9 @@ public class PlaySetPopup : MonoBehaviour
 			DataManager.Instance.SetCurrentPlayerColor(playerColorIndex);
 			DataManager.Instance.randomPositionOn = false;
 		}
-    }
+
+		playerRandomText.gameObject.SetActive(DataManager.Instance.randomPositionOn);
+	}
 
     public void PlayBtnClickOn()
     {

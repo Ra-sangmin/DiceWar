@@ -8,7 +8,8 @@ public class Timer : MonoBehaviour
 {
     [SerializeField] Slider timer;
     [SerializeField] RectTransform activeOnPanel;
-    private bool timerOn = false;
+	[SerializeField] Text timeText;
+	private bool timerOn = false;
 
     public float timerCurrentDelay;
     private float timerMaxDelay = 20;
@@ -21,13 +22,13 @@ public class Timer : MonoBehaviour
         
     }
 
-    public void SetTimerOn(bool timerOn)
+    public void SetTimerOn(bool timerOn , bool haveNoAreaOn = false)
     {
         this.timerOn = timerOn;
 
         activeOnPanel.gameObject.SetActive(timerOn);
 
-        timerCurrentDelay = timerMaxDelay;
+        timerCurrentDelay = haveNoAreaOn ? 0 : timerMaxDelay;
 
         ResetTimerValue();
     }
@@ -59,5 +60,11 @@ public class Timer : MonoBehaviour
     {
         float value = timerCurrentDelay / timerMaxDelay;
         timer.value = value;
-    }
+
+        if (timeText != null )
+        {
+            string text = timerCurrentDelay >= 0 ? ((int)timerCurrentDelay).ToString() : string.Empty;
+			timeText.text = text;
+		}
+	}
 }

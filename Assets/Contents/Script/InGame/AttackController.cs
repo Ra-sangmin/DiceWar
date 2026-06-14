@@ -2,9 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
-using System.Threading.Tasks;
 using UnityEngine;
-using UnityEngine.UIElements;
 
 public class AttackController
 {
@@ -15,18 +13,6 @@ public class AttackController
 	private InGameBottomController inGameBottomController;
 
 	private PlayerEnum currentPlayerEnum;
-
-	// Start is called once before the first execution of Update after the MonoBehaviour is created
-	void Start()
-    {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
 
 	public void SetClass(PlayerIconController playerIconController , InGameBottomController inGameBottomController)
 	{
@@ -50,16 +36,10 @@ public class AttackController
 			case AILevel.Easy:		await EasyAttackOn(source);
 				break;
 			case AILevel.Normal:	await NormalAttackOn(source);
-			//case AILevel.Normal:    await EasyAttackOn(playerEnum);
 				break;
 			case AILevel.Hard:		await HardAttackOn(source);
 				break;
 		}
-
-		//if (DataManager.Instance.isMultiOn)
-		//{
-		//	await UniTask.Delay(500);
-		//}
 	}
 
 	public bool AttackAreaOn(AreaData attackArea, AreaData checkArea)
@@ -101,17 +81,29 @@ public class AttackController
 		}
 	}
 
-	bool CheckData(AttackData attackData)
+	bool CheckData(AttackData attackData , bool hardOn = false)
 	{
 		bool notAttackDataOn = false;
 
 		AreaData fromAreaData = DataManager.Instance.GetAreaData(attackData.fromAreaData.id);
 		AreaData toAreaData = DataManager.Instance.GetAreaData(attackData.toAreaData.id);
 
-		if (fromAreaData.player == toAreaData.player ||
-			fromAreaData.dice == 1)
+		List<PlayerEnum> checkPlayerEnumList = new List<PlayerEnum>() { fromAreaData.player, toAreaData.player };
+
+		bool isMyAlliance = DataManager.Instance.IsAllAlliance(checkPlayerEnumList);
+
+		if (fromAreaData.player == toAreaData.player || // 공격 과 수비 영토가 같은 플레이어 영토라면
+			fromAreaData.dice == 1 || // 공격 영토의 주사위가 1개라면
+			isMyAlliance) // 동맹 플레이어를 공격하는것이라면
 		{
 			notAttackDataOn = true;
+		}
+		else
+		{
+			if (hardOn)
+			{
+				notAttackDataOn = fromAreaData.dice < toAreaData.dice;
+			}
 		}
 
 		return notAttackDataOn;
@@ -204,61 +196,6 @@ public class AttackController
 		return attackDataList;
 	}
 
-
-	///// <summary>
-	///// ���� ū ������� ������ ���信��, �ٸ� ����� �̾��� �� �ִ� ���� ã�� �� ���� �ֻ��� ���� �̻��̸�, ���� ex) �ֻ��� 3���� 3���� ������ �� ����.
-	///// </summary>
-	///// <param name="playerEnum"></param>
-	///// <param name="attackAreaList"></param>
-	///// <returns></returns>
-	//public async UniTask NormalAttackOn_old(PlayerEnum playerEnum, List<AreaData> attackAreaList)
-	//{
-	//	List<AttackData> attackDataList = await GetAdjTarget();
-
-	//	Debug.LogWarning(attackDataList.Count);
-
-	//	if (attackDataList.Count != 0)
-	//	{
-	//		foreach (var attackData in attackDataList)
-	//		{
-	//			AreaData fromAreaData = DataManager.Instance.GetAreaData(attackData.fromAreaData.id);
-	//			AreaData toAreaData = DataManager.Instance.GetAreaData(attackData.toAreaData.id);
-
-	//			if (fromAreaData.player == toAreaData.player ||
-	//				fromAreaData.dice == 1 ||
-	//				fromAreaData.dice < toAreaData.dice)
-	//			{
-	//				continue;
-	//			}
-
-	//			await AttackOn(attackData.fromAreaData, attackData.toAreaData,null);
-
-	//			await UniTask.Delay(3000);
-	//		}
-	//	}
-	//	else
-	//	{
-	//		int attackCount = 3;
-
-	//		foreach (var attackArea in attackAreaList)
-	//		{
-	//			var checkAreaData = attackArea.GetAdjList().FirstOrDefault(checkArea => AttackAreaOn(attackArea, checkArea) && attackArea.dice >= checkArea.dice);
-
-	//			if (checkAreaData != null)
-	//			{
-	//				await AttackOn(attackArea, checkAreaData, null);
-
-	//				attackCount--;
-
-	//				if (attackCount < 0)
-	//				{
-	//					break;
-	//				}
-	//			}
-	//		}
-	//	}
-	//}
-
 	/// <summary>
 	/// ���� ū ����� �̾����� ���� ã��
 	/// </summary>
@@ -279,14 +216,7 @@ public class AttackController
 		foreach (var areaData in bigAreaDataList)
 		{
 			enemyList.AddRange(areaData.CheckAdjAttakList2(otherAreaList));
-			//Debug.LogWarning("areaData = " + areaData.id);
 		}
-
-		foreach (var areaData in otherAreaList)
-		{
-			//Debug.LogWarning("other = " + areaData.id);
-		}
-
 
 		foreach (var enemy in enemyList)
 		{
@@ -300,38 +230,9 @@ public class AttackController
 					attackDataList.Add(new AttackData(adjData, enemy));
 				}
 			}
-
-			//Debug.LogWarning("result Target = " + target.id);
 		}
 
-		//await UniTask.Delay(3000);
-
 		return attackDataList;
-
-
-
-		//List<AreaData> areaData = DataManager.Instance.SetBundleKey(playerIcon.playerEnum);
-
-		//Dictionary<PlayerEnum, List<AreaData>> areaDataDic = new Dictionary<PlayerEnum, List<AreaData>>();
-
-		//foreach (var playerIcon in playerIconList)
-		//{
-		//	//üũ ����� �����̶��
-		//	if (playerIcon.playerEnum == playerEnum)
-		//		continue;
-
-		//	//�����̶��
-		//	if (DataManager.Instance.IsAllAlliance(new List<PlayerEnum>() { playerEnum, playerIcon.playerEnum }))
-		//		continue;
-
-		//	List<AreaData> areaData = DataManager.Instance.SetBundleKey(playerIcon.playerEnum);
-
-		//	//targetAreaDataList.AddRange(areaData);
-
-		//	//areaDataDic.Add(playerIcon.playerEnum, areaData);
-		//}
-
-		
 	}
 
 	private int GetMoreDice(PlayerEnum playerEnum)
@@ -382,9 +283,6 @@ public class AttackController
 
 			await Scenario_1(attackCount , source);
 		}
-
-		//���� ���� ū ���� ����
-		//attackCount = await EnemyBigAreaAttack(playerEnum, attackAreaList, attackCount);
 	}
 
 	async UniTask Scenario_1(int attackCount , CancellationTokenSource source)
@@ -412,15 +310,8 @@ public class AttackController
 
 				foreach (var attackData in attackDataList)
 				{
-					AreaData fromAreaData = DataManager.Instance.GetAreaData(attackData.fromAreaData.id);
-					AreaData toAreaData = DataManager.Instance.GetAreaData(attackData.toAreaData.id);
-
-					if (fromAreaData.player == toAreaData.player ||
-						fromAreaData.dice == 1 ||
-						fromAreaData.dice < toAreaData.dice)
-					{
+					if (CheckData(attackData , true))
 						continue;
-					}
 
 					await AttackOn(attackData.fromAreaData, attackData.toAreaData, source);
 
@@ -482,15 +373,8 @@ public class AttackController
 
 			foreach (var attackData in attackDataList)
 			{
-				AreaData fromAreaData = DataManager.Instance.GetAreaData(attackData.fromAreaData.id);
-				AreaData toAreaData = DataManager.Instance.GetAreaData(attackData.toAreaData.id);
-
-				if (fromAreaData.player == toAreaData.player ||
-					fromAreaData.dice == 1 ||
-					fromAreaData.dice < toAreaData.dice)
-				{
+				if (CheckData(attackData, true))
 					continue;
-				}
 
 				await AttackOn(attackData.fromAreaData, attackData.toAreaData, source);
 
@@ -508,179 +392,6 @@ public class AttackController
 			}
 		}
 	}
-
-	//public async UniTask HardAttackOn_old(List<AreaData> attackAreaList)
-	//{
-	//	//�� ��ü ���� ��
-	//	int allAreaCount = DataManager.Instance.areaDataList.Where(data => data.player == currentPlayerEnum).Count();
-
-	//	//���� ū ���� ��
-	//	int bigAreaCount = DataManager.Instance.SetBundleKey(currentPlayerEnum).Count;
-
-	//	int attackCount = allAreaCount - bigAreaCount;
-
-	//	//��綥�� �ѵ�� ���
-	//	if (attackCount == 0)
-	//	{
-	//		int moreDice = Mathf.Max(GetMoreDice(currentPlayerEnum), 0);
-
-	//		attackCount = Mathf.RoundToInt((moreDice) / 7.0f);
-	//	}
-	//	else 
-	//	{
-	//		//���� ū ����� �̾����� ���� ã��
-	//		attackCount = await MyBigAreaContinueAttack(attackCount);
-	//	}
-
-	//	//���� ���� ū ���� ����
-	//	attackCount = await EnemyBigAreaAttack(attackAreaList, attackCount);
-	//}
-
-	//private async UniTask<int> EnemyBigAreaAttack(List<AreaData> attackAreaList , int attackCount)
-	//{
-	//	if(attackCount <=  0) 
-	//	{
-	//		return 0;
-	//	}
-
-	//	List<AreaData> targetAreaDataList = GetBigAreaTarget(currentPlayerEnum, attackAreaList);
-
-	//	if (targetAreaDataList.Count != 0)
-	//	{
-	//		foreach (var targetAreaData in targetAreaDataList)
-	//		{
-	//			if (attackCount <= 0)
-	//			{
-	//				break;
-	//			}
-
-	//			foreach (var myAreaData in targetAreaData.CheckAdj(currentPlayerEnum))
-	//			{
-	//				AreaData fromAreaData = DataManager.Instance.GetAreaData(myAreaData.id);
-	//				AreaData toAreaData = DataManager.Instance.GetAreaData(targetAreaData.id);
-
-	//				if (fromAreaData.player == toAreaData.player ||
-	//					fromAreaData.dice == 1 ||
-	//					fromAreaData.dice < toAreaData.dice)
-	//				{
-	//					continue;
-	//				}
-
-	//				await AttackOn(fromAreaData, toAreaData, null);
-
-	//				attackCount--;
-
-	//				if (attackCount <= 0)
-	//				{
-	//					break;
-	//				}
-	//			}
-	//		}
-	//	}
-
-	//	return attackCount;
-	//}
-
-	//private async UniTask<int> MyBigAreaContinueAttack(int attackCount)
-	//{
-	//	if (attackCount <= 0)
-	//	{
-	//		return 0;
-	//	}
-
-	//	//���� ū ����� �̾����� ���� ã��
-	//	List<AttackData> attackDataList = await GetAdjTarget();
-
-	//	if (attackDataList.Count != 0)
-	//	{
-	//		foreach (var attackData in attackDataList)
-	//		{
-	//			AreaData fromAreaData = DataManager.Instance.GetAreaData(attackData.fromAreaData.id);
-	//			AreaData toAreaData = DataManager.Instance.GetAreaData(attackData.toAreaData.id);
-
-	//			if (fromAreaData.player == toAreaData.player ||
-	//				fromAreaData.dice == 1 ||
-	//				fromAreaData.dice < toAreaData.dice)
-	//			{
-	//				continue;
-	//			}
-
-	//			await AttackOn(attackData.fromAreaData, attackData.toAreaData,null);
-
-	//			attackCount--;
-
-	//			if (attackCount <= 0)
-	//			{
-	//				break;
-	//			}
-	//		}
-	//	}
-	//	else
-	//	{
-	//		attackCount = 0;
-	//	}
-
-	//	return attackCount;
-	//}
-
-	//private List<AreaData> GetBigAreaTarget(PlayerEnum playerEnum , List<AreaData> attackAreaList)
-	//{
-	//	List<PlayerIcon> playerIconList = playerIconController.GetActiveList();
-
-	//	Dictionary<PlayerEnum, List<AreaData>> areaDataDic = new Dictionary<PlayerEnum, List<AreaData>>();
-
-	//	//���� ���� ū ����� �������� ���
-	//	List<AreaData> bigAreaDataList = new List<AreaData>();
-
-	//	foreach (var playerIcon in playerIconList)
-	//	{
-	//		//üũ ����� �����̶��
-	//		if (playerIcon.playerEnum == playerEnum)
-	//			continue;
-
-	//		//�����̶��
-	//		if (DataManager.Instance.IsAllAlliance(new List<PlayerEnum>() { playerEnum, playerIcon.playerEnum }))
-	//			continue;
-
-	//		List<AreaData> areaData = DataManager.Instance.SetBundleKey(playerIcon.playerEnum);
-
-	//		bigAreaDataList.AddRange(areaData);
-	//	}
-
-	//	List<AreaData> targetAreaData = new List<AreaData>();
-
-	//	foreach (var attackArea in attackAreaList)
-	//	{
-	//		List<AreaData> temnpCheckAreaDataList = attackArea.CheckAdjAttakList(bigAreaDataList);
-
-	//		foreach (var temnpCheckAreaData in temnpCheckAreaDataList)
-	//		{
-	//			if (targetAreaData.Any(data => data.id == temnpCheckAreaData.id) == false)
-	//			{
-	//				targetAreaData.Add(temnpCheckAreaData);
-	//			}
-	//		}
-	//	}
-
-	//	return targetAreaData;
-	//}
-
-	//public async UniTask<bool> NoneAttackOn(AreaData attackArea) 
-	//{
-	//	bool attackOn = false;
-
-	//	var checkAreaData = attackArea.GetAdjList().FirstOrDefault(checkArea => AttackAreaOn(attackArea, checkArea) && attackArea.dice >= checkArea.dice);
-
-	//	if (checkAreaData != null)
-	//	{
-	//		await AttackOn(attackArea, checkAreaData, null);
-
-	//		attackOn = true;
-	//	}
-
-	//	return attackOn; 
-	//}
-
 
 	public async UniTask<bool> AttackOn(AreaData myData, AreaData enemyData , CancellationTokenSource source)
 	{

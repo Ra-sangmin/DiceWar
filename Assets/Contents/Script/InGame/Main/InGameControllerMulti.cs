@@ -15,7 +15,8 @@ public class InGameControllerMulti : InGameControllerBase
 {
 	[SerializeField] Timer timer;
 	[SerializeField] ApproveController approveController;
-
+	[SerializeField] MyAllianceApproveController myAllianceApproveController;
+	
 	List<allianceRequestCheckData> allianceRequestCheckDataList = new List<allianceRequestCheckData>();
 
 	protected override void Awake()
@@ -156,30 +157,14 @@ public class InGameControllerMulti : InGameControllerBase
 
 		int delayTime = allAIOn ? 200 : 500;
 
-		//만약 모두 AI 라면
-		if (allAIOn)
+		//요청 보내기
+		AllianceRequest request = new AllianceRequest()
 		{
-			//바로 동맹 결과 요청 진행
-			AllianceResultRequest request = new AllianceResultRequest()
-			{
-				orderData = orderData,
-				allianceDataList = allianceDataList,
-			};
+			orderData = orderData,
+			allianceDataList = allianceDataList,
+		};
 
-			ServerManager.Instance.SendMessageOn(request);
-		}
-		// 유저가 섞여 있다면
-		else
-		{
-			//요청 보내기
-			AllianceRequest request = new AllianceRequest()
-			{
-				orderData = orderData,
-				allianceDataList = allianceDataList,
-			};
-
-			ServerManager.Instance.SendMessageOn(request);
-		}
+		ServerManager.Instance.SendMessageOn(request);
 
 		await UniTask.Delay(delayTime, cancellationToken: source.Token);
 	}
@@ -344,7 +329,10 @@ public class InGameControllerMulti : InGameControllerBase
 					if (myTurnCount > 1)
 					{
 						DataManager.Instance.myTurnCount = 0;
-						mapController.SkillCardAddOn();
+
+						List<PlayerEnum> addOnPlayerList = mapController.playerIconController.GetActiveDiceLowerList();
+
+						mapController.inGameBottomController.nonePlayPanel.SkillCardAddOn(addOnPlayerList);
 					}
 				}
 
@@ -389,8 +377,14 @@ public class InGameControllerMulti : InGameControllerBase
 	private void LandTradeResponseOn(BaseTCPRequest baseRequest) 
 	{
 		LandTradeRequest landTradeRequest = (LandTradeRequest)baseRequest;
-
-		if (landTradeRequest.toPlayerEnum == GetMyPlayer())
+		
+		//내가 제안한 경우
+		if (landTradeRequest.fromPlayerEnum == GetMyPlayer())
+		{
+			mapController.inGameBottomController.nonePlayPanel.SkillUseOn();
+		}
+		//나에게 제안이 왔을경우
+		else if (landTradeRequest.toPlayerEnum == GetMyPlayer())
 		{
 			ApproveData approveData = new ApproveData()
 			{
@@ -400,9 +394,35 @@ public class InGameControllerMulti : InGameControllerBase
 
 			approveController.AddPopupOn(approveData);
 		}
-		else if (landTradeRequest.fromPlayerEnum == GetMyPlayer())
+
+		//제안 받은 플레이어가 AI 이고, 내가 게임 리더라면
+		if (IsAIOn(landTradeRequest.toPlayerEnum) && DataManager.Instance.isOwner)
 		{
-			mapController.inGameBottomController.nonePlayPanel.SkillUseOn();
+			bool approveOn = true;
+
+			var areaDataList = DataManager.Instance.SetBundleKey(landTradeRequest.toPlayerEnum);
+
+			AreaData areaData = landTradeRequest.areaData;
+
+			List<PlayerEnum> checkPlayerEnumList = new List<PlayerEnum>() { landTradeRequest.fromPlayerEnum  , landTradeRequest.toPlayerEnum };
+
+			bool isMyAlliance = DataManager.Instance.IsAllAlliance(checkPlayerEnumList);
+
+			if (areaDataList.Any(data => data.id == areaData.id) || //큰 덩어리에 속해 있거나,
+				landTradeRequest.coinCount <= 0 ||  //  0코인 이라면
+				!landTradeRequest.buyOn || // 영토 구매라면
+				!isMyAlliance) //나와 동맹이 아니라면
+			{
+				approveOn = false;
+			}
+
+			LandTradeApproveRequest request = new LandTradeApproveRequest()
+			{
+				landTradeRequest = landTradeRequest,
+				approveOn = approveOn,
+			};
+
+			ServerManager.Instance.SendMessageOn(request);
 		}
 	}
 
@@ -414,12 +434,17 @@ public class InGameControllerMulti : InGameControllerBase
 	{
 		LandTradeApproveRequest landTradeApproveRequest = (LandTradeApproveRequest)baseRequest;
 
+		LandTradeRequest tradeData = landTradeApproveRequest.landTradeRequest;
+
 		bool approveOn = landTradeApproveRequest.approveOn;
+
+		if (tradeData.fromPlayerEnum == GetMyPlayer())
+		{
+			LandTradeWarningPopupOn(tradeData , approveOn);
+		}
 
 		if (approveOn)
 		{
-			LandTradeRequest tradeData = landTradeApproveRequest.landTradeRequest;
-
 			AreaData currentAreaData = DataManager.Instance.GetAreaData(tradeData.areaData.id);
 			PlayerEnum changePlayerEnum = tradeData.buyOn ? tradeData.fromPlayerEnum : tradeData.toPlayerEnum;
 			currentAreaData.PlayerChangeOn(changePlayerEnum);
@@ -440,6 +465,31 @@ public class InGameControllerMulti : InGameControllerBase
 				DataManager.Instance.AddCoin(coinCount);
 			}
 		}
+		else
+		{
+			//내가 제안해서 실패했을 경우
+			if (tradeData.fromPlayerEnum == GetMyPlayer())
+			{
+				DataManager.Instance.SkillCardCountAdd(1);
+			}
+		}
+	}
+
+	private void LandTradeWarningPopupOn(LandTradeRequest tradeData , bool approveOn)
+	{
+		int localizeKey = -1;
+
+		if (approveOn)
+		{
+			localizeKey = tradeData.buyOn ? 41 : 43;
+		}
+		else
+		{
+			localizeKey = tradeData.buyOn ? 42 : 44;
+		}
+
+		string resultStr = LocalizeManager.Instance.GetStrData(LocalizeStatus.Game, localizeKey);
+		PopupManager.Instance.InGameWarningPopupOn(resultStr);
 	}
 
 	/// <summary>
@@ -459,7 +509,9 @@ public class InGameControllerMulti : InGameControllerBase
 
 			allianceRequestCheckDataList.Add(checkData);
 
-			mapController.inGameBottomController.nonePlayPanel.SkillUseOn();			
+			mapController.inGameBottomController.nonePlayPanel.SkillUseOn();
+
+			myAllianceApproveController.SetData(allianceRequest);
 		}
 		else
 		{
@@ -503,15 +555,16 @@ public class InGameControllerMulti : InGameControllerBase
 							continue;
 						}
 
-						// 동맹 요청 주최가 AI라서 나머지 AI는 이미 검증되었으므로 true로 만듬
-						AllianceApproveRequest approveRequest = new AllianceApproveRequest()
+						await UniTask.Delay(200, cancellationToken: source.Token);
+
+						AllianceApproveRequest request = new AllianceApproveRequest()
 						{
 							orderData = allianceRequest.orderData,
 							playerEnum = allianceData.playerEnum,
 							approveOn = true,
 						};
 
-						checkData.allianceApproveRequestList.Add(approveRequest);
+						ServerManager.Instance.SendMessageOn(request);
 					}
 				}
 				//동맹 주최가 유저 이지만 , 동맹 요청에 AI가 포함되어 리더가 AI 수락을 처리
@@ -561,7 +614,7 @@ public class InGameControllerMulti : InGameControllerBase
 	/// 동맹 요청 수락
 	/// </summary>
 	/// <param name="baseRequest"></param>
-	private void AllianceApproveResponseOn(BaseTCPRequest baseRequest)
+	private async void AllianceApproveResponseOn(BaseTCPRequest baseRequest)
 	{
 		AllianceApproveRequest allianceApproveRequest = (AllianceApproveRequest)baseRequest;
 
@@ -569,6 +622,13 @@ public class InGameControllerMulti : InGameControllerBase
 		if (allianceApproveRequest.orderData.playerEnum == GetMyPlayer())
 		{
 			AllianceApproveResultCheckOn(allianceApproveRequest);
+
+			myAllianceApproveController.ApprovedOn(allianceApproveRequest.playerEnum, allianceApproveRequest.approveOn);
+
+			if (allianceApproveRequest.approveOn == false)
+			{
+				myAllianceApproveController.FadeOn();
+			}
 		}
 		else
 		{
@@ -604,9 +664,9 @@ public class InGameControllerMulti : InGameControllerBase
 			string resultStr = LocalizeManager.Instance.GetStrData(LocalizeStatus.Game, 40);
 
 			PopupManager.Instance.InGameWarningPopupOn(resultStr);
-
 			return;
 		}
+		
 
 		checkData.allianceApproveRequestList.Add(allianceApproveRequest);
 
@@ -654,6 +714,11 @@ public class InGameControllerMulti : InGameControllerBase
 		string resultStr = LocalizeManager.Instance.GetStrData(LocalizeStatus.Game, 39);
 
 		PopupManager.Instance.InGameWarningPopupOn(resultStr);
+
+		if (allianceResultRequest.orderData.playerEnum == GetMyPlayer())
+		{
+			myAllianceApproveController.FadeOn();
+		}
 	}
 
 	/// <summary>

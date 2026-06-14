@@ -83,6 +83,10 @@ public class PlaySetPopup : MonoBehaviour
         SetToggleActive(mapSizeToggleList, 2);
         SetToggleActive(playersCountToggleList, 5);
 
+        //SetToggleActive(aIToggleList, 0);
+        //SetToggleActive(mapSizeToggleList, 0);
+        //SetToggleActive(playersCountToggleList, 2);
+
         SetNeedCoinCheck();
 	}
 

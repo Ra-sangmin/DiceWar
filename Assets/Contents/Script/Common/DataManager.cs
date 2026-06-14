@@ -347,7 +347,7 @@ public class DataManager : MonoSingleton<DataManager>
 		return 0;
 	}
 
-	List<AreaData> GetAreaDtaList(PlayerEnum playerEnum)
+	public List<AreaData> GetAreaDtaList(PlayerEnum playerEnum)
     {
 		return areaDataList.Where(data => data.player == playerEnum).ToList();
 	}
@@ -989,46 +989,76 @@ public class DataManager : MonoSingleton<DataManager>
 			AllianceData orderData = new AllianceData()
 			{
 				playerEnum = playerData,
-				coinCount = oneManCoinCount
+				//coinCount = oneManCoinCount
 			};
 
 			allianceDataList.Add(orderData);
 
-			maxCoinCount -= oneManCoinCount;
+			//maxCoinCount -= oneManCoinCount;
 		}
 
 		AllianceData orderPlayerData = allianceDataList.FirstOrDefault(data => data.playerEnum == orderPlayer);
 
 		//동맹 제안할 플레이어 추출
 		List<AllianceData> otherPlayerList = allianceDataList.Where(data => data.playerEnum != orderPlayer).ToList();
-		List<PlayerIcon> connectedHigherList = playerIconController.GetActiveDiceHigherList(otherPlayerList);
-
-		while (true) 
+		
+		//AI가 동맹 주체라면
+		if (GetPlayerData(orderPlayer).isAI)
         {
-			//공평하게 나누고 maxCoinCount 가 0 보다 크다면
-			if (maxCoinCount > 0)
-			{
-				orderPlayerData.coinCount += 1;
-				maxCoinCount -= 1;
-			}
+			List<PlayerIcon> allConnectedHigherList = playerIconController.GetActiveDiceHigherList(allianceDataList);
 
-			if (maxCoinCount > 0)
-			{
-				foreach (var playerIcon in connectedHigherList)
+			int allAreaCount = allConnectedHigherList.Sum(data => data.connectedCount);
+
+			foreach (var playerIcon in allConnectedHigherList)
+            {
+				var allianceData = allianceDataList.FirstOrDefault(data => data.playerEnum.Equals(playerIcon.playerEnum));
+
+				if (allianceData != null)
 				{
-					var allianceData = otherPlayerList.FirstOrDefault(data => data.playerEnum.Equals(playerIcon.playerEnum));
+                    int coinCount = GetNeedCoin() * num_player * playerIcon.connectedCount / allAreaCount;
 
-					if (allianceData != null)
-					{
-						allianceData.coinCount += 1;
-						maxCoinCount -= 1;
-					}
+					allianceData.coinCount += coinCount;
+					maxCoinCount -= coinCount;
 				}
 			}
 
-			if (maxCoinCount <= 0)
+            if (maxCoinCount > 0)
+            {
+				orderPlayerData.coinCount += maxCoinCount;
+				maxCoinCount = 0;
+			}
+		}
+        else
+        {
+			List<PlayerIcon> connectedHigherList = playerIconController.GetActiveDiceHigherList(otherPlayerList);
+
+			while (true)
 			{
-				break;
+				//공평하게 나누고 maxCoinCount 가 0 보다 크다면
+				if (maxCoinCount > 0)
+				{
+					orderPlayerData.coinCount += 1;
+					maxCoinCount -= 1;
+				}
+
+				if (maxCoinCount > 0)
+				{
+					foreach (var playerIcon in connectedHigherList)
+					{
+						var allianceData = otherPlayerList.FirstOrDefault(data => data.playerEnum.Equals(playerIcon.playerEnum));
+
+						if (allianceData != null)
+						{
+							allianceData.coinCount += 1;
+							maxCoinCount -= 1;
+						}
+					}
+				}
+
+				if (maxCoinCount <= 0)
+				{
+					break;
+				}
 			}
 		}
 
@@ -1120,21 +1150,16 @@ public class DataManager : MonoSingleton<DataManager>
 
 		foreach (var allianceData in allianceAllDataList)
 		{
-			isAllAlliance = allianceData.allianceDataList.All(data => checkPlayerEnumList.Contains(data.playerEnum));
+            List<PlayerEnum> allList = allianceData.allianceDataList.Select(data => data.playerEnum).ToList();
+
+			isAllAlliance = checkPlayerEnumList.All(data => allList.Contains(data));
 
             if (isAllAlliance)
             {
-                break;
+                isAllAlliance = true;
+				break;
             }
 		}
-
-		//foreach (PlayerEnum playerEnum in checkPlayerEnumList)
-  //      {
-  //          if (IsAlliance(playerEnum) == false)
-  //          {
-  //              isAllAlliance = false;
-  //          }
-  //      }
 
         return isAllAlliance;
     }

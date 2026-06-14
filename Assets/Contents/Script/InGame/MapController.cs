@@ -421,13 +421,6 @@ public class MapController : MonoBehaviour
 		}
 	}
 
-    public void SkillCardAddOn()
-    {
-        List<PlayerEnum> addOnPlayerList = playerIconController.GetActiveDiceLowerList();
-
-		inGameBottomController.nonePlayPanel.SkillCardAddOn(addOnPlayerList);   
-	}
-
 	private void AttackRequestOn(AreaData fromAreaData , AreaData toAreaData , DiceWarData fromDiceWarData, DiceWarData toDiceWarData)
     {
         AttackRequest request = new AttackRequest()

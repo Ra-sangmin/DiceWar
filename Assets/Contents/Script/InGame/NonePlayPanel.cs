@@ -53,12 +53,14 @@ public class NonePlayPanel : MonoBehaviour
 
     public void SetAreaData(AreaData areaData , InGameButtonStatus inGameButtonStatus)
     {
-        if (inGameButtonStatus == InGameButtonStatus.Buy && areaData.player != DataManager.Instance.GetMyPlayerData().pe) 
+        PlayerEnum myPlayerEnum = DataManager.Instance.GetMyPlayerData().pe;
+
+		if (inGameButtonStatus == InGameButtonStatus.Buy && areaData.player != myPlayerEnum) 
         {
 			selectAreaData = areaData;
 			LandTradePopupOn(true);
         }
-        else if (inGameButtonStatus == InGameButtonStatus.Sell && areaData.player == DataManager.Instance.GetMyPlayerData().pe)
+        else if (inGameButtonStatus == InGameButtonStatus.Sell && areaData.player == myPlayerEnum)
         {
 			selectAreaData = areaData;
 			LandTradePopupOn(false);

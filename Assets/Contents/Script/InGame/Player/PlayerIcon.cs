@@ -15,7 +15,8 @@ public class PlayerIcon : MonoBehaviour
 
     public PlayerEnum playerEnum = PlayerEnum.Player_None;
     public int connectedCount;
-    public UnityAction<PlayerIcon> playerClickOn = data => { };
+	public int allAreaCount;
+	public UnityAction<PlayerIcon> playerClickOn = data => { };
 
     // Start is called before the first frame update
     void Start()
@@ -65,7 +66,9 @@ public class PlayerIcon : MonoBehaviour
     {
         this.connectedCount = connectedCount;
         connectedCountText.text = connectedCount.ToString();
-    }
+
+        allAreaCount = DataManager.Instance.GetAreaDtaList(playerEnum).Count;
+	}
 
     public void SetMyTurnEffect(bool forceActiveOn = false)
     {

@@ -149,7 +149,7 @@ public class PlayerIconController : MonoBehaviour
     public List<PlayerEnum> GetActiveDiceLowerList()
     {
         //연결된 영토가 작은 순으로 취득
-        List<PlayerEnum> allActiveList = GetActiveList().OrderBy(data => data.connectedCount).Select(data => data.playerEnum).ToList();
+		List<PlayerEnum> allActiveList = GetActiveList().OrderBy(data => data.connectedCount).ThenBy(data => data.allAreaCount).Select(data => data.playerEnum).ToList();
 
         //하위 순위권 플레이어 숫자 취득
         int listCount = (int)Math.Round(allActiveList.Count / 2.0f);

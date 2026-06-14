@@ -33,6 +33,7 @@ public class LoadingController : MonoBehaviour
     bool aIPlayOn = false;
 
     private float aiStartTime = 10;
+	//private float aiStartTime = 2;
 
     public enum LoadingStatus
     {

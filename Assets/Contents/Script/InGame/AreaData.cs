@@ -167,7 +167,8 @@ public class AreaData
 
 		foreach (var adj in adjList)
 		{
-            if (adj.player == player) 
+            if (adj.player == player ||
+				DataManager.Instance.IsAllAlliance(new List<PlayerEnum>() { adj.player, player })) 
                 continue;
             
             List<AreaData> targetAdjList = adj.GetAdjList();

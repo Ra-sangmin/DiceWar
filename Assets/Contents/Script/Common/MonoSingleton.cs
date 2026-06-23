@@ -61,6 +61,9 @@ public class MonoSingleton<T> : MonoBehaviour where T : MonoBehaviour
 	// [추가] 오브젝트가 파괴될 때 참조를 비워줍니다.
 	protected virtual void OnDestroy()
 	{
-		// _instance = null; // 필요에 따라 해제 (일반적으로 종료 시점엔 _isQuitting으로 충분함)
+		if (_instance == this)
+		{
+			_instance = null;
+		}
 	}
 }

@@ -1292,6 +1292,7 @@ public class DataManager : MonoSingleton<DataManager>
     {
 		PlayerData p_data = GetPlayerData(playerEnum);
         p_data.sc += addCount;
+		p_data.sc = Mathf.Clamp(p_data.sc, 0, 3);
 
 		SkillCardRequest request = new SkillCardRequest()
 		{

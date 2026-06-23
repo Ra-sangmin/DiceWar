@@ -203,10 +203,10 @@ public class AttackController
 	/// <returns></returns>
 	private async UniTask<List<AttackData>> GetAdjTarget()
 	{
-		//���� ū ���
+		//가장 큰 영역 
 		List<AreaData> bigAreaDataList = DataManager.Instance.SetBundleKey(currentPlayerEnum);
 
-		//�ٸ� �����
+		//큰 영역 제외 자른 영토
 		List<AreaData> otherAreaList = DataManager.Instance.areaDataList.Where(data => data.player == currentPlayerEnum && bigAreaDataList.Any(bigData => bigData.id == data.id) == false).ToList();
 
 		List<AreaData> enemyList = new List<AreaData>();
@@ -259,16 +259,16 @@ public class AttackController
 
 	public async UniTask HardAttackOn(CancellationTokenSource source)
 	{
-		//�� ��ü ���� ��
+		//모든 영토 수
 		int allAreaCount = DataManager.Instance.areaDataList.Where(data => data.player == currentPlayerEnum).Count();
 
-		//���� ū ���� ��
+		//연결된 영토 수
 		int bigAreaCount = DataManager.Instance.SetBundleKey(currentPlayerEnum).Count;
 
-		//��翵���� �ֻ����� Max ����
+		//모든 영토의 주사위가 Max 치 인지 
 		bool allDiceMaxOn = DataManager.Instance.areaDataList.Where(data => data.player == currentPlayerEnum).All(data => data.IsDiceMax());
 
-		//��綥�� �ѵ�� �̰ų� �ֻ��� ���� ��� max ���
+		//모든 영토수가 연결된 영토수와 같거나, 모든 주사위 수가 Max 치일때
 		if (allAreaCount == bigAreaCount || allDiceMaxOn)
 		{
 			int moreDice = Mathf.Max(GetMoreDice(currentPlayerEnum), 0);
@@ -335,7 +335,7 @@ public class AttackController
 	{
 		while (attackCount > 0)
 		{
-			//���� ū ����� �̾����� ���� ã��
+			//공격 타겟 취득
 			List<AttackData> attackDataList = await GetAdjTarget();
 
 			if (attackDataList.Count == 0)
@@ -363,8 +363,9 @@ public class AttackController
 
 					if (attackDataList.Count == 0)
 					{
-						attackCount = 0;
-						break;
+						var allAreaData = DataManager.Instance.areaDataList.Where(data => data.player == currentPlayerEnum).ToList();
+						//무작위 영토에서 공격 가능 영토 체크
+						attackDataList.AddRange(GetAttackData(allAreaData, 1));
 					}
 				}
 			}
@@ -420,7 +421,6 @@ public class AttackController
 		await inGameBottomController.nonePlayPanel.AttackOn(myDiceWarData, enemyDiceWarData , source);
 
 		//���ɿ� �����Ͽ��ٸ�
-
 		bool win = myDiceWarData.diceSum > enemyDiceWarData.diceSum;
 
 		if (win)

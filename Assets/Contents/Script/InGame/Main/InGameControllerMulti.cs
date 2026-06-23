@@ -314,14 +314,14 @@ public class InGameControllerMulti : InGameControllerBase
 
 			PlayerIcon playerIcon = mapController.playerIconController.GetPlayerIcon(currentPlayer);
 
+			bool myTurn = DataManager.Instance.IsMyTurn();
+
 			if (playerIcon == null)
 			{
 				TurnRequestOn(turnRequest).Forget();
 			}
 			else
 			{
-				bool myTurn = DataManager.Instance.IsMyTurn();
-
 				if (myTurn && DataManager.Instance.isOwner)
 				{
 					int myTurnCount = DataManager.Instance.MyTurnAddOn();
@@ -339,7 +339,7 @@ public class InGameControllerMulti : InGameControllerBase
 				TurnCheck();
 			}
 
-			if (DataManager.Instance.IsMyTurn())
+			if (myTurn)
 			{
 				timer.SetTimerOn(true, playerIcon.connectedCount == 0);
 				endTurnBtn.interactable = true;

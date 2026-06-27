@@ -79,15 +79,16 @@ public class PlaySetPopup : MonoBehaviour
 
     void SetMultiToggle()
     {
-        SetToggleActive(aIToggleList, 2);
-        SetToggleActive(mapSizeToggleList, 2);
-        SetToggleActive(playersCountToggleList, 5);
-
-        //SetToggleActive(aIToggleList, 0);
-        //SetToggleActive(mapSizeToggleList, 0);
-        //SetToggleActive(playersCountToggleList, 2);
-
-        SetNeedCoinCheck();
+#if UNITY_EDITOR || UNITY_STANDALONE_WIN || DEV
+		SetToggleActive(aIToggleList, 0);
+		SetToggleActive(mapSizeToggleList, 0);
+		SetToggleActive(playersCountToggleList, 0);
+#else
+        //SetToggleActive(aIToggleList, 2);
+        //SetToggleActive(mapSizeToggleList, 2);
+        //SetToggleActive(playersCountToggleList, 5);
+#endif
+		SetNeedCoinCheck();
 	}
 
     public void SetToggleActive(List<SMToggle> toggleList, int activeIndex)

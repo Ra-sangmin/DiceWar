@@ -1,10 +1,12 @@
 let mysql = require('mysql');
+const { db } = require('./dbConfig');
+
 let db_info = {
-    host : 'diceanddeal.c9as6u8gu1w3.ap-northeast-2.rds.amazonaws.com',//db주소
-    port : '3306',
-    user : 'admin',//db유저
-    password : 'kKGf7NIIiLSIEq96s31S',//db암호
-    database : 'dad'//db이름
+    host : db.host,//db주소
+    port : db.port,
+    user : db.user,//db유저
+    password : db.password,//db암호
+    database : db.database//db이름
 }
 
 module.exports = {

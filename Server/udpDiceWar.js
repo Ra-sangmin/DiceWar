@@ -1,15 +1,17 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const mysql = require('mysql2/promise');
+const { db } = require('./dbConfig');
 
 /* ======================
     MySQL Pool 설정
 ====================== */
 const pool = mysql.createPool({
-  host: 'diceanddeal.c9as6u8gu1w3.ap-northeast-2.rds.amazonaws.com',
-  user: 'admin',
-  password: 'kKGf7NIIiLSIEq96s31S',
-  database: 'dad',
+  host: db.host,
+  port: db.port,
+  user: db.user,
+  password: db.password,
+  database: db.database,
   waitForConnections: true,
   connectionLimit: 20, // 동시 접속이 늘어날 것에 대비해 조금 늘렸어요
   queueLimit: 0,

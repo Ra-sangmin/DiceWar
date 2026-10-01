@@ -72,3 +72,16 @@ crashlytics-build.properties
 # Temporary auto-generated Android Assets
 /[Aa]ssets/[Ss]treamingAssets/aa.meta
 /[Aa]ssets/[Ss]treamingAssets/aa/*
+
+# ===== 비밀 정보 (절대 커밋 금지) =====
+# 서버 접속 키
+*.pem
+*.ppk
+# Android 앱 서명 키
+*.keystore
+*.jks
+# 서버 환경변수 (DB 접속 정보 등) - Server/.env.example 참고
+.env
+!.env.example
+# 서버 의존성
+Server/node_modules/

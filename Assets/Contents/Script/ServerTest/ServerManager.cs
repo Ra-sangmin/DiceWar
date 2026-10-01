@@ -39,6 +39,9 @@ public class ServerManager : MonoSingleton<ServerManager>
 
 	private bool isAppQuitting = false;
 
+	// 현재 연결의 수신 스레드가 끊김을 감지했는지 (서버가 연결을 닫았거나 소켓 에러)
+	private volatile bool connectionLost = false;
+
 	void Start()
 	{
 		ConnectToServer();
@@ -63,8 +66,11 @@ public class ServerManager : MonoSingleton<ServerManager>
 			client = new TcpClient();
 			client.Connect(IPAddress.Parse(IP), PORT);
 			stream = client.GetStream();
+			connectionLost = false;
 
-			receiveThread = new Thread(ReceiveLoop);
+			// 수신 스레드는 자기 연결의 stream만 읽는다 (재연결 후 이전 스레드가 새 stream을 같이 읽지 않도록)
+			NetworkStream receiveStream = stream;
+			receiveThread = new Thread(() => ReceiveLoop(receiveStream));
 			receiveThread.IsBackground = true;
 			receiveThread.Start();
 
@@ -76,16 +82,16 @@ public class ServerManager : MonoSingleton<ServerManager>
 		}
 	}
 
-	private void ReceiveLoop()
+	private void ReceiveLoop(NetworkStream receiveStream)
 	{
 		while (true)
 		{
 			try
 			{
 				// [안전 장치] 만약 메인 스레드가 통로를 파괴했다면 조용히 종료합니다.
-				if (stream == null) break;
+				if (stream == null || stream != receiveStream) break;
 
-				int byteCount = stream.Read(buffer, 0, buffer.Length);
+				int byteCount = receiveStream.Read(buffer, 0, buffer.Length);
 				if (byteCount <= 0)
 				{
 					//Debug.LogWarning("서버 연결 끊김");
@@ -106,6 +112,12 @@ public class ServerManager : MonoSingleton<ServerManager>
 				// 과거의 스레드가 죽으면서, 새 게임을 위해 만든 새 통로를 부숴버리는 '팀킬'이 발생하기 때문입니다.
 				break;
 			}
+		}
+
+		// 현재 연결이 끊긴 경우에만 표시 (이미 재연결된 뒤 종료되는 과거 스레드는 무시)
+		if (stream == receiveStream && isAppQuitting == false)
+		{
+			connectionLost = true;
 		}
 	}
 
@@ -134,7 +146,7 @@ public class ServerManager : MonoSingleton<ServerManager>
 		try
 		{
 			// 선제적 재연결
-			if (client == null || !client.Connected || stream == null)
+			if (client == null || !client.Connected || stream == null || connectionLost)
 			{
 				//Debug.Log("[TCP] 연결이 없어서 다시 뚫습니다.");
 				ConnectToServer();
@@ -384,8 +396,18 @@ public class ServerManager : MonoSingleton<ServerManager>
 		// 다른 앱으로 나갔다가 돌아왔을 때 (백그라운드 -> 포그라운드)
 		if (pauseStatus == false && isAppQuitting == false)
 		{
-			// 백그라운드 중 OS가 소켓을 끊었을 수 있으므로 연결을 새로 뚫습니다.
-			ConnectToServer();
+			// 연결이 실제로 끊겼을 때만 새로 뚫습니다.
+			// 살아있는 소켓까지 새로 뚫으면 서버의 방에 등록되지 않은 새 소켓이 되어
+			// 턴 패킷이 전달되지 않고 턴이 넘어가지 않습니다.
+			if (client == null || !client.Connected || stream == null || connectionLost)
+			{
+				ConnectToServer();
+			}
+			else
+			{
+				// 백그라운드 동안 못 보낸 하트비트를 바로 보내서 서버에 살아있음을 알림
+				heartbeatTimer = heartbeatInterval;
+			}
 		}
 	}
 

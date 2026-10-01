@@ -1305,9 +1305,13 @@ public class InGameControllerMulti : InGameControllerBase
 
 		List<SendAreaData> sendAreaData = new List<SendAreaData>();
 
-		foreach (var areaData in areaDataList)
+		//EndTurnBtnClickOn / DiceAddOn 은 null 을 줄 수 있다 - 여기서 예외가 나면 턴 종료 패킷이 안 나가서 턴이 멈춘다
+		if (areaDataList != null)
 		{
-			sendAreaData.Add(areaData.GetSendAreaData());
+			foreach (var areaData in areaDataList)
+			{
+				sendAreaData.Add(areaData.GetSendAreaData());
+			}
 		}
 
 		TurnRequest turnRequest = new TurnRequest()

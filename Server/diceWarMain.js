@@ -1,4 +1,5 @@
 const net = require("net");
+const crypto = require("crypto");
 const express = require('express');
 
 const clients = new Map();
@@ -52,12 +53,28 @@ class RoomData {
         this.gameReadyOn = gameReadyOn;
         // 플레이어 번호별 재입장 대기 정보 { timer, pending: [] } (연결이 살아있으면 null)
         this.waits = [];
+        // 플레이어 번호별 재입장 토큰 (매칭 때 본인에게만 발급, 재입장 / 소켓이 바뀐 뒤의 퇴장 요청 때 확인)
+        this.tokens = [];
     }
 }
 
 /* ======================
     헬퍼 함수 (최적화)
 ====================== */
+function CreateRejoinToken() {
+    return crypto.randomBytes(16).toString('hex');
+}
+
+// 해당 자리의 토큰과 같은지 (길이가 다르거나 문자열이 아니면 실패)
+function IsValidToken(room, idx, token) {
+    const saved = room.tokens[idx];
+    if (typeof saved !== 'string' || typeof token !== 'string') return false;
+
+    const a = Buffer.from(saved);
+    const b = Buffer.from(token);
+    return a.length === b.length && crypto.timingSafeEqual(a, b);
+}
+
 function GetRoomDataFromIndex(roomDataIndex) {
     return roomDatas.find(r => r.index === roomDataIndex) || null;
 }
@@ -200,8 +217,8 @@ function SetData(socket, data) {
         let room = GetRoomDataFromIndex(jsonData.roomDataIndex);
         
         if (protocol === PROTOCOL_GAME_OUT) {
-            // [핵심] 소켓 정보뿐만 아니라, 유니티가 보낸 내 플레이어 번호(outPlayerEnum)를 같이 넘깁니다.
-            if (room) GameOutOn(socket, room, jsonData.outPlayerEnum);
+            // [핵심] 소켓 정보뿐만 아니라, 유니티가 보낸 내 플레이어 번호(outPlayerEnum)와 토큰을 같이 넘깁니다.
+            if (room) GameOutOn(socket, room, jsonData.outPlayerEnum, jsonData.rejoinToken);
             return;
         }
 
@@ -233,20 +250,30 @@ function GameReadyOn(socket, jsonData) {
         roomDatas.push(room);
     }
 
+    const rejoinToken = CreateRejoinToken();
+
     room.sockets.push(socket);
     room.gameOuts.push(false);
+    room.tokens.push(rejoinToken);
 
     const socketCnt = room.sockets.length;
     const playerEnum = socketCnt - 1;
-    const resultData = JSON.stringify({
+    const resultData = {
         requestProtocal: 1,
         socketCnt,
         roomDataIndex: room.index,
         playerEnum,
         isOwner: playerEnum === 0
-    });
+    };
 
-    BroadcastOn(room, resultData);
+    // 토큰은 새로 들어온 본인에게만 보낸다 (다른 유저에게는 토큰 없이)
+    const publicData = JSON.stringify(resultData);
+    const privateData = JSON.stringify({ ...resultData, rejoinToken });
+
+    room.sockets.forEach((s, i) => {
+        if (!s || s.destroyed || room.gameOuts[i]) return;
+        sendMessage(s, s === socket ? privateData : publicData);
+    });
 }
 
 function GameOutCheckOn(socket) {
@@ -291,7 +318,8 @@ function RejoinOn(socket, jsonData) {
         room.gameReadyOn &&
         Number.isInteger(idx) &&
         idx >= 0 && idx < room.sockets.length &&
-        !room.gameOuts[idx];
+        !room.gameOuts[idx] &&
+        IsValidToken(room, idx, jsonData.rejoinToken);
 
     if (rejoinOn) {
         // 이전 소켓의 종료 이벤트가 아직 안 왔어도, 자리를 새 소켓으로 바꿔두면 나중에 와도 무시된다
@@ -320,11 +348,14 @@ function RejoinOn(socket, jsonData) {
     }
 }
 
-function GameOutOn(socket, room, outPlayerEnum) {
+function GameOutOn(socket, room, outPlayerEnum, rejoinToken) {
     let idx = room.sockets.indexOf(socket);
 
-    // [유령 방어] 재연결 때문에 소켓이 바뀌었어도, 유니티가 보낸 번호(outPlayerEnum)를 신뢰하여 강제로 찾습니다!
+    // [유령 방어] 재연결 때문에 소켓이 바뀌었어도, 유니티가 보낸 번호(outPlayerEnum)로 찾습니다.
+    // 단, 다른 사람을 내보내지 못하도록 그 자리의 토큰이 맞을 때만 허용합니다.
+    // (서버가 직접 호출하는 재입장 대기 만료는 socket 없이 번호만 넘기므로 토큰 확인을 하지 않습니다)
     if (idx === -1 && outPlayerEnum !== undefined && outPlayerEnum !== null) {
+        if (socket && !IsValidToken(room, outPlayerEnum, rejoinToken)) return;
         idx = outPlayerEnum;
     }
 
@@ -335,6 +366,7 @@ function GameOutOn(socket, room, outPlayerEnum) {
         room.sockets.splice(idx, 1);
         room.gameOuts.splice(idx, 1);
         room.waits.splice(idx, 1);
+        room.tokens.splice(idx, 1);
         
         // 대기방에 아무도 없으면 파괴
         if (room.sockets.length === 0) {

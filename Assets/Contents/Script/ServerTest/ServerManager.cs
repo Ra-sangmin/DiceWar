@@ -27,6 +27,9 @@ public class ServerManager : MonoSingleton<ServerManager>
 
 	public int roomDataIndex = -1;
 
+	// 매칭 때 서버가 나에게만 발급한 재입장 토큰 (재입장 / 소켓이 바뀐 뒤의 퇴장 요청에 같이 보낸다)
+	private string rejoinToken = string.Empty;
+
 	public bool receiveOn = true;
 
 	private TcpClient client;
@@ -163,6 +166,7 @@ public class ServerManager : MonoSingleton<ServerManager>
 		{
 			roomDataIndex = roomDataIndex,
 			playerEnum = dataMgr.playerData.pe,
+			rejoinToken = rejoinToken,
 		};
 
 		try
@@ -361,6 +365,13 @@ public class ServerManager : MonoSingleton<ServerManager>
 		if (baseRequest.requestProtocal == RequestProtocal.GameReady)
 		{
 			roomDataIndex = baseRequest.roomDataIndex;
+
+			// 토큰은 내가 들어갈 때 받은 응답에만 들어있다 (다른 유저 입장 알림에는 없음)
+			string token = ((GameReadyRequest)baseRequest).rejoinToken;
+			if (string.IsNullOrEmpty(token) == false)
+			{
+				rejoinToken = token;
+			}
 		}
 
 		// 안전한 패킷만 큐에 넣습니다.
@@ -472,7 +483,8 @@ public class ServerManager : MonoSingleton<ServerManager>
 			GameOutRequest gameOutRequest = new GameOutRequest()
 			{
 				outPlayerEnum = dataMgr.playerData.pe,
-				roomDataIndex = this.roomDataIndex // [추가] 방 번호도 확실히 세팅
+				roomDataIndex = this.roomDataIndex, // [추가] 방 번호도 확실히 세팅
+				rejoinToken = rejoinToken,
 			};
 
 			// 1. JSON 문자열로 변환
@@ -485,6 +497,7 @@ public class ServerManager : MonoSingleton<ServerManager>
 			if (stream != null) stream.Flush();
 
 			roomDataIndex = -1;
+			rejoinToken = string.Empty;
 			//Debug.Log("[TCP] 종료 패킷 즉시 전송 완료!");
 		}
 	}
@@ -545,6 +558,7 @@ public class GameReadyRequest : BaseTCPRequest
 	public PlayerEnum playerEnum;
 	public bool isOwner = false;
 	public MapSizeEnum mapSizeEnum;
+	public string rejoinToken; //서버 응답에서 본인에게만 들어온다
 
 	public GameReadyRequest()
 	{
@@ -559,6 +573,7 @@ public class GameOutRequest : BaseTCPRequest
 
 	public PlayerEnum outPlayerEnum = PlayerEnum.Player_None;
 	public bool isOwner = false;
+	public string rejoinToken; //소켓이 바뀐 뒤 퇴장할 때 본인 확인용
 
 	public GameOutRequest()
 	{
@@ -735,6 +750,7 @@ public class HeartbeatRequest : BaseTCPRequest
 public class RejoinRequest : BaseTCPRequest
 {
 	public PlayerEnum playerEnum;
+	public string rejoinToken; //매칭 때 받은 재입장 토큰
 	public bool rejoinOn = false;
 
 	public RejoinRequest()

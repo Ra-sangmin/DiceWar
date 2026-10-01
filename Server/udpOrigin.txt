@@ -1,0 +1,93 @@
+const express = require('express')
+const bodyParser = require('body-parser')
+
+const db_config = require(__dirname + '/database.js');
+const conn = db_config.init();
+
+var app = express()
+app.use(express.json())
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json());
+
+app.get('/', async (req, res) => {
+
+})
+
+app.get('/test', async (req, res) => {
+
+	res.json("test On");
+	res.end();
+})
+
+app.post('/getUserData', async (req,res) => {
+
+	GetUserDataOn(req,res);
+})
+
+//유저 정보 취득
+function GetUserDataOn(req,res) 
+{
+	const email = req.body.email;
+
+	const queryStr = 'SELECT * FROM user WHERE email = "'+email+'" limit 1;'
+
+	conn.query(queryStr, function (error, results, fields) {
+		if (error) throw error;
+
+		//회원 정보가 없다면
+		if(results == 0)
+		{
+			SignUpUserDataOn(req,res);
+		}
+		else
+		{
+			res.json(results[0]);
+			res.end();
+		}
+    });
+}
+
+//회원 가입
+function SignUpUserDataOn(req,res) 
+{
+	const email = req.body.email;
+	const snsType = req.body.snsType;
+	
+	const queryStr = 'INSERT INTO user (email,snsType) VALUES ("'+email+'",'+snsType+');'
+
+	conn.query(queryStr, function (error, results, fields) {
+		if (error) throw error;
+		GetUserDataOn(req,res);
+    });
+}
+
+//코인 정보 업데이트
+app.post('/updateCoinData', async (req,res) => {
+
+	const email = req.body.email;
+	const coin = req.body.coin;
+	const freeCoin = req.body.freeCoin;
+	const chargeCoin = req.body.chargeCoin;
+
+	//console.log("coin = : " + coin);
+
+	let queryStr = "";
+
+	if(coin != null)
+	{
+		queryStr = 'UPDATE user SET coin = '+coin+' WHERE email = "'+email+'";'
+	}
+	else
+	{
+		queryStr = 'UPDATE user SET freeCoin = '+freeCoin+' , chargeCoin = '+chargeCoin+'  WHERE email = "'+email+'";'		
+	}
+
+	conn.query(queryStr, function (error, results, fields) {
+		if (error) throw error;
+		GetUserDataOn(req,res); 
+    });
+})
+
+app.listen(8002, async () => {
+  	console.log('> server start! ')
+})

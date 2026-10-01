@@ -3,23 +3,25 @@
     <ui:VisualElement name="tutorial-root" class="popup-root popup-open-anim">
         <ui:VisualElement name="tutorial-mask" class="tutorial__mask" />
 
-        <ui:Label name="tutorial-title" text="" class="tutorial__title" picking-mode="Ignore" />
-        <ui:VisualElement name="tutorial-tabs" class="tutorial__tabs" />
+        <ui:VisualElement name="tutorial-stage" class="popup-stage" picking-mode="Ignore">
+            <ui:Label name="tutorial-title" text="" class="tutorial__title" picking-mode="Ignore" />
+            <ui:VisualElement name="tutorial-tabs" class="tutorial__tabs" />
 
-        <ui:Button name="tutorial-skip-btn" text="" class="tutorial__skip-btn">
-            <ui:Label name="tutorial-skip-label" text="Skip" class="tutorial__skip-label" picking-mode="Ignore" />
-        </ui:Button>
-        <ui:Button name="tutorial-close-btn" text="" class="tutorial__close-btn" />
-
-        <ui:VisualElement name="tutorial-image" class="tutorial__image" picking-mode="Ignore" />
-
-        <ui:VisualElement name="tutorial-card" class="tutorial__card">
-            <ui:Label name="tutorial-page-title" text="" class="tutorial__page-title" picking-mode="Ignore" />
-            <ui:Label name="tutorial-page-body" text="" class="tutorial__page-body" picking-mode="Ignore" />
-            <ui:Label name="tutorial-page-index" text="" class="tutorial__page-index" picking-mode="Ignore" />
-            <ui:Button name="tutorial-after-btn" text="" class="tutorial__nav-btn">
-                <ui:VisualElement class="tutorial__nav-icon" picking-mode="Ignore" />
+            <ui:Button name="tutorial-skip-btn" text="" class="tutorial__skip-btn">
+                <ui:Label name="tutorial-skip-label" text="Skip" class="tutorial__skip-label" picking-mode="Ignore" />
             </ui:Button>
+            <ui:Button name="tutorial-close-btn" text="" class="tutorial__close-btn" />
+
+            <ui:VisualElement name="tutorial-image" class="tutorial__image" picking-mode="Ignore" />
+
+            <ui:VisualElement name="tutorial-card" class="tutorial__card">
+                <ui:Label name="tutorial-page-title" text="" class="tutorial__page-title" picking-mode="Ignore" />
+                <ui:Label name="tutorial-page-body" text="" class="tutorial__page-body" picking-mode="Ignore" />
+                <ui:Label name="tutorial-page-index" text="" class="tutorial__page-index" picking-mode="Ignore" />
+                <ui:Button name="tutorial-after-btn" text="" class="tutorial__nav-btn">
+                    <ui:VisualElement class="tutorial__nav-icon" picking-mode="Ignore" />
+                </ui:Button>
+            </ui:VisualElement>
         </ui:VisualElement>
     </ui:VisualElement>
 </ui:UXML>

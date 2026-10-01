@@ -2,15 +2,17 @@
     <Style src="PopupView.uss" />
     <ui:VisualElement name="ok-popup-root" class="popup-root popup-open-anim">
         <ui:Button name="ok-popup-mask" text="" class="ok-popup__mask" />
-        <ui:VisualElement name="ok-popup-plate" class="popup-plate ok-popup__plate" picking-mode="Ignore" />
-        <ui:VisualElement name="ok-popup-panel" class="ok-popup__bg">
-            <ui:Label name="ok-popup-contens-text" text="" class="ok-popup__contens-text" picking-mode="Ignore" />
-            <ui:Button name="ok-popup-cancel-btn" text="" class="ok-popup__btn ok-popup__cancel-btn">
-                <ui:Label name="ok-popup-cancel-label" text="" class="ok-popup__btn-label" picking-mode="Ignore" />
-            </ui:Button>
-            <ui:Button name="ok-popup-ok-btn" text="" class="ok-popup__btn ok-popup__ok-btn">
-                <ui:Label name="ok-popup-ok-label" text="" class="ok-popup__btn-label" picking-mode="Ignore" />
-            </ui:Button>
+        <ui:VisualElement name="ok-popup-stage" class="popup-stage" picking-mode="Ignore">
+            <ui:VisualElement name="ok-popup-plate" class="popup-plate ok-popup__plate" picking-mode="Ignore" />
+            <ui:VisualElement name="ok-popup-panel" class="ok-popup__bg">
+                <ui:Label name="ok-popup-contens-text" text="" class="ok-popup__contens-text" picking-mode="Ignore" />
+                <ui:Button name="ok-popup-cancel-btn" text="" class="ok-popup__btn ok-popup__cancel-btn">
+                    <ui:Label name="ok-popup-cancel-label" text="" class="ok-popup__btn-label" picking-mode="Ignore" />
+                </ui:Button>
+                <ui:Button name="ok-popup-ok-btn" text="" class="ok-popup__btn ok-popup__ok-btn">
+                    <ui:Label name="ok-popup-ok-label" text="" class="ok-popup__btn-label" picking-mode="Ignore" />
+                </ui:Button>
+            </ui:VisualElement>
         </ui:VisualElement>
     </ui:VisualElement>
 </ui:UXML>

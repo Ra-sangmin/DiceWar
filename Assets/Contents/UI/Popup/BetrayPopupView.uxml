@@ -3,22 +3,24 @@
     <ui:VisualElement name="betray-root" class="popup-root popup-open-anim">
         <ui:VisualElement name="betray-dim-0" class="popup-dim popup-dim--blur" />
         <ui:VisualElement name="betray-dim-1" class="popup-dim popup-dim--soft" />
-        <ui:VisualElement name="betray-bg" class="betray__bg" picking-mode="Ignore" />
-        <ui:Label name="betray-title" text="" class="betray__title" picking-mode="Ignore" />
-        <ui:Label name="betray-sub-text" text="" class="betray__sub-text" picking-mode="Ignore" />
-        <ui:VisualElement name="betray-player-toggle" class="betray__player-toggle" />
-        <ui:Button name="betray-cancel-btn" text="" class="betray__btn betray__cancel-btn">
-            <ui:Label name="betray-cancel-label" text="Cancel" class="betray__btn-label" picking-mode="Ignore" />
-        </ui:Button>
-        <ui:Button name="betray-ok-btn" text="" class="betray__btn betray__ok-btn">
-            <ui:Label name="betray-ok-label" text="Betray" class="betray__btn-label" picking-mode="Ignore" />
-        </ui:Button>
-        <ui:Button name="betray-back-btn" text="" class="betray__back-btn" />
-        <ui:VisualElement name="my-coin-panel" class="my-coin-panel betray__my-coin">
-            <ui:Label name="my-coin-text" text="0" class="my-coin-panel__text betray__my-coin-text" picking-mode="Ignore" />
-            <ui:Button name="my-coin-plus-btn" text="" class="my-coin-panel__plus-btn betray__my-coin-plus">
-                <ui:VisualElement class="my-coin-panel__plus-icon betray__my-coin-plus-icon" picking-mode="Ignore" />
+        <ui:VisualElement name="betray-stage" class="popup-stage" picking-mode="Ignore">
+            <ui:VisualElement name="betray-bg" class="betray__bg" picking-mode="Ignore" />
+            <ui:Label name="betray-title" text="" class="betray__title" picking-mode="Ignore" />
+            <ui:Label name="betray-sub-text" text="" class="betray__sub-text" picking-mode="Ignore" />
+            <ui:VisualElement name="betray-player-toggle" class="betray__player-toggle" />
+            <ui:Button name="betray-cancel-btn" text="" class="betray__btn betray__cancel-btn">
+                <ui:Label name="betray-cancel-label" text="Cancel" class="betray__btn-label" picking-mode="Ignore" />
             </ui:Button>
+            <ui:Button name="betray-ok-btn" text="" class="betray__btn betray__ok-btn">
+                <ui:Label name="betray-ok-label" text="Betray" class="betray__btn-label" picking-mode="Ignore" />
+            </ui:Button>
+            <ui:Button name="betray-back-btn" text="" class="betray__back-btn" />
+            <ui:VisualElement name="my-coin-panel" class="my-coin-panel betray__my-coin">
+                <ui:Label name="my-coin-text" text="0" class="my-coin-panel__text betray__my-coin-text" picking-mode="Ignore" />
+                <ui:Button name="my-coin-plus-btn" text="" class="my-coin-panel__plus-btn betray__my-coin-plus">
+                    <ui:VisualElement class="my-coin-panel__plus-icon betray__my-coin-plus-icon" picking-mode="Ignore" />
+                </ui:Button>
+            </ui:VisualElement>
         </ui:VisualElement>
     </ui:VisualElement>
 </ui:UXML>

@@ -1,0 +1,1805 @@
+﻿/* ===== 기본 폰트 (경기천년제목 Medium / normal, 2026-09-26 변경) =====
+   개별 규칙이 없는 요소가 Unity 기본 테마 폰트(NotInter)로 떨어지지 않도록
+   루트에 한 번 지정해 상속시킨다. (2026-09-19) */
+:root {
+    -unity-font-definition: url("/Assets/Contents/Font/GyeonggiTitle-Medium.ttf");
+    -unity-font-style: normal;
+}
+
+/* ===== 인게임 화면 (UGUI Canvas → UI Toolkit 이식) =====
+   좌표/크기는 기존 프리팹의 런타임 실측값을 그대로 옮긴 것이다. */
+
+.ingame-root {
+    flex-grow: 1;
+    /* 원본 BGPanel 은 스프라이트 없는 검정 Image 였다 */
+    background-color: rgb(0, 0, 0);
+}
+
+/* 배경(Snack bar.png).
+   스프라이트(714x221)는 사방 41px 이 회색 그라디언트 테두리이고 안쪽은 균일한 어두운 면이다.
+   url() 이 Texture2D 가 아니라 Sprite(Snack bar_0)로 해석되기 때문에
+   -unity-slice-* 는 무시되고 스프라이트 border(0)만 쓰인다 → 9-slice 는 못 쓴다.
+   대신 요소를 사방 400px 화면 밖으로 빼서 늘어난 테두리까지 전부 화면 밖에 놓는다.
+   1080 높이 기준 세로 배율이 가장 커서 세로가 기준이 된다:
+     테두리두께 = 41 * (1080 + 2*400) / 221 = 349px < 400px  → 화면에 안 보임
+     가로는  41 * (1920 + 2*400) / 714 = 156px < 400px
+   비율이 바뀌어도(세로형/울트라와이드) 둘 다 400px 아래로 유지된다. */
+.ingame-bg {
+    position: absolute;
+    left: -400px;
+    top: -400px;
+    right: -400px;
+    bottom: -400px;
+    background-image: url("/Assets/Contents/Image/BG/InGame/Snack bar.png");
+    -unity-background-scale-mode: stretch-to-fill;
+}
+
+/* ---------- 맵 레이어 ---------- */
+.map-layer {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+}
+
+/* 맵 좌표의 기준점 (원본 ParantObj 중심) — 위치는 런타임에 translate 로 지정 */
+.map-origin {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 0;
+    height: 0;
+}
+
+.map-sub-layer {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 0;
+    height: 0;
+}
+
+/* ---------- 육각 타일 ---------- */
+.hexagon {
+    position: absolute;
+}
+
+/* 원본 centerImage 는 부모 stretch + sizeDelta(4,0) → 좌우로 2px 씩 넓다 */
+.hexagon__center {
+    position: absolute;
+    left: -2px;
+    top: 0;
+    right: -2px;
+    bottom: 0;
+    background-image: url("/Assets/Contents/Image/hexagon/hexagon.png");
+    -unity-background-scale-mode: stretch-to-fill;
+}
+
+.hexagon__area-text {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    margin: 0;
+    padding: 0;
+    font-size: 36px;
+    color: rgb(50, 50, 50);
+    -unity-text-align: middle-center;
+}
+
+/* ---------- 영토 경계선 ---------- */
+.hexagon-line {
+    position: absolute;
+}
+
+/* 경계선 조각.
+   원본 스프라이트(haxagonLineBg.png)는 양 끝이 뾰족한 렌즈 모양이라
+   변 가운데가 굵고 꼭짓점 쪽이 가늘어져 굵기가 일정하지 않았다.
+   스프라이트는 순수 흰색 + 알파라 색은 그대로 두고 단색 배경으로 대체한다.
+   위치/길이/각도는 HexagonLineElement 가 타일 크기에서 계산해 넣는다
+   (맵 크기마다 변의 각도가 달라서 USS 고정 회전값으로는 맞출 수 없다). */
+.hexagon-line__seg {
+    position: absolute;
+    background-color: rgb(188, 188, 188);
+}
+
+/* ---------- 주사위 더미 ---------- */
+.map-dice {
+    position: absolute;
+}
+
+.map-dice__dice {
+    position: absolute;
+    background-image: url("/Assets/Contents/Image/dice/3Ddice_1.png");
+    -unity-background-scale-mode: stretch-to-fill;
+}
+
+.map-dice__area-text {
+    position: absolute;
+    left: 0;
+    top: 100px;
+    width: 100px;
+    margin: 0;
+    padding: 0;
+    font-size: 20px;
+    color: rgb(255, 255, 255);
+    -unity-text-align: middle-center;
+}
+
+.map-dice__adj-text {
+    position: absolute;
+    left: 0;
+    top: 124px;
+    width: 100px;
+    margin: 0;
+    padding: 0;
+    font-size: 16px;
+    color: rgb(200, 200, 200);
+    -unity-text-align: middle-center;
+}
+
+/* ---------- HUD 레이어 ---------- */
+.hud-layer {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+}
+
+/* 좌상단 튜토리얼 / 우상단 옵션 버튼 (원본 138x139) */
+.ingame-corner-btn {
+    position: absolute;
+    width: 138px;
+    height: 139px;
+    margin: 0;
+    padding: 0;
+    background-color: rgba(0, 0, 0, 0);
+    border-width: 0;
+    border-radius: 0;
+    -unity-background-scale-mode: scale-to-fit;
+    transition-property: scale;
+    transition-duration: 0.08s;
+}
+
+.ingame-corner-btn:hover { scale: 1.05 1.05; }
+.ingame-corner-btn:active { scale: 0.95 0.95; }
+
+.ingame-corner-btn--tutorial {
+    left: 15px;
+    top: 10px;
+    background-image: url("/Assets/Contents/Image/Button/icon buttons.png");
+}
+
+.ingame-corner-btn--option {
+    right: 10px;
+    top: 10px;
+    background-image: url("/Assets/Contents/Image/Button/icon badge.png");
+}
+
+/* ---------- 우측 플레이어 현황 아이콘 ----------
+   원본: PlayerIconPanel(anchor 우상단, pivot(1,1), anchoredPosition(-10,-170), width 100)
+         VerticalLayoutGroup(spacing 10, UpperRight) */
+.player-icon-panel {
+    position: absolute;
+    right: 10px;
+    top: 170px;
+    width: 100px;
+    flex-direction: column;
+    align-items: flex-end;
+    /* 6.7 gap: 형제 간격 (2026-09-29) */
+    gap: 10px;
+}
+
+/* 원본 PlayerIcon 138x93 (패널보다 넓어 왼쪽으로 삐져나온다) */
+.player-icon {
+    position: relative;
+    width: 138px;
+    height: 93px;
+    flex-shrink: 0;
+}
+
+/* 내 턴 강조 (원본 210x150, 중앙 정렬) */
+.player-icon__select {
+    position: absolute;
+    left: -36px;
+    top: -28.5px;
+    width: 210px;
+    height: 150px;
+    background-image: url("/Assets/Contents/Image/BG/InGame/player_state_bg_select_none.png");
+    -unity-background-scale-mode: stretch-to-fill;
+}
+
+.player-icon__bg {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    background-image: url("/Assets/Contents/Image/BG/InGame/player_state_bg_none.png");
+    -unity-background-scale-mode: stretch-to-fill;
+}
+
+/* 원본 sizeDelta(-4,-4) → 사방 2px 안쪽 */
+.player-icon__center-bg {
+    position: absolute;
+    left: 2px;
+    top: 2px;
+    right: 2px;
+    bottom: 2px;
+    background-image: url("/Assets/Contents/Image/BG/InGame/player_state_bg_none.png");
+    -unity-background-scale-mode: stretch-to-fill;
+}
+
+/* 원본 73x78, BG 좌하단 기준 (46, 46.4) */
+.player-icon__icon {
+    position: absolute;
+    left: 9.5px;
+    top: 7.6px;
+    width: 73px;
+    height: 78px;
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.player-icon__icon--0 { background-image: url("/Assets/Contents/Image/BG/InGame/Icon_bg_0.png"); }
+.player-icon__icon--1 { background-image: url("/Assets/Contents/Image/BG/InGame/Icon_bg_1.png"); }
+.player-icon__icon--2 { background-image: url("/Assets/Contents/Image/BG/InGame/Icon_bg_2.png"); }
+.player-icon__icon--3 { background-image: url("/Assets/Contents/Image/BG/InGame/Icon_bg_3.png"); }
+.player-icon__icon--4 { background-image: url("/Assets/Contents/Image/BG/InGame/Icon_bg_4.png"); }
+.player-icon__icon--5 { background-image: url("/Assets/Contents/Image/BG/InGame/Icon_bg_5.png"); }
+.player-icon__icon--6 { background-image: url("/Assets/Contents/Image/BG/InGame/Icon_bg_6.png"); }
+
+/* 연결 영토 수 (원본 61.5x92, 루트 중앙 기준 (32.4, 0.7)) */
+.player-icon__count {
+    position: absolute;
+    left: 70.65px;
+    top: -0.2px;
+    width: 61.5px;
+    height: 92px;
+    margin: 0;
+    padding: 0;
+    font-size: 42px;
+    color: rgb(244, 248, 252);
+    -unity-font-definition: url("/Assets/Contents/Font/GyeonggiTitle-Medium.ttf");
+    -unity-font-style: normal;
+    -unity-text-align: middle-center;
+}
+
+/* ===================================================================
+   인게임 하단 바 (NonePlayPanel)
+   좌표는 실행 중인 원본에서 실측한 화면 좌표(1920x1080, 좌상단 기준)를 옮긴 값.
+   컨테이너: left 0 / top 930 / 1920x150
+   =================================================================== */
+.none-play-panel {
+    position: absolute;
+    left: 0;
+    top: 930px;
+    width: 1920px;
+    height: 150px;
+    display: none;
+}
+
+/* bottom_bg.png (0,934 1920x142) */
+.none-play__bg {
+    position: absolute;
+    left: 0;
+    top: 4px;
+    width: 1920px;
+    height: 142px;
+    background-image: url("/Assets/Contents/Image/BG/InGame/bottom_bg.png");
+    -unity-background-scale-mode: stretch-to-fill;
+}
+
+/* bottom_bg2.png (140,958.5 1366.5x93) */
+.none-play__message-bar {
+    position: absolute;
+    left: 140px;
+    top: 28.5px;
+    width: 1366.5px;
+    height: 93px;
+    background-image: url("/Assets/Contents/Image/BG/InGame/bottom_bg2.png");
+    -unity-background-scale-mode: stretch-to-fill;
+}
+
+.none-play__intro-text {
+    position: absolute;
+    left: 154.2px;
+    top: 13.5px;
+    width: 1036.2px;
+    height: 66px;
+    margin: 0;
+    padding: 0;
+    font-size: 38px;
+    color: rgb(255, 255, 255);
+    -unity-font-definition: url("/Assets/Contents/Font/GyeonggiTitle-Medium.ttf");
+    -unity-font-style: normal;
+    -unity-text-align: middle-center;
+}
+
+/* ---------- 주사위 대결 ---------- */
+.dice-war__row {
+    position: absolute;
+    top: 40px;
+    width: 850px;
+    height: 70px;
+    flex-direction: row;
+    align-items: center;
+    /* 6.7 gap: 형제 간격 (2026-09-29) */
+    gap: 20px;
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+/* 내 쪽: 오른쪽 정렬 + 역순 배치 (원본 HLG MiddleRight, reverse=true).
+   row-reverse 에서는 flex-start 가 오른쪽이다. */
+.dice-war__row--my {
+    left: -140px;
+    flex-direction: row-reverse;
+    justify-content: flex-start;
+}
+
+/* 상대 쪽: 왼쪽 정렬 */
+.dice-war__row--enemy {
+    left: 950px;
+    justify-content: flex-start;
+}
+
+.dice-war__dice {
+    width: 55px;
+    height: 55px;
+    flex-shrink: 0;
+    -unity-background-scale-mode: stretch-to-fill;
+}
+
+/* 원본 spacing 20 → 좌우 10px 씩 */
+
+.dice-war__dice--1 { background-image: url("/Assets/Contents/Image/dice/dice01.png"); }
+.dice-war__dice--2 { background-image: url("/Assets/Contents/Image/dice/dice02.png"); }
+.dice-war__dice--3 { background-image: url("/Assets/Contents/Image/dice/dice03.png"); }
+.dice-war__dice--4 { background-image: url("/Assets/Contents/Image/dice/dice04.png"); }
+.dice-war__dice--5 { background-image: url("/Assets/Contents/Image/dice/dice05.png"); }
+.dice-war__dice--6 { background-image: url("/Assets/Contents/Image/dice/dice06.png"); }
+
+.dice-war__result {
+    position: absolute;
+    top: 25px;
+    width: 100px;
+    height: 100px;
+    margin: 0;
+    padding: 0;
+    font-size: 60px;
+    color: rgb(255, 255, 255);
+    -unity-font-definition: url("/Assets/Contents/Font/GyeonggiTitle-Medium.ttf");
+    -unity-font-style: normal;
+    -unity-text-align: middle-center;
+    transition-property: scale;
+    transition-duration: 0.2s;
+}
+
+.dice-war__result--my { left: 720px; }
+.dice-war__result--enemy { left: 840px; }
+
+/* 승리쪽 강조 (원본 DOScale Yoyo) */
+.dice-war__result--win { scale: 1.1 1.1; }
+
+/* ---------- 스킬 카드 ---------- */
+.skill-card__icon {
+    position: absolute;
+    left: 15px;
+    top: 29.5px;
+    width: 92px;
+    height: 92px;
+    -unity-background-scale-mode: scale-to-fit;
+    background-image: url("/Assets/Contents/Image/BG/InGame/count=none.png");
+}
+
+.skill-card__icon--0 { background-image: url("/Assets/Contents/Image/BG/InGame/count=none.png"); }
+.skill-card__icon--1 { background-image: url("/Assets/Contents/Image/BG/InGame/count=1.png"); }
+.skill-card__icon--2 { background-image: url("/Assets/Contents/Image/BG/InGame/count=2.png"); }
+.skill-card__icon--3 { background-image: url("/Assets/Contents/Image/BG/InGame/count=3.png"); }
+
+/* 투명 클릭 영역 (원본 SkillBtn 120x120, alpha 0) */
+.skill-card__btn {
+    position: absolute;
+    left: 13.2px;
+    top: 15px;
+    width: 120px;
+    height: 120px;
+    margin: 0;
+    padding: 0;
+    background-color: rgba(0, 0, 0, 0);
+    border-width: 0;
+}
+
+/* 스킬 메뉴 (원본 BtnPanel 100x413, VLG spacing 10 LowerCenter) */
+.skill-btn-panel {
+    position: absolute;
+    left: 89px;
+    top: -421.1px;
+    width: 100px;
+    height: 413.1px;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: center;
+    display: none;
+}
+
+.skill-menu-btn {
+    width: 250px;
+    height: 92px;
+    margin: 5px 0;
+    padding: 0;
+    background-color: rgba(0, 0, 0, 0);
+    border-width: 0;
+    border-radius: 0;
+    flex-shrink: 0;
+    display: none;
+}
+
+.skill-menu-btn--normal {
+    background-image: url("/Assets/Contents/Image/Button/btn_bg4.png");
+    -unity-background-scale-mode: stretch-to-fill;
+}
+
+.skill-menu-btn--cancel {
+    background-image: url("/Assets/Contents/Image/Button/btn_bg2.png");
+    -unity-slice-left: 30;
+    -unity-slice-right: 30;
+    -unity-slice-top: 30;
+    -unity-slice-bottom: 30;
+}
+
+.skill-menu-btn__label {
+    flex-grow: 1;
+    margin: 0;
+    padding: 0;
+    font-size: 45px;
+    color: rgb(135, 233, 244);
+    -unity-font-definition: url("/Assets/Contents/Font/GyeonggiTitle-Medium.ttf");
+    -unity-font-style: normal;
+    -unity-text-align: middle-center;
+}
+
+/* ---------- 타이머 (원본 1534.6,962.8 82x82) ---------- */
+.timer {
+    position: absolute;
+    left: 1534.6px;
+    top: 32.8px;
+    width: 82px;
+    height: 82px;
+}
+
+.timer__inactive {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    background-image: url("/Assets/Contents/Image/BG/InGame/timer_bg2.png");
+    -unity-background-scale-mode: stretch-to-fill;
+}
+
+.timer__active {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    background-image: url("/Assets/Contents/Image/BG/InGame/timer_bg.png");
+    -unity-background-scale-mode: stretch-to-fill;
+    display: none;
+}
+
+/* 원본 Fill Area 는 사방 6px 안쪽 */
+.timer__fill-area {
+    position: absolute;
+    left: 6px;
+    top: 6px;
+    right: 6px;
+    bottom: 6px;
+}
+
+/* 원본 Image(Filled / Radial360 / Top / Clockwise) 대체.
+   UI Toolkit 에는 방사형 채우기가 없어서 Timer.cs 가 부채꼴 메시로 직접 그린다.
+   아래 background-image 는 Timer.cs 가 스프라이트를 읽어가기 위한 것이고,
+   읽은 뒤에는 코드가 배경을 지우고 메시로 대신 그린다. */
+.timer__fill {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    background-image: url("/Assets/Contents/Image/BG/InGame/timer_fg.png");
+    -unity-background-scale-mode: stretch-to-fill;
+}
+
+/* ---------- 턴 종료 버튼 (원본 1646.2,958.4 250x93.3) ---------- */
+.end-turn-btn {
+    position: absolute;
+    left: 1646.2px;
+    top: 28.4px;
+    width: 250px;
+    height: 93.3px;
+    margin: 0;
+    padding: 0;
+    background-color: rgba(0, 0, 0, 0);
+    border-width: 0;
+    border-radius: 0;
+    background-image: url("/Assets/Contents/Image/Button/btn_bg3.png");
+    -unity-slice-left: 20;
+    -unity-slice-right: 20;
+    -unity-slice-top: 20;
+    -unity-slice-bottom: 20;
+    /* 원본 uGUI Button ColorTint : 활성 빨강 / 비활성 회색 */
+    -unity-background-image-tint-color: rgb(255, 69, 73);
+    transition-property: scale;
+    transition-duration: 0.08s;
+}
+
+.end-turn-btn:hover { scale: 1.03 1.03; }
+.end-turn-btn:active { scale: 0.97 0.97; }
+
+.end-turn-btn:disabled {
+    -unity-background-image-tint-color: rgb(94, 98, 104);
+}
+
+.end-turn-btn__label {
+    flex-grow: 1;
+    margin: 0;
+    padding: 0;
+    font-size: 44px;
+    color: rgb(255, 255, 255);
+    -unity-font-definition: url("/Assets/Contents/Font/GyeonggiTitle-Medium.ttf");
+    -unity-font-style: normal;
+    -unity-text-align: middle-center;
+}
+
+/* ---------- 비축 주사위 (원본 20,830 330x85) ---------- */
+.stash-panel {
+    position: absolute;
+    left: 20px;
+    top: -100px;
+    width: 330px;
+    height: 85px;
+    opacity: 0;
+}
+
+.stash-panel__dice {
+    position: absolute;
+    left: 4px;
+    top: 58.5px;
+    width: 55px;
+    height: 53px;
+    background-image: url("/Assets/Contents/Image/dice/3Ddice_1.png");
+    -unity-background-scale-mode: stretch-to-fill;
+}
+
+.stash-panel__text {
+    position: absolute;
+    left: 101.5px;
+    top: 9.5px;
+    width: 188px;
+    height: 66px;
+    margin: 0;
+    padding: 0;
+    font-size: 45px;
+    color: rgb(255, 255, 255);
+    -unity-font-definition: url("/Assets/Contents/Font/GyeonggiTitle-Medium.ttf");
+    -unity-font-style: normal;
+    -unity-text-align: middle-right;
+}
+
+/* ===================================================================
+   맵 선택 패널 (게임 시작 전 하단 바) — 원본 MapSelectPanel
+   부모 InGameBottomController(하단 stretch, h150) 기준 pos(0,42.5) 1133.2x221
+   =================================================================== */
+.map-select-panel {
+    position: absolute;
+    left: 50%;
+    bottom: 66.5px;
+    translate: -50% 0;
+    width: 964px;
+    height: 174px;
+}
+
+/* BG : Snack bar.png (border 80,60,80,60) 패널 전체 stretch */
+.map-select__bg {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    background-image: url("/Assets/Contents/Image/BG/InGame/Snack bar.png");
+    -unity-slice-left: 80;
+    -unity-slice-right: 80;
+    -unity-slice-top: 60;
+    -unity-slice-bottom: 60;
+}
+
+/* "플레이어:" 텍스트 + 내 아이콘 (원본 Text pos(90,-3.5), 자식 Icon 은 우측 17px 간격) */
+.map-select__player-row {
+    position: absolute;
+    left: 67.6px;
+    top: 34.65px;
+    flex-direction: row;
+    align-items: center;
+}
+
+.map-select__player-label {
+    margin: 0;
+    padding: 0;
+    height: 106.7px;
+    font-size: 48px;
+    color: rgb(255, 255, 255);
+    -unity-font-definition: url("/Assets/Contents/Font/GyeonggiTitle-Medium.ttf");
+    -unity-font-style: normal;
+    -unity-text-align: middle-left;
+}
+
+.map-select__player-icon {
+    width: 73px;
+    height: 78px;
+    margin-left: 19px;
+    flex-shrink: 0;
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.map-select__player-icon--0 { background-image: url("/Assets/Contents/Image/BG/InGame/Icon_bg_0.png"); }
+.map-select__player-icon--1 { background-image: url("/Assets/Contents/Image/BG/InGame/Icon_bg_1.png"); }
+.map-select__player-icon--2 { background-image: url("/Assets/Contents/Image/BG/InGame/Icon_bg_2.png"); }
+.map-select__player-icon--3 { background-image: url("/Assets/Contents/Image/BG/InGame/Icon_bg_3.png"); }
+.map-select__player-icon--4 { background-image: url("/Assets/Contents/Image/BG/InGame/Icon_bg_4.png"); }
+.map-select__player-icon--5 { background-image: url("/Assets/Contents/Image/BG/InGame/Icon_bg_5.png"); }
+.map-select__player-icon--6 { background-image: url("/Assets/Contents/Image/BG/InGame/Icon_bg_6.png"); }
+
+/* ChangeBtn (원본 pos(75,-5) 330x93) — AdPlayBtn / PlayBtn 을 겹쳐 담는 컨테이너 */
+/* 버튼 높이 73 은 의도적이다 — 시안은 93 이지만 사용자가 "위아래 10px 씩 줄여달라" 고 요청했다.
+   (2026-09-19) 시안과 대조할 때 93 으로 되돌리지 말 것.
+   높이를 다시 바꾸면 top(= 43 + (93-H)/2), 가격 배지 높이, 광고 아이콘/라벨 top 도 같이 맞춰야 한다. */
+.map-select__change-group {
+    position: absolute;
+    left: 422.2px;
+    top: 53px;
+    width: 261px;
+    height: 73px;
+}
+
+/* AdPlayBtn : 부모 stretch, sizeDelta(-6,-6) → 사방 3px 안쪽 (btn_bg4, ppu 1.3) */
+.map-select__ad-btn {
+    position: absolute;
+    left: 3px;
+    top: 3px;
+    right: 3px;
+    bottom: 3px;
+    margin: 0;
+    padding: 0;
+    background-color: rgba(0, 0, 0, 0);
+    border-width: 0;
+    border-radius: 0;
+    background-image: url("/Assets/Contents/Image/Button/btn_bg4.png");
+    -unity-slice-left: 15;
+    -unity-slice-right: 15;
+    -unity-slice-top: 15;
+    -unity-slice-bottom: 15;
+    -unity-background-image-tint-color: rgb(255, 255, 255);
+    transition-property: scale;
+    transition-duration: 0.08s;
+}
+
+.map-select__ad-btn:hover { scale: 1.03 1.03; }
+.map-select__ad-btn:active { scale: 0.97 0.97; }
+
+/* 원본 uGUI Button ColorTint disabledColor (0.784,0.784,0.784,0.502) */
+.map-select__ad-btn:disabled {
+    -unity-background-image-tint-color: rgba(200, 200, 200, 0.502);
+    opacity: 0.8;
+}
+
+.map-select__ad-icon {
+    position: absolute;
+    left: 30px;
+    top: 16px;
+    width: 35px;
+    height: 35px;
+    background-image: url("/Assets/Contents/Image/Button/adIcon.png");
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.map-select__ad-label {
+    position: absolute;
+    left: 65px;
+    top: -16.5px;
+    width: 168px;
+    height: 100px;
+    margin: 0;
+    padding: 0;
+    font-size: 38px;
+    color: rgb(126, 215, 226);
+    -unity-font-definition: url("/Assets/Contents/Font/GyeonggiTitle-Medium.ttf");
+    -unity-font-style: normal;
+    -unity-text-align: middle-center;
+}
+
+/* PlayBtn : 부모 stretch (330x93), HorizontalLayoutGroup spacing 7.6 MiddleCenter */
+.map-select__play-btn {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    margin: 0;
+    padding: 0;
+    background-color: rgba(0, 0, 0, 0);
+    border-width: 0;
+    border-radius: 0;
+    background-image: url("/Assets/Contents/Image/Button/btn_bg3.png");
+    -unity-slice-left: 20;
+    -unity-slice-right: 20;
+    -unity-slice-top: 20;
+    -unity-slice-bottom: 20;
+    -unity-background-image-tint-color: rgb(94, 98, 104);
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    transition-property: scale;
+    transition-duration: 0.08s;
+}
+
+.map-select__play-btn:hover { scale: 1.03 1.03; }
+.map-select__play-btn:active { scale: 0.97 0.97; }
+
+.map-select__play-label {
+    width: 96px;
+    height: 100px;
+    margin: 0;
+    padding: 0;
+    font-size: 40px;
+    color: rgb(219, 223, 229);
+    -unity-font-definition: url("/Assets/Contents/Font/GyeonggiTitle-Medium.ttf");
+    -unity-font-style: normal;
+    -unity-text-align: middle-center;
+}
+
+/* NeedCoinTextPanel : 112.1x65, btn_bg3 에 검정 27% */
+.map-select__need-coin-panel {
+    width: 101px;
+    height: 57px;
+    margin-left: 14px;
+    flex-shrink: 0;
+    background-image: url("/Assets/Contents/Image/Button/btn_bg3.png");
+    -unity-slice-left: 20;
+    -unity-slice-right: 20;
+    -unity-slice-top: 20;
+    -unity-slice-bottom: 20;
+    /* 원본 검정 27% 는 Linear 색공간에서 시안(69,73,79)보다 밝게 합성된다 → 알파를 올려 맞춤 */
+    -unity-background-image-tint-color: rgba(0, 0, 0, 0.468);
+}
+
+.map-select__need-coin-text {
+    position: absolute;
+    left: 6px;
+    top: -2.25px;
+    width: 80px;
+    height: 61.5px;
+    margin: 0;
+    padding: 0;
+    font-size: 47px;
+    color: rgb(219, 223, 229);
+    -unity-font-definition: url("/Assets/Contents/Font/GyeonggiTitle-Medium.ttf");
+    -unity-font-style: normal;
+    -unity-text-align: middle-left;
+}
+
+.map-select__coin-icon {
+    position: absolute;
+    left: 58.5px;
+    top: 11px;
+    width: 35px;
+    height: 35px;
+    background-image: url("/Assets/Contents/Image/BG/Main/Coin.png");
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+/* yesBtn (시작하기) : 원본 pos(380,-5) 220x93, btn_bg3 빨강 틴트 */
+.map-select__yes-btn {
+    position: absolute;
+    left: 708.2px;
+    top: 53px;
+    width: 188px;
+    height: 73px;
+    margin: 0;
+    padding: 0;
+    background-color: rgba(0, 0, 0, 0);
+    border-width: 0;
+    border-radius: 0;
+    background-image: url("/Assets/Contents/Image/Button/btn_bg3.png");
+    -unity-slice-left: 20;
+    -unity-slice-right: 20;
+    -unity-slice-top: 20;
+    -unity-slice-bottom: 20;
+    -unity-background-image-tint-color: rgb(255, 69, 73);
+    transition-property: scale;
+    transition-duration: 0.08s;
+}
+
+.map-select__yes-btn:hover { scale: 1.03 1.03; }
+.map-select__yes-btn:active { scale: 0.97 0.97; }
+
+.map-select__yes-label {
+    flex-grow: 1;
+    margin: 0;
+    margin-top: -1px;
+    padding: 0;
+    font-size: 39px;
+    color: rgb(255, 255, 255);
+    -unity-font-definition: url("/Assets/Contents/Font/GyeonggiTitle-Medium.ttf");
+    -unity-font-style: normal;
+    -unity-text-align: middle-center;
+}
+
+
+/* ===================================================================
+   플레이어 상세 패널 (아이콘 클릭 시 좌측으로 펼쳐짐) — 원본 PlayerDataPanel
+   원본 ContensPanel : HorizontalLayoutGroup(reverseArrangement) + ContentSizeFitter
+   =================================================================== */
+.player-data-panel {
+    position: absolute;
+    right: 180px;
+    top: 200px;
+    height: 204px;
+    min-width: 150px;
+    flex-direction: row-reverse;
+    align-items: center;
+    display: none;
+    background-image: url("/Assets/Contents/Image/BG/InGame/bottom_bg2.png");
+    -unity-slice-left: 30;
+    -unity-slice-right: 30;
+    -unity-slice-top: 30;
+    -unity-slice-bottom: 30;
+}
+
+/* SkillCardPanel 150x205 (항상 가장 오른쪽) */
+.player-data__skill-panel {
+    width: 150px;
+    height: 205px;
+    flex-shrink: 0;
+}
+
+/* LineImage 2x127, 패널 왼쪽 끝 구분선 */
+.player-data__line {
+    position: absolute;
+    left: 0.8px;
+    top: 39px;
+    width: 2px;
+    height: 127px;
+    background-color: rgb(94, 98, 104);
+}
+
+/* SkillCard 100x100 (원본 Icon_0~3 를 scale-to-fit 한 장으로 대체) */
+.player-data__skill-icon {
+    position: absolute;
+    left: 25.2px;
+    top: 47.5px;
+    width: 100px;
+    height: 100px;
+    -unity-background-scale-mode: scale-to-fit;
+    background-image: url("/Assets/Contents/Image/BG/InGame/count=none.png");
+}
+
+/* ---------- 동맹 아이콘 (원본 PlayerAllianceIcon 프리팹 165x120) ---------- */
+.player-alliance-icon {
+    width: 165px;
+    height: 120px;
+    flex-shrink: 0;
+}
+
+.player-alliance-icon__fg {
+    position: absolute;
+    left: 34.4px;
+    top: -27.9px;
+    width: 95px;
+    height: 100px;
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.player-alliance-icon__fg--0 { background-image: url("/Assets/Contents/Image/BG/InGame/PlayerIcon/player_select_0.png"); }
+.player-alliance-icon__fg--1 { background-image: url("/Assets/Contents/Image/BG/InGame/PlayerIcon/player_select_1.png"); }
+.player-alliance-icon__fg--2 { background-image: url("/Assets/Contents/Image/BG/InGame/PlayerIcon/player_select_2.png"); }
+.player-alliance-icon__fg--3 { background-image: url("/Assets/Contents/Image/BG/InGame/PlayerIcon/player_select_3.png"); }
+.player-alliance-icon__fg--4 { background-image: url("/Assets/Contents/Image/BG/InGame/PlayerIcon/player_select_4.png"); }
+.player-alliance-icon__fg--5 { background-image: url("/Assets/Contents/Image/BG/InGame/PlayerIcon/player_select_5.png"); }
+.player-alliance-icon__fg--6 { background-image: url("/Assets/Contents/Image/BG/InGame/PlayerIcon/player_select_6.png"); }
+
+.player-alliance-icon__coin {
+    position: absolute;
+    left: 40.6px;
+    top: 90px;
+    width: 40px;
+    height: 40px;
+    background-image: url("/Assets/Contents/Image/BG/Main/Coin.png");
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.player-alliance-icon__text {
+    position: absolute;
+    left: 95.33px;
+    top: 56.8px;
+    width: 103.74px;
+    height: 104px;
+    margin: 0;
+    padding: 0;
+    font-size: 40px;
+    color: rgb(255, 243, 241);
+    -unity-font-definition: url("/Assets/Contents/Font/GyeonggiTitle-Medium.ttf");
+    -unity-font-style: normal;
+    -unity-text-align: middle-left;
+}
+
+
+/* ===================================================================
+   동맹 승인 현황 바 (멀티 전용) — 원본 MyAllianceApproveController
+   원본은 CanvasGroup.DOFade 로 페이드. USS transition 으로 대체한다.
+   =================================================================== */
+.alliance-approve-panel {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    opacity: 0;
+    display: none;
+    transition-property: opacity;
+    transition-duration: 0.25s;
+}
+
+/* 동맹 제안 바 (2026-09-19 시안) — 화면 절대좌표. 시안 1243x786 기준 S = 1.6497
+   바 1399x139 @ (211,747). 반투명이라 뒤의 맵이 비친다 */
+.alliance-approve__bar {
+    position: absolute;
+    left: 211px;
+    top: 747px;
+    width: 1399px;
+    height: 139px;
+    background-image: url("/Assets/Contents/Image/BG/InGame/bottom_bg2.png");
+    -unity-background-scale-mode: stretch-to-fill;
+    /* 시안의 반투명 바 색을 Linear 색공간에서 역산한 값이다.
+       bottom_bg2(40,46,54) 를 검은 배경 위에서 (24,31,32) 로 보이게 맞춘 틴트 (2026-09-19) */
+    -unity-background-image-tint-color: rgba(191, 204, 183, 0.83);
+}
+
+.alliance-approve__title {
+    position: absolute;
+    left: 188px;
+    top: 0;
+    bottom: 0;
+    width: 220px;
+    margin: 0;
+    padding: 0;
+    font-size: 43px;
+    color: rgb(255, 255, 255);
+    -unity-font-definition: url("/Assets/Contents/Font/GyeonggiTitle-Medium.ttf");
+    -unity-font-style: normal;
+    -unity-text-align: middle-left;
+}
+
+/* 제안한 플레이어 아이콘 묶음 : btn_bg7.png (9슬라이스 30), 내용만큼 늘어난다 */
+.alliance-approve__icon-panel {
+    position: absolute;
+    left: 394.3px;
+    top: 26.5px;
+    height: 87px;
+    flex-direction: row;
+    align-items: center;
+    padding-left: 26px;
+    padding-right: 15.3px;
+    background-image: url("/Assets/Contents/Image/Button/btn_bg7.png");
+    -unity-slice-left: 30;
+    -unity-slice-right: 30;
+    -unity-slice-top: 30;
+    -unity-slice-bottom: 30;
+}
+
+/* 보상 : N + 코인 */
+.alliance-approve__reward-panel {
+    position: absolute;
+    left: 795.2px;
+    top: 0;
+    bottom: 0;
+    flex-direction: row;
+    align-items: center;
+}
+
+.alliance-approve__reward {
+    margin: 0;
+    padding: 0;
+    font-size: 39px;
+    color: rgb(255, 255, 255);
+    -unity-font-definition: url("/Assets/Contents/Font/GyeonggiTitle-Medium.ttf");
+    -unity-font-style: normal;
+    -unity-text-align: middle-left;
+}
+
+.alliance-approve__coin {
+    width: 48px;
+    height: 48px;
+    margin-left: 11.6px;
+    flex-shrink: 0;
+    background-image: url("/Assets/Contents/Image/BG/Main/Coin.png");
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+/* 철회 버튼 */
+.alliance-approve__cancel-btn {
+    position: absolute;
+    left: 1026.2px;
+    top: 26.5px;
+    width: 186px;
+    height: 87px;
+    margin: 0;
+    padding: 0;
+    border-width: 0;
+    border-radius: 16px;
+    background-color: rgb(69, 73, 79);
+    transition-property: scale;
+    transition-duration: 0.08s;
+}
+
+.alliance-approve__cancel-btn:hover { scale: 1.03 1.03; }
+.alliance-approve__cancel-btn:active { scale: 0.97 0.97; }
+.alliance-approve__cancel-btn:disabled { opacity: 0.55; }
+
+.alliance-approve__cancel-label {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    margin: 0;
+    padding: 0;
+    font-size: 38px;
+    color: rgb(255, 255, 255);
+    -unity-font-definition: url("/Assets/Contents/Font/GyeonggiTitle-Medium.ttf");
+    -unity-font-style: normal;
+    -unity-text-align: middle-center;
+}
+
+/* Icon_0~6 : 47.45x50.7 에 scale 1.5, 간격 34.6 */
+.alliance-approve__icon {
+    width: 36.3px;
+    height: 38.8px;
+    margin-right: 7.7px;
+    flex-shrink: 0;
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+/* -------------------------------------------------------------------
+   결과 상태 (.alliance-approve--result) — 제안이 성립/거절되면 바가
+   "아이콘 + 요청 승인 N/M" 작은 알약으로 바뀐다 (2026-09-19 시안)
+   시안 1680x538, 게임화면 709x399 -> S = 2.7091 (턴 종료 버튼 / 메시지 바로 보정)
+   알약 501 x 79 @ top 814.9 — 폭은 플레이어 수에 따라 달라지므로 **바(211..1610) 중앙**에 붙인다
+   (left:50% 는 바 기준이다. 실측 657.5 / 시안 633.1 — 24px 차이)
+   ------------------------------------------------------------------- */
+.alliance-approve--result {
+    background-image: none;
+}
+
+.alliance-approve--result .alliance-approve__title,
+.alliance-approve--result .alliance-approve__reward-panel,
+.alliance-approve--result .alliance-approve__cancel-btn {
+    display: none;
+}
+
+.alliance-approve--result .alliance-approve__icon-panel {
+    left: 50%;
+    top: 67.9px;
+    height: 79px;
+    translate: -50% 0;
+    padding-left: 24px;
+    padding-right: 27px;
+}
+
+/* 알약에서는 아이콘이 1.548 배 커진다 */
+.alliance-approve--result .alliance-approve__icon {
+    width: 56.2px;
+    height: 60px;
+    margin-right: 11.9px;
+}
+
+.alliance-approve--result .alliance-approve__on {
+    left: 9.3px;
+    top: 15.5px;
+    width: 37.6px;
+    height: 28.9px;
+}
+
+.alliance-approve--result .alliance-approve__off {
+    left: 4.5px;
+    top: 6.3px;
+    width: 47.4px;
+    height: 47.4px;
+}
+
+.alliance-approve__result-title {
+    display: none;
+    margin: 0;
+    margin-left: 17.9px;
+    padding: 0;
+    flex-shrink: 0;
+    font-size: 39px;
+    color: rgb(255, 255, 255);
+    -unity-font-definition: url("/Assets/Contents/Font/GyeonggiTitle-Medium.ttf");
+    -unity-font-style: normal;
+    -unity-text-align: middle-left;
+}
+
+.alliance-approve__count {
+    display: none;
+    margin: 0;
+    margin-left: 32.5px;
+    padding: 0;
+    flex-shrink: 0;
+    font-size: 36px;
+    color: rgb(255, 255, 255);
+    -unity-font-definition: url("/Assets/Contents/Font/GyeonggiTitle-Medium.ttf");
+    -unity-font-style: normal;
+    -unity-text-align: middle-left;
+}
+
+.alliance-approve--result .alliance-approve__result-title,
+.alliance-approve--result .alliance-approve__count {
+    display: flex;
+}
+
+.alliance-approve__icon--0 { background-image: url("/Assets/Contents/Image/BG/InGame/Icon_bg_0.png"); }
+.alliance-approve__icon--1 { background-image: url("/Assets/Contents/Image/BG/InGame/Icon_bg_1.png"); }
+.alliance-approve__icon--2 { background-image: url("/Assets/Contents/Image/BG/InGame/Icon_bg_2.png"); }
+.alliance-approve__icon--3 { background-image: url("/Assets/Contents/Image/BG/InGame/Icon_bg_3.png"); }
+.alliance-approve__icon--4 { background-image: url("/Assets/Contents/Image/BG/InGame/Icon_bg_4.png"); }
+.alliance-approve__icon--5 { background-image: url("/Assets/Contents/Image/BG/InGame/Icon_bg_5.png"); }
+.alliance-approve__icon--6 { background-image: url("/Assets/Contents/Image/BG/InGame/Icon_bg_6.png"); }
+
+/* AprroveOn : CheckMark.png 31.8x24.4 (아이콘 중앙) */
+.alliance-approve__on {
+    position: absolute;
+    left: 6px;
+    top: 10px;
+    width: 24.3px;
+    height: 18.7px;
+    background-image: url("/Assets/Contents/Image/BG/InGame/CheckMark.png");
+    -unity-background-image-tint-color: rgb(174, 251, 138);
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+/* AprroveOff : close_btn.png 40x40 (아이콘 중앙) */
+/* close_btn.png 은 원래 청록색이라 청록 플레이어 아이콘 위에서 안 보인다 —
+   거절 표시는 빨강으로 틴트한다 (2026-09-19) */
+.alliance-approve__off {
+    position: absolute;
+    left: 2.9px;
+    top: 4.1px;
+    width: 30.6px;
+    height: 30.6px;
+    background-image: url("/Assets/Contents/Image/Button/close_btn.png");
+    -unity-background-image-tint-color: rgb(255, 69, 73);
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+/* -------------------------------------------------------------------
+   동맹 제안 받기 바 (2026-09-19 시안). 제안자 쪽 바(.alliance-approve__bar)와
+   같은 디자인이고 버튼만 거절 / 수락 두 개다.
+   시안 1423x831 안의 게임 화면 1339x754 → S = 1.43585 (턴 종료 버튼 / 메시지 바로 보정)
+   바 1433x139 @ (179,747) — 오른쪽 끝이 제안자 바와 같은 1612 다
+   ------------------------------------------------------------------- */
+/* 2026-09-26 : 복수 제안 시안(좌우 화살표)에 맞춰 바를 210 / 1400 으로. 내부 요소의 화면 좌표는 그대로라 -31 씩 옮겼다 */
+.approve-alliance__bar {
+    position: absolute;
+    left: 210px;
+    top: 747px;
+    width: 1400px;
+    height: 139px;
+    display: none;
+    background-image: url("/Assets/Contents/Image/BG/InGame/bottom_bg2.png");
+    -unity-background-scale-mode: stretch-to-fill;
+    -unity-background-image-tint-color: rgba(191, 204, 183, 0.83);
+}
+
+.approve-alliance__title {
+    position: absolute;
+    left: 89px;
+    top: 0;
+    bottom: 0;
+    width: 220px;
+    margin: 0;
+    padding: 0;
+    font-size: 43px;
+    color: rgb(255, 255, 255);
+    -unity-font-definition: url("/Assets/Contents/Font/GyeonggiTitle-Medium.ttf");
+    -unity-font-style: normal;
+    -unity-text-align: middle-left;
+}
+
+.approve-alliance__icon-panel {
+    position: absolute;
+    left: 294.6px;
+    top: 26.5px;
+    height: 87px;
+    flex-direction: row;
+    align-items: center;
+    padding-left: 26px;
+    padding-right: 15.3px;
+    background-image: url("/Assets/Contents/Image/Button/btn_bg7.png");
+    -unity-slice-left: 30;
+    -unity-slice-right: 30;
+    -unity-slice-top: 30;
+    -unity-slice-bottom: 30;
+}
+
+.approve-alliance__reward-panel {
+    position: absolute;
+    left: 696.7px;
+    top: 0;
+    bottom: 0;
+    flex-direction: row;
+    align-items: center;
+}
+
+.approve-alliance__reward {
+    margin: 0;
+    padding: 0;
+    font-size: 39px;
+    color: rgb(255, 255, 255);
+    -unity-font-definition: url("/Assets/Contents/Font/GyeonggiTitle-Medium.ttf");
+    -unity-font-style: normal;
+    -unity-text-align: middle-left;
+}
+
+.approve-alliance__coin {
+    width: 48px;
+    height: 48px;
+    margin-left: 11.6px;
+    flex-shrink: 0;
+    background-image: url("/Assets/Contents/Image/BG/Main/Coin.png");
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.approve-alliance__refuse-btn,
+.approve-alliance__accept-btn {
+    position: absolute;
+    top: 26.5px;
+    height: 87px;
+    margin: 0;
+    padding: 0;
+    border-width: 0;
+    border-radius: 16px;
+    transition-property: scale;
+    transition-duration: 0.08s;
+}
+
+.approve-alliance__refuse-btn {
+    left: 926.4px;
+    width: 188px;
+    background-color: rgb(69, 73, 79);
+}
+
+.approve-alliance__accept-btn {
+    left: 1123.2px;
+    width: 187px;
+    background-color: rgb(255, 69, 73);
+}
+
+.approve-alliance__refuse-btn:hover,
+.approve-alliance__accept-btn:hover { scale: 1.03 1.03; }
+
+.approve-alliance__refuse-btn:active,
+.approve-alliance__accept-btn:active { scale: 0.97 0.97; }
+
+.approve-alliance__refuse-btn:disabled,
+.approve-alliance__accept-btn:disabled { opacity: 0.45; }
+
+.approve-alliance__btn-label {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    margin: 0;
+    padding: 0;
+    font-size: 38px;
+    color: rgb(255, 255, 255);
+    -unity-font-definition: url("/Assets/Contents/Font/GyeonggiTitle-Medium.ttf");
+    -unity-font-style: normal;
+    -unity-text-align: middle-center;
+}
+
+/* 이미 동맹 중이면 수락 대신 "배신 -N🪙" 이 된다 (2026-09-19 시안)
+   .approve-alliance__accept-btn 보다 뒤에 와야 width 를 이긴다 */
+.approve-alliance__betray-coin {
+    display: none;
+    flex-direction: row;
+    align-items: center;
+    margin-left: 18px;
+}
+
+.approve-alliance__betray-coin-text {
+    margin: 0;
+    padding: 0;
+    flex-shrink: 0;
+    font-size: 38px;
+    color: rgb(255, 255, 255);
+    -unity-font-definition: url("/Assets/Contents/Font/GyeonggiTitle-Medium.ttf");
+    -unity-font-style: normal;
+    -unity-text-align: middle-right;
+}
+
+.approve-alliance__betray-coin-icon {
+    width: 35px;
+    height: 35px;
+    margin-left: 5px;
+    flex-shrink: 0;
+    background-image: url("/Assets/Contents/Image/BG/Main/Coin.png");
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.approve-alliance__accept-btn--betray {
+    width: 219px;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+}
+
+/* 라벨을 레이아웃에 참여시켜야 배지와 묶여서 가운데로 온다 */
+.approve-alliance__accept-btn--betray .approve-alliance__btn-label {
+    position: relative;
+    left: auto;
+    right: auto;
+    top: auto;
+    bottom: auto;
+    width: auto;
+    height: auto;
+}
+
+.approve-alliance__accept-btn--betray .approve-alliance__betray-coin {
+    display: flex;
+}
+
+/* ===================================================================
+   승인 요청 바 (동맹 / 영토 거래, 멀티 전용) — 원본 ApproveController + ApprovePopup
+   =================================================================== */
+.approve-layer {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+}
+
+/* ApprovePopup : 화면 하단 중앙 (135,745 1500x160) */
+.approve-popup {
+    position: absolute;
+    left: 135px;
+    top: 745px;
+    width: 1500px;
+    height: 160px;
+    display: none;
+}
+
+/* Contens_0 : bottom_bg2.png (133.2,767.1 950x140) */
+.approve__contens-0 {
+    position: absolute;
+    left: -1.8px;
+    top: 22.1px;
+    width: 950px;
+    height: 140px;
+    background-image: url("/Assets/Contents/Image/BG/InGame/bottom_bg2.png");
+    -unity-slice-left: 30;
+    -unity-slice-right: 30;
+    -unity-slice-top: 30;
+    -unity-slice-bottom: 30;
+}
+
+/* Contens_1 : bottom_bg.png (1189.9,767.1 443.1x140) */
+.approve__contens-1 {
+    position: absolute;
+    left: 1054.9px;
+    top: 22.1px;
+    width: 443.1px;
+    height: 140px;
+    background-image: url("/Assets/Contents/Image/BG/InGame/bottom_bg.png");
+    -unity-slice-left: 30;
+    -unity-slice-right: 30;
+    -unity-slice-top: 30;
+    -unity-slice-bottom: 30;
+}
+
+/* ContenstPanel : snack_bar.png (ppu 1.5 → slice 13.33) */
+.approve__contents-panel {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    background-image: url("/Assets/Contents/Image/BG/InGame/snack_bar.png");
+    -unity-slice-left: 13;
+    -unity-slice-right: 13;
+    -unity-slice-top: 13;
+    -unity-slice-bottom: 13;
+}
+
+.approve__sub-panel {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+}
+
+/* TitleText (47.8,-2.3 212.7x161) */
+.approve__title {
+    position: absolute;
+    left: 47.8px;
+    top: -2.3px;
+    width: 212.7px;
+    height: 161px;
+    margin: 0;
+    padding: 0;
+    font-size: 47px;
+    color: rgb(255, 255, 255);
+    -unity-font-definition: url("/Assets/Contents/Font/GyeonggiTitle-Medium.ttf");
+    -unity-font-style: normal;
+    -unity-text-align: middle-left;
+}
+
+/* SubTitleText (658,42.5 227.09x75.1) */
+.approve__subtitle {
+    position: absolute;
+    left: 658px;
+    top: 42.5px;
+    width: 227.09px;
+    height: 75.1px;
+    margin: 0;
+    padding: 0;
+    font-size: 40px;
+    color: rgb(255, 255, 255);
+    -unity-font-definition: url("/Assets/Contents/Font/GyeonggiTitle-Medium.ttf");
+    -unity-font-style: normal;
+    -unity-text-align: middle-left;
+}
+
+/* PlayerToggleIcon (300,40 80x80) — 토글 기능 없이 표시만 한다 */
+.approve__player-icon {
+    position: absolute;
+    left: 300px;
+    top: 40px;
+    width: 80px;
+    height: 80px;
+}
+
+.approve__player-icon-bg {
+    position: absolute;
+    left: -15px;
+    top: -15px;
+    width: 110px;
+    height: 110px;
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.approve__player-icon-fg {
+    position: absolute;
+    left: -15.7px;
+    top: -5.6px;
+    width: 97px;
+    height: 102px;
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.approve__player-icon-bg--0 { background-image: url("/Assets/Contents/Image/BG/InGame/PlayerIcon/player_none_0.png"); }
+.approve__player-icon-bg--1 { background-image: url("/Assets/Contents/Image/BG/InGame/PlayerIcon/player_none_1.png"); }
+.approve__player-icon-bg--2 { background-image: url("/Assets/Contents/Image/BG/InGame/PlayerIcon/player_none_2.png"); }
+.approve__player-icon-bg--3 { background-image: url("/Assets/Contents/Image/BG/InGame/PlayerIcon/player_none_3.png"); }
+.approve__player-icon-bg--4 { background-image: url("/Assets/Contents/Image/BG/InGame/PlayerIcon/player_none_4.png"); }
+.approve__player-icon-bg--5 { background-image: url("/Assets/Contents/Image/BG/InGame/PlayerIcon/player_none_5.png"); }
+.approve__player-icon-bg--6 { background-image: url("/Assets/Contents/Image/BG/InGame/PlayerIcon/player_none_6.png"); }
+
+.approve__player-icon-fg--0 { background-image: url("/Assets/Contents/Image/BG/InGame/PlayerIcon/player_select_0.png"); }
+.approve__player-icon-fg--1 { background-image: url("/Assets/Contents/Image/BG/InGame/PlayerIcon/player_select_1.png"); }
+.approve__player-icon-fg--2 { background-image: url("/Assets/Contents/Image/BG/InGame/PlayerIcon/player_select_2.png"); }
+.approve__player-icon-fg--3 { background-image: url("/Assets/Contents/Image/BG/InGame/PlayerIcon/player_select_3.png"); }
+.approve__player-icon-fg--4 { background-image: url("/Assets/Contents/Image/BG/InGame/PlayerIcon/player_select_4.png"); }
+.approve__player-icon-fg--5 { background-image: url("/Assets/Contents/Image/BG/InGame/PlayerIcon/player_select_5.png"); }
+.approve__player-icon-fg--6 { background-image: url("/Assets/Contents/Image/BG/InGame/PlayerIcon/player_select_6.png"); }
+
+/* CoinPanel (876.5,30 175x100) */
+.approve__coin-panel {
+    position: absolute;
+    left: 876.5px;
+    top: 30px;
+    width: 175px;
+    height: 100px;
+}
+
+.approve__coin-text {
+    position: absolute;
+    left: -0.5px;
+    top: -1.6px;
+    width: 103.74px;
+    height: 104px;
+    margin: 0;
+    padding: 0;
+    font-size: 50px;
+    color: rgb(255, 243, 241);
+    -unity-font-definition: url("/Assets/Contents/Font/GyeonggiTitle-Medium.ttf");
+    -unity-font-style: normal;
+    -unity-text-align: middle-center;
+}
+
+.approve__coin-icon {
+    position: absolute;
+    left: 80.3px;
+    top: 26.3px;
+    width: 50px;
+    height: 50px;
+    background-image: url("/Assets/Contents/Image/BG/Main/Coin.png");
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+/* RefuseBtn (1061,33.5 188x93) / AcceptBtn (1261,33.5 188x93) */
+.approve__refuse-btn,
+.approve__accept-btn {
+    position: absolute;
+    top: 33.5px;
+    width: 188px;
+    height: 93px;
+    margin: 0;
+    padding: 0;
+    background-color: rgba(0, 0, 0, 0);
+    border-width: 0;
+    border-radius: 0;
+    background-image: url("/Assets/Contents/Image/Button/btn_bg3.png");
+    -unity-slice-left: 20;
+    -unity-slice-right: 20;
+    -unity-slice-top: 20;
+    -unity-slice-bottom: 20;
+    transition-property: scale;
+    transition-duration: 0.08s;
+}
+
+.approve__refuse-btn {
+    left: 1061px;
+    -unity-background-image-tint-color: rgb(137, 140, 144);
+}
+
+.approve__accept-btn {
+    left: 1261px;
+    -unity-background-image-tint-color: rgb(255, 69, 73);
+}
+
+.approve__accept-btn:disabled {
+    -unity-background-image-tint-color: rgb(94, 98, 104);
+}
+
+.approve__refuse-btn:hover,
+.approve__accept-btn:hover { scale: 1.03 1.03; }
+
+.approve__refuse-btn:active,
+.approve__accept-btn:active { scale: 0.97 0.97; }
+
+.approve__btn-label {
+    flex-grow: 1;
+    margin: 0;
+    padding: 0;
+    font-size: 47px;
+    color: rgb(255, 243, 241);
+    -unity-font-definition: url("/Assets/Contents/Font/GyeonggiTitle-Medium.ttf");
+    -unity-font-style: normal;
+    -unity-text-align: middle-center;
+}
+
+/* BeforeBtn / AfterBtn : back_btn.png 100x100 (AfterBtn 은 좌우 반전) */
+.approve__nav-btn {
+    position: absolute;
+    /* 시안 '동맹 제안 받기_복수 제안' : 138x138, 바(752~890) 와 같은 높이 (2026-09-26) */
+    top: 747.5px;
+    width: 138px;
+    height: 138px;
+    margin: 0;
+    padding: 0;
+    display: none;
+    background-color: rgba(0, 0, 0, 0);
+    border-width: 0;
+    border-radius: 0;
+    -unity-background-scale-mode: stretch-to-fill;
+    transition-property: scale;
+    transition-duration: 0.08s;
+}
+
+.approve__nav-btn:hover { scale: 1.05 1.05; }
+.approve__nav-btn:active { scale: 0.95 0.95; }
+
+.approve__nav-btn--before {
+    left: 60px;
+    background-image: url("/Assets/Contents/Image/Button/alliance_prev_btn.png");
+}
+
+.approve__nav-btn--after {
+    left: 1622px;
+    background-image: url("/Assets/Contents/Image/Button/alliance_next_btn.png");
+}
+
+/* 영토 교환 제안 받기 바 — 시안 : 바 기준 아이콘 40x40 @ (48, 49), 문구 @ 128.
+   바 위치/버튼은 동맹 바와 같게 둬서 좌우 화살표와 맞춘다 (시안은 top 이 35px 아래지만 제안이 섞이면 어긋난다) */
+.approve-trade__icon {
+    position: absolute;
+    left: 48px;
+    top: 49.5px;
+    width: 40px;
+    height: 40px;
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.approve-trade__title {
+    left: 128px;
+    width: 500px;
+}
+
+/* 대기 중인 제안 수 배지 (시안 : 화살표 버튼 우상단 40x40 빨간 원) */
+.approve__count-badge {
+    position: absolute;
+    left: 108px;
+    top: -10px;
+    width: 40px;
+    height: 40px;
+    margin: 0;
+    padding: 0;
+    border-radius: 20px;
+    background-color: rgb(255, 69, 73);
+    color: rgb(255, 255, 255);
+    font-size: 28px;
+    -unity-text-align: middle-center;
+    display: none;
+}
+
+/* ===================================================================
+   InGameAreaEditor — 개발용 치트 패널 (Game_Multi 전용)
+   [Conditional("UNITY_EDITOR")] / ("UNITY_STANDALONE_WIN") 이라 모바일에서는 동작하지 않는다.
+   원본 실측 : OnBtn(1833,846) 70x70 / Panel(105,915) 1430x175
+   =================================================================== */
+.area-editor {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+}
+
+.area-editor__on-btn {
+    position: absolute;
+    left: 1833px;
+    top: 846px;
+    width: 70px;
+    height: 70px;
+    margin: 0;
+    padding: 0;
+    background-color: rgba(0, 0, 0, 0);
+    border-width: 0;
+    border-radius: 0;
+    background-image: url("/Assets/Contents/Image/Button/old/settingBtn.png");
+    -unity-background-scale-mode: scale-to-fit;
+    display: none;
+}
+
+/* Snack bar 스프라이트는 서브에셋 border(80,60,80,60) 가 있어서 9슬라이스가 저절로 먹는다 */
+.area-editor__panel {
+    position: absolute;
+    left: 105px;
+    top: 915px;
+    width: 1430px;
+    height: 175px;
+    background-image: url("/Assets/Contents/Image/BG/InGame/Snack bar.png");
+    display: none;
+}
+
+.area-editor__btn {
+    position: absolute;
+    top: 52.5px;
+    height: 70px;
+    margin: 0;
+    padding: 0;
+    background-color: rgba(0, 0, 0, 0);
+    border-width: 0;
+    border-radius: 0;
+    background-image: url("/Assets/Contents/Image/Button/btn_bg3.png");
+    -unity-slice-left: 20;
+    -unity-slice-right: 20;
+    -unity-slice-top: 20;
+    -unity-slice-bottom: 20;
+}
+
+.area-editor__btn--time {
+    left: 80px;
+    width: 220.3px;
+    -unity-background-image-tint-color: rgb(95, 190, 248);
+}
+
+.area-editor__btn--skill {
+    left: 360.3px;
+    width: 220.3px;
+    -unity-background-image-tint-color: rgb(245, 248, 95);
+}
+
+/* 원본은 BGImage(회색) 위에 ActiveImage(빨강)를 덮는 uGUI Toggle 이었다 → 틴트 교체로 대체 */
+.area-editor__btn--toggle {
+    -unity-background-image-tint-color: rgb(118, 118, 118);
+}
+
+.area-editor__btn--toggle.area-editor__btn--on {
+    -unity-background-image-tint-color: rgb(255, 69, 73);
+}
+
+.area-editor__btn--get-area { left: 640.6px; width: 180px; }
+.area-editor__btn--get-dice { left: 963.6px; width: 197.6px; }
+
+.area-editor__btn-label {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    margin: 0;
+    padding: 0;
+    font-size: 26px;
+    color: rgb(255, 255, 255);
+    -unity-font-definition: url("/Assets/Contents/Font/GyeonggiTitle-Medium.ttf");
+    -unity-font-style: normal;
+    -unity-text-align: middle-center;
+}
+
+.area-editor__btn-label--dark {
+    color: rgb(0, 0, 0);
+}
+
+.area-editor__player-icon {
+    position: absolute;
+    left: 832.3px;
+    top: 48.1px;
+    width: 73px;
+    height: 78px;
+    margin: 0;
+    padding: 0;
+    background-color: rgba(0, 0, 0, 0);
+    border-width: 0;
+    border-radius: 0;
+    -unity-background-scale-mode: scale-to-fit;
+    display: none;
+}
+
+.area-editor__player-my-text {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    margin: 0;
+    padding: 0;
+    font-size: 20px;
+    color: rgb(255, 255, 255);
+    -unity-font-definition: url("/Assets/Contents/Font/GyeonggiTitle-Medium.ttf");
+    -unity-font-style: normal;
+    -unity-text-align: middle-center;
+}
+
+.area-editor__dice-icon {
+    position: absolute;
+    left: 1179.4px;
+    top: 57.1px;
+    width: 60px;
+    height: 60px;
+    margin: 0;
+    padding: 0;
+    background-color: rgba(0, 0, 0, 0);
+    border-width: 0;
+    border-radius: 0;
+    -unity-background-scale-mode: scale-to-fit;
+    display: none;
+}

@@ -1,95 +1,156 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-using UnityEngine.Events;
+﻿using UnityEngine;
 using UnityEngine.SceneManagement;
-using UnityEngine.UI;
+using UnityEngine.UIElements;
 using UniRx;
 
+[RequireComponent(typeof(PanelRenderer))]
 public class MainController : MonoBehaviour
 {
-    //[SerializeField] Text myCoinText;
+	private PanelUI panelUI;
 
-    private int step = 0;
+	private Button singlePlayBtn;
+	private Button multiPlayBtn;
+	private Button tutorialBtn;
+	private Button getCoinBtn;
+	private Button infoBtn;
+	private Button settingBtn;
+	private Button diceSettingBtn;
 
-    private void Awake()
-    {
-        //SetEvent();
-    }
+	private Label singlePlayLabel;
+	private Label multiPlayLabel;
+	private Label tutorialLabel;
+	private Label getCoinLabel;
+	private Label coinLabel;
 
-    //void SetEvent()
-    //{
-    //    if (DataManager.Instance.userData == null)
-    //    {
-    //        DataManager.Instance.userData = new UserData();
-    //    }
+	private void Awake()
+	{
+		panelUI = new PanelUI(this, OnUIReady);
+	}
 
-    //    DataManager.Instance.userData.myCoin.
-    //        Subscribe(coin => SetCoin()).
-    //        AddTo(gameObject);
-    //    SetCoin();
-    //}
+	/// <summary> PanelRenderer 의 UI 가 준비되면 한 번 호출된다 (2026-09-29) </summary>
+	void OnUIReady(VisualElement root)
+	{
+		SetUI(root);
 
-    // Start is called before the first frame update
-    void Start()
-    {
-		//StepChangeOn(1);
+		SetEvent();
+	}
+
+	private void OnDestroy()
+	{
+		panelUI?.Dispose();
+	}
+
+	// Start is called before the first frame update
+	void Start()
+	{
+
+		//멀티 중 앱을 벗어나 퇴장 처리된 경우 안내
+		if (string.IsNullOrEmpty(DataManager.Instance.mainToastText) == false)
+		{
+			PopupManager.Instance.InGameWarningPopupOn(DataManager.Instance.mainToastText);
+			DataManager.Instance.mainToastText = string.Empty;
+		}
+
 		SoundManager.Instance.PlayBGM(BGMEnum.Intro);
 
-		PopupManager.Instance.SetCanvasParant(transform);
+		PopupManager.Instance.SetPopupParant();
 
-        ServerManager.Instance.Init();
-    }
+		ServerManager.Instance.Init();
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
+		//SetUI / SetEvent 는 UI 가 준비되면 OnUIReady 에서 (PanelRenderer, 2026-09-29)
+	}
 
-	//public void StepChangeOn(int step)
-	//{
-	//    this.step = step;
+	void SetUI(VisualElement root)
+	{
 
-	//    for (int i = 0; i < stepPanelList.Count; i++) 
-	//    {
-	//        bool activeOn = step == i;
-	//        stepPanelList[i].gameObject.SetActive(activeOn);
-	//    }
-	//}
+		singlePlayBtn = root.Q<Button>("single-play-btn");
+		multiPlayBtn = root.Q<Button>("multi-play-btn");
+		tutorialBtn = root.Q<Button>("tutorial-btn");
+		getCoinBtn = root.Q<Button>("get-coin-btn");
+		infoBtn = root.Q<Button>("info-btn");
+		settingBtn = root.Q<Button>("setting-btn");
+		diceSettingBtn = root.Q<Button>("dice-setting-btn");
 
+		singlePlayLabel = root.Q<Label>("single-play-label");
+		multiPlayLabel = root.Q<Label>("multi-play-label");
+		tutorialLabel = root.Q<Label>("tutorial-label");
+		getCoinLabel = root.Q<Label>("get-coin-label");
+		coinLabel = root.Q<Label>("coin-text");
 
-    //void SetCoin()
-    //{
-    //    myCoinText.text = DataManager.Instance.userData.myCoin.Value.ToString();
-    //}
+		singlePlayBtn.clicked += () => { PlayClickSe(); SinglePlaySetPopupOn(); };
+		multiPlayBtn.clicked += () => { PlayClickSe(); MultiPlaySetPopupOn(); };
+		tutorialBtn.clicked += () => { PlayClickSe(); TutorialPopupOn(); };
+		//Get Coin 버튼은 기획 시트에 따라 삭제 (2026-09-26) - UXML 에 없으면 null
+		if (getCoinBtn != null)
+			getCoinBtn.clicked += () => { PlayClickSe(); BuyCoinPopupOpen(); };
+		infoBtn.clicked += () => { PlayClickSe(); InfoPopupOn(); };
+		settingBtn.clicked += () => { PlayClickSe(); SettingPopupOn(); };
+		diceSettingBtn.clicked += DiceSetPopupOn;
+	}
 
-    public void PlayBtnClickOn()
-    {
-        SceneManager.LoadScene("Game");
-    }
+	void SetEvent()
+	{
+		//언어 변경 시 버튼 문구 갱신 (기존 LocalizeText 컴포넌트 역할)
+		LocalizeManager.Instance.language
+			.Subscribe(_ => LocalizeTextSet())
+			.AddTo(gameObject);
 
-    //public void LoginClickOn()
-    //{
-    //    //DataManager.Instance.loginId = "loginClear";
-    //    //StepChangeOn(1);
-    //}
+		//보유 코인 갱신 (기존 MyCoinPanel 역할)
+		DataManager.Instance.CheckUserData();
 
-    public void SettingPopupOn()
-    {
-        PopupManager.Instance.MainSettingPopupOn();
-    }
+		DataManager.Instance.userData.myCoin
+			.Subscribe(_ => SetCoin())
+			.AddTo(gameObject);
+
+		SetCoin();
+	}
+
+	void LocalizeTextSet()
+	{
+		LocalizeManager localize = LocalizeManager.Instance;
+
+		singlePlayLabel.text = localize.GetStrData(LocalizeStatus.Main, 0);
+		multiPlayLabel.text = localize.GetStrData(LocalizeStatus.Main, 1);
+		tutorialLabel.text = localize.GetStrData(LocalizeStatus.Main, 2);
+		if (getCoinLabel != null)
+			getCoinLabel.text = localize.GetStrData(LocalizeStatus.BuyCoinPopup, 3);
+	}
+
+	void SetCoin()
+	{
+		coinLabel.SetNumber(DataManager.Instance.userData.myCoin.Value);
+	}
+
+	void PlayClickSe()
+	{
+		SoundManager.Instance.PlaySe(SeEnum.Yes);
+	}
+
+	// Update is called once per frame
+	void Update()
+	{
+
+	}
+
+	public void PlayBtnClickOn()
+	{
+		SceneManager.LoadScene("Game");
+	}
+
+	public void SettingPopupOn()
+	{
+		PopupManager.Instance.MainSettingPopupOn();
+	}
 
 	public void InfoPopupOn()
 	{
 		PopupManager.Instance.MainInfoPopupOn();
 	}
 
-	//public void BuyCoinPopupOpen()
- //   {
- //       PopupManager.Instance.BuyCoinPopupOn();
- //   }
+	public void BuyCoinPopupOpen()
+	{
+		PopupManager.Instance.BuyCoinPopupOn();
+	}
 
 	public void SinglePlaySetPopupOn()
 	{
@@ -99,5 +160,17 @@ public class MainController : MonoBehaviour
 	public void MultiPlaySetPopupOn()
 	{
 		PopupManager.Instance.PlaySetPopupOn(true);
+	}
+
+	/// <summary> 튜토리얼 버튼 : 인게임과 같은 튜토리얼 팝업을 연다 (2026-09-18) </summary>
+	public void TutorialPopupOn()
+	{
+		PopupManager.Instance.TutorialPopupOn();
+	}
+
+	/// <summary> 좌하단 숨김 핫스팟 : 개발용 주사위 설정 팝업 (2026-09-20 부터 런타임 생성) </summary>
+	public void DiceSetPopupOn()
+	{
+		PopupManager.Instance.DiceSetPopupOn();
 	}
 }

@@ -2,12 +2,21 @@
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UIElements;
 
+[RequireComponent(typeof(PanelRenderer))]
 public class IntroController : MonoBehaviour
 {
 	[SerializeField] Transform reporter;
 
 	[SerializeField] AppleLogin appleLogin;
+
+	private PanelUI panelUI;
+
+	private Button googleBtn;
+	private Button appleBtn;
+	private Button infoBtn;
+	private Button settingBtn;
 
 	// 서비스 클래스 참조 (ID를 넘길 필요가 없어졌습니다.)
 	private GoogleAuthService _authService;
@@ -15,12 +24,18 @@ public class IntroController : MonoBehaviour
 	void Awake()
 	{
 		_authService = new GoogleAuthService();
+		panelUI = new PanelUI(this, OnUIReady);
+	}
+
+	private void OnDestroy()
+	{
+		panelUI?.Dispose();
 	}
 
 	// Start is called once before the first execution of Update after the MonoBehaviour is created
 	void Start()
     {
-		PopupManager.Instance.SetCanvasParant(transform);
+		PopupManager.Instance.SetPopupParant();
 
 		DataManager.Instance.userData = null;
 
@@ -29,8 +44,22 @@ public class IntroController : MonoBehaviour
 #if TEST
 		reporter.gameObject.SetActive(true);
 #endif
+	}
 
-		appleLogin.gameObject.SetActive(AppleAuthManager.IsCurrentPlatformSupported);
+	/// <summary> PanelRenderer 의 UI 가 준비되면 한 번 호출된다 (예전 Start 의 요소 찾기, 2026-09-29) </summary>
+	void OnUIReady(VisualElement root)
+	{
+		googleBtn = root.Q<Button>("google-btn");
+		appleBtn = root.Q<Button>("apple-btn");
+		infoBtn = root.Q<Button>("info-btn");
+		settingBtn = root.Q<Button>("setting-btn");
+
+		googleBtn.clicked += GoogleSignInBtnClick;
+		appleBtn.clicked += AppleLoginBtnClick;
+		infoBtn.clicked += InfoPopupOn;
+		settingBtn.clicked += SettingPopupOn;
+
+		appleBtn.style.display = AppleAuthManager.IsCurrentPlatformSupported ? DisplayStyle.Flex : DisplayStyle.None;
 	}
 
     // Update is called once per frame
@@ -74,7 +103,7 @@ public class IntroController : MonoBehaviour
 		}
 	}
 
-	public void AppleLogin()
+	public void AppleLoginBtnClick()
 	{
 		appleLogin.SigninWithApple(data => LoginClear(data));
 	}

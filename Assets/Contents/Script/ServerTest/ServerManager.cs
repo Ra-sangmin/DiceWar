@@ -379,6 +379,16 @@ public class ServerManager : MonoSingleton<ServerManager>
 		base.OnApplicationQuit();
 	}
 
+	private void OnApplicationPause(bool pauseStatus)
+	{
+		// 다른 앱으로 나갔다가 돌아왔을 때 (백그라운드 -> 포그라운드)
+		if (pauseStatus == false && isAppQuitting == false)
+		{
+			// 백그라운드 중 OS가 소켓을 끊었을 수 있으므로 연결을 새로 뚫습니다.
+			ConnectToServer();
+		}
+	}
+
 	private void OnDisable()
 	{
 		if (!isAppQuitting)

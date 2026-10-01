@@ -1,0 +1,86 @@
+﻿<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" editor-extension-mode="False">
+    <Style src="PopupView.uss" />
+    <ui:VisualElement name="game-result-root" class="popup-root popup-open-anim">
+        <ui:VisualElement name="game-result-dim-0" class="popup-dim popup-dim--blur" />
+        <ui:VisualElement name="game-result-dim-1" class="popup-dim popup-dim--soft" />
+        <ui:VisualElement name="game-result-bg" class="game-result__bg" picking-mode="Ignore" />
+        <ui:VisualElement name="game-result-coin-image" class="popup__coin-image game-result__coin-image" picking-mode="Ignore" />
+        <ui:Label name="game-result-title" text="" class="game-result__title" picking-mode="Ignore" />
+        <ui:Label name="game-result-coin-text" text="0 coin" class="game-result__coin-text" picking-mode="Ignore" />
+        <ui:VisualElement name="game-result-reward-panel" class="game-result__reward-panel" picking-mode="Ignore">
+            <ui:Label name="game-result-reward-title" text="" class="game-result__reward-title" picking-mode="Ignore" />
+            <ui:VisualElement name="game-result-reward-coins" class="game-result__reward-coins" picking-mode="Ignore">
+                <ui:VisualElement class="option__reward-coin game-result__reward-coin--left" />
+                <ui:VisualElement class="option__reward-coin game-result__reward-coin--right" />
+                <ui:VisualElement class="option__reward-coin game-result__reward-coin--center" />
+            </ui:VisualElement>
+            <ui:VisualElement name="game-result-lose-coin" class="game-result__lose-coin" picking-mode="Ignore" />
+            <ui:Label name="game-result-reward-text" text="" class="game-result__reward-text" picking-mode="Ignore" />
+            <ui:VisualElement name="game-result-rows" class="game-result__rows" picking-mode="Ignore">
+                <ui:VisualElement name="game-result-row-1" class="game-result__reward-row" picking-mode="Ignore">
+                    <ui:Label name="game-result-row1-label" text="" class="game-result__reward-label" picking-mode="Ignore" />
+                    <ui:Label name="game-result-row1-value" text="" class="game-result__reward-value" picking-mode="Ignore" />
+                </ui:VisualElement>
+                <ui:VisualElement name="game-result-row-2" class="game-result__reward-row" picking-mode="Ignore">
+                    <ui:Label name="game-result-row2-label" text="" class="game-result__reward-label" picking-mode="Ignore" />
+                    <ui:Label name="game-result-row2-value" text="" class="game-result__reward-value" picking-mode="Ignore" />
+                </ui:VisualElement>
+                <ui:VisualElement name="game-result-row-3" class="game-result__reward-row" picking-mode="Ignore">
+                    <ui:Label name="game-result-row3-label" text="" class="game-result__reward-label" picking-mode="Ignore" />
+                    <ui:Label name="game-result-row3-value" text="" class="game-result__reward-value game-result__reward-value--minus" picking-mode="Ignore" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+        </ui:VisualElement>
+        <ui:Button name="game-result-go-main-btn" text="" class="popup-btn popup-btn--main">
+            <ui:Label name="game-result-go-main-label" text="Home" class="popup-btn__label popup-btn__label--main" picking-mode="Ignore" />
+        </ui:Button>
+        <ui:VisualElement name="game-result-play-group" class="game-result__play-group">
+            <ui:Button name="game-result-ad-btn" text="" class="game-result__ad-btn">
+                <ui:VisualElement name="game-result-ad-icon" class="game-result__ad-icon" picking-mode="Ignore" />
+                <ui:Label name="game-result-ad-label" text="" class="game-result__ad-label" picking-mode="Ignore" />
+            </ui:Button>
+            <ui:Button name="game-result-play-btn" text="" class="game-result__play-btn">
+                <ui:Label name="game-result-play-label" text="" class="game-result__play-label" picking-mode="Ignore" />
+                <ui:VisualElement name="game-result-need-coin-panel" class="popup__need-coin-panel" picking-mode="Ignore">
+                    <ui:Label name="game-result-need-coin-text" text="" class="popup__need-coin-text" />
+                    <ui:VisualElement class="popup__need-coin-icon" />
+                </ui:VisualElement>
+            </ui:Button>
+        </ui:VisualElement>
+    <!-- 싱글 전용 (2026-09-20 시안) : OptionPopup 의 보상/버튼 클래스를 그대로 재사용하고
+         위치만 루트의 싱글 클래스가 잡는다. 멀티 레이아웃은 싱글에서 전부 숨긴다. -->
+        <ui:Button name="game-result-close-btn" text="" class="option__close-btn game-result__single-only" />
+        <ui:VisualElement name="game-result-single-reward" class="game-result__single-reward game-result__single-only" picking-mode="Ignore">
+            <ui:Label name="game-result-single-reward-title" text="" class="option__reward-title game-result__single-reward-title" picking-mode="Ignore" />
+            <ui:VisualElement name="game-result-single-coins" class="option__reward-coins game-result__single-coins" picking-mode="Ignore">
+                <ui:VisualElement class="option__reward-coin game-result__single-coin--left" />
+                <ui:VisualElement class="option__reward-coin game-result__single-coin--right" />
+                <ui:VisualElement class="option__reward-coin game-result__single-coin--center" />
+            </ui:VisualElement>
+            <ui:VisualElement name="game-result-single-lose-coin" class="game-result__single-lose-coin" picking-mode="Ignore" />
+            <ui:Label name="game-result-single-reward-text" text="" class="option__reward-text game-result__single-reward-text" picking-mode="Ignore" />
+        </ui:VisualElement>
+        <ui:VisualElement name="game-result-single-btn-panel" class="option__btn-panel game-result__single-btn-panel game-result__single-only">
+            <ui:Button name="game-result-single-home-btn" text="" class="option__btn">
+                <ui:Label name="game-result-single-home-label" text="" class="option__btn-label" picking-mode="Ignore" />
+            </ui:Button>
+            <ui:Button name="game-result-single-retry-btn" text="" class="option__btn game-result__single-gap">
+                <ui:Label name="game-result-single-retry-label" text="" class="option__btn-label" picking-mode="Ignore" />
+            </ui:Button>
+            <ui:VisualElement name="game-result-single-play-group" class="option__play-group game-result__single-gap--wide">
+                <ui:Button name="game-result-single-ad-btn" text="" class="option__ad-btn">
+                    <ui:VisualElement name="game-result-single-ad-icon" class="option__ad-icon" picking-mode="Ignore" />
+                    <ui:Label name="game-result-single-ad-label" text="" class="option__ad-label" picking-mode="Ignore" />
+                </ui:Button>
+                <ui:Button name="game-result-single-play-btn" text="" class="option__play-btn">
+                    <ui:Label name="game-result-single-play-label" text="" class="option__play-label" picking-mode="Ignore" />
+                    <ui:VisualElement name="game-result-single-need-coin-panel" class="option__need-coin-panel" picking-mode="Ignore">
+                        <ui:Label name="game-result-single-need-coin-text" text="" class="option__need-coin-text" />
+                        <ui:VisualElement class="option__need-coin-icon" />
+                    </ui:VisualElement>
+                </ui:Button>
+            </ui:VisualElement>
+        </ui:VisualElement>
+        <ui:Label name="game-result-retry-reward" text="" class="game-result__retry-reward" picking-mode="Ignore" />
+    </ui:VisualElement>
+</ui:UXML>

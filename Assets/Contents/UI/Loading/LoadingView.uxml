@@ -1,0 +1,40 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" editor-extension-mode="False">
+    <Style src="LoadingView.uss" />
+    <ui:VisualElement name="loading-root" class="loading-root">
+        <ui:Label name="loading-title" text="Loading.." class="loading-title" />
+        <ui:VisualElement name="time-panel" class="time-panel">
+            <ui:Label name="time-text" text="00 : 00" class="time-text" />
+            <ui:Label name="waiting-label" text="waiting time" class="waiting-label" />
+        </ui:VisualElement>
+        <ui:VisualElement name="player-icon-panel" class="player-icon-panel">
+            <ui:VisualElement name="player-icon-0" class="player-icon player-icon--0">
+                <ui:VisualElement class="player-icon__bg" />
+                <ui:VisualElement class="player-icon__fg" />
+            </ui:VisualElement>
+            <ui:VisualElement name="player-icon-1" class="player-icon player-icon--1">
+                <ui:VisualElement class="player-icon__bg" />
+                <ui:VisualElement class="player-icon__fg" />
+            </ui:VisualElement>
+            <ui:VisualElement name="player-icon-2" class="player-icon player-icon--2">
+                <ui:VisualElement class="player-icon__bg" />
+                <ui:VisualElement class="player-icon__fg" />
+            </ui:VisualElement>
+            <ui:VisualElement name="player-icon-3" class="player-icon player-icon--3">
+                <ui:VisualElement class="player-icon__bg" />
+                <ui:VisualElement class="player-icon__fg" />
+            </ui:VisualElement>
+            <ui:VisualElement name="player-icon-4" class="player-icon player-icon--4">
+                <ui:VisualElement class="player-icon__bg" />
+                <ui:VisualElement class="player-icon__fg" />
+            </ui:VisualElement>
+            <ui:VisualElement name="player-icon-5" class="player-icon player-icon--5">
+                <ui:VisualElement class="player-icon__bg" />
+                <ui:VisualElement class="player-icon__fg" />
+            </ui:VisualElement>
+            <ui:VisualElement name="player-icon-6" class="player-icon player-icon--6">
+                <ui:VisualElement class="player-icon__bg" />
+                <ui:VisualElement class="player-icon__fg" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

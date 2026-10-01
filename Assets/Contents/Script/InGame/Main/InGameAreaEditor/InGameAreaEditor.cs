@@ -1,33 +1,87 @@
 ﻿using UnityEngine;
-using UnityEngine.UI;
-using UniRx;
+using UnityEngine.UIElements;
 using System.Diagnostics;
 using Debug = UnityEngine.Debug;
 
+/// <summary>
+/// 개발용 치트 패널. (uGUI Canvas → UI Toolkit 이식)
+/// 화면 요소는 InGameView.uxml 의 area-editor-* 이고, 이 클래스는 그 요소들을 조작한다.
+/// 원본과 같이 [Conditional] 로 에디터 / 윈도우 빌드에서만 동작한다.
+/// </summary>
 public class InGameAreaEditor : MonoBehaviour
 {
-	[SerializeField] private Button editorPanelOnBtn;
-	[SerializeField] private RectTransform editorPanel;
-	[SerializeField] private Toggle getAreaToggle;
+	/// <summary> 토글이 켜졌을 때 붙는 클래스 (원본 ActiveImage 대신) </summary>
+	const string ToggleOnClass = "area-editor__btn--on";
+
 	[SerializeField] private PlayerIconSelector playerIconSelector;
-	[SerializeField] private Toggle getDiceToggle;
 	[SerializeField] private DiceSelector diceSelector;
+
+	private UnityEngine.UIElements.Button editorPanelOnBtn;
+	private VisualElement editorPanel;
+	private UnityEngine.UIElements.Button getAreaToggle;
+	private UnityEngine.UIElements.Button getDiceToggle;
+
+	private bool getAreaOn = false;
+	private bool getDiceOn = false;
 
 	private InGameControllerBase inGameControllerBase;
 
 	private Timer timer;
 	private NonePlayPanel nonePlayPanel;
 
-	//[SerializeField] private Timer timer;
-
-	private void Awake()
+	/// <summary> 인게임 UIDocument 루트를 받아 요소를 찾는다. InGameControllerBase.Start 에서 호출한다. </summary>
+	public void InitView(VisualElement root)
 	{
-		editorPanelOnBtn.gameObject.SetActive(false);
-		editorPanel.gameObject.SetActive(false);
-		playerIconSelector.gameObject.SetActive(false);
-		diceSelector.gameObject.SetActive(false);
+		if (root == null)
+			return;
+
+		editorPanelOnBtn = root.Q<UnityEngine.UIElements.Button>("area-editor-on-btn");
+		editorPanel = root.Q<VisualElement>("area-editor-panel");
+		getAreaToggle = root.Q<UnityEngine.UIElements.Button>("area-editor-get-area-toggle");
+		getDiceToggle = root.Q<UnityEngine.UIElements.Button>("area-editor-get-dice-toggle");
+
+		if (playerIconSelector != null)
+		{
+			playerIconSelector.InitView(root.Q<VisualElement>("area-editor-player-icon"),
+									   root.Q<VisualElement>("area-editor-player-my-text"));
+		}
+
+		if (diceSelector != null)
+		{
+			diceSelector.InitView(root.Q<VisualElement>("area-editor-dice-icon"));
+		}
+
+		UnityEngine.UIElements.Button addTimeBtn = root.Q<UnityEngine.UIElements.Button>("area-editor-add-time-btn");
+		UnityEngine.UIElements.Button addSkillBtn = root.Q<UnityEngine.UIElements.Button>("area-editor-add-skill-btn");
+		UnityEngine.UIElements.Button playerIconBtn = root.Q<UnityEngine.UIElements.Button>("area-editor-player-icon");
+		UnityEngine.UIElements.Button diceIconBtn = root.Q<UnityEngine.UIElements.Button>("area-editor-dice-icon");
+
+		if (editorPanelOnBtn != null) editorPanelOnBtn.clicked += EditorPanelOnBtnClickOn;
+		if (addTimeBtn != null) addTimeBtn.clicked += AddTimeBtnClickOn;
+		if (addSkillBtn != null) addSkillBtn.clicked += AddSkillCardBtnClickOn;
+		if (getAreaToggle != null) getAreaToggle.clicked += () => GetAreaToggleOn(!getAreaOn);
+		if (getDiceToggle != null) getDiceToggle.clicked += () => GetDiceToggleOn(!getDiceOn);
+		if (playerIconBtn != null) playerIconBtn.clicked += () => { if (playerIconSelector != null) playerIconSelector.PlayerChangeOn(); };
+		if (diceIconBtn != null) diceIconBtn.clicked += () => { if (diceSelector != null) diceSelector.DiceChangeOn(); };
+
+		SetActive(editorPanelOnBtn, false);
+		SetActive(editorPanel, false);
+
+		if (playerIconSelector != null) playerIconSelector.SetActiveOn(false);
+		if (diceSelector != null) diceSelector.SetActiveOn(false);
 
 		Init();
+	}
+
+	static void SetActive(VisualElement element, bool activeOn)
+	{
+		if (element != null)
+			element.style.display = activeOn ? DisplayStyle.Flex : DisplayStyle.None;
+	}
+
+	static bool IsActive(VisualElement element)
+	{
+		return element != null && element.resolvedStyle.display == DisplayStyle.Flex;
 	}
 
 	public void SetData(InGameControllerBase inGameControllerBase)
@@ -48,62 +102,73 @@ public class InGameAreaEditor : MonoBehaviour
 	{
 		DataManager.Instance.areaGetPlayerEnum = PlayerEnum.Player_None;
 
-		getAreaToggle.OnValueChangedAsObservable()
-			.Subscribe(isOn => 
-			{
-				PlayerEnum playerEnum = isOn ? playerIconSelector.currentPlayerEnum : PlayerEnum.Player_None;
-				DataManager.Instance.areaGetPlayerEnum = playerEnum;
-				playerIconSelector.gameObject.SetActive(isOn);
-			})
-			.AddTo(this);
+		if (playerIconSelector != null)
+			playerIconSelector.SetPlayer(DataManager.Instance.playerData.pe);
+	}
 
-		getDiceToggle.OnValueChangedAsObservable()
-			.Subscribe(isOn =>
-			{
-				int diceCount = isOn ? diceSelector.diceCount : 0;
-				DataManager.Instance.diceGetCount = diceCount;
+	void GetAreaToggleOn(bool isOn)
+	{
+		getAreaOn = isOn;
 
-				diceSelector.gameObject.SetActive(isOn);
-			})
-			.AddTo(this);
+		if (getAreaToggle != null)
+			getAreaToggle.EnableInClassList(ToggleOnClass, isOn);
 
-		playerIconSelector.SetPlayer(DataManager.Instance.playerData.pe);
+		PlayerEnum playerEnum = isOn && playerIconSelector != null ? playerIconSelector.currentPlayerEnum : PlayerEnum.Player_None;
+		DataManager.Instance.areaGetPlayerEnum = playerEnum;
+
+		if (playerIconSelector != null)
+			playerIconSelector.SetActiveOn(isOn);
+	}
+
+	void GetDiceToggleOn(bool isOn)
+	{
+		getDiceOn = isOn;
+
+		if (getDiceToggle != null)
+			getDiceToggle.EnableInClassList(ToggleOnClass, isOn);
+
+		int diceCount = isOn && diceSelector != null ? diceSelector.diceCount : 0;
+		DataManager.Instance.diceGetCount = diceCount;
+
+		if (diceSelector != null)
+			diceSelector.SetActiveOn(isOn);
 	}
 
 	[Conditional("UNITY_EDITOR")]
 	[Conditional("UNITY_STANDALONE_WIN")]
 	public void ActiveOn(bool activeOn)
-    {
-		editorPanelOnBtn.gameObject.SetActive(activeOn);
+	{
+		SetActive(editorPanelOnBtn, activeOn);
 
 		if (activeOn == false)
 		{
 			DataManager.Instance.areaGetPlayerEnum = PlayerEnum.Player_None;
 			DataManager.Instance.diceGetCount = 0;
-			getAreaToggle.isOn = false;
-			getDiceToggle.isOn = false;
-			editorPanel.gameObject.SetActive(false);
+			GetAreaToggleOn(false);
+			GetDiceToggleOn(false);
+			SetActive(editorPanel, false);
 		}
 	}
 
 	public void EditorPanelOnBtnClickOn()
-    {
-        bool activeOn = editorPanel.gameObject.activeSelf;
+	{
+		bool activeOn = IsActive(editorPanel);
 
-		editorPanel.gameObject.SetActive(!activeOn);
+		SetActive(editorPanel, !activeOn);
 
 		if (!activeOn == false)
 		{
 			DataManager.Instance.areaGetPlayerEnum = PlayerEnum.Player_None;
 			DataManager.Instance.diceGetCount = 0;
-			getAreaToggle.isOn = false;
-			getDiceToggle.isOn = false;
+			GetAreaToggleOn(false);
+			GetDiceToggleOn(false);
 		}
 	}
+
 	public void AddTimeBtnClickOn()
 	{
 		if (timer == null)
-        	return;
+			return;
 
 		timer.timerCurrentDelay += 10;
 	}

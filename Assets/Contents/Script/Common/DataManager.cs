@@ -1,12 +1,8 @@
 ﻿using Cysharp.Threading.Tasks;
-using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using UniRx;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 using Random = UnityEngine.Random;
 
 public class DataManager : MonoSingleton<DataManager>
@@ -21,6 +17,8 @@ public class DataManager : MonoSingleton<DataManager>
     
     public int num_player = 2;//총 플레이어의 수 (기본 값 : 3)
     public int off_line_num_player = 0;//AI 수 (기본 값 : 2)
+    public int matchingUserCnt = 2;//매칭 유저 수 (기본 값 : 2)
+
     public int num_area = 10;//총 영토의 수 (기본값 : 10)
     public int diceMaxCount = 6;//영토의 주사위 최대 갯수
 
@@ -47,6 +45,12 @@ public class DataManager : MonoSingleton<DataManager>
 	public PlayerEnum currentPlayer  { get { return (PlayerEnum)currentTurnIndex; } }
 
 	private Dictionary<PlayerEnum,int> playerColorIndexDic = new Dictionary<PlayerEnum,int>();
+
+	/// <summary>
+	/// 싱글 연패 횟수. 패배 후 '다시하기' 로 같은 판을 이기면 보상이 (loseCount + 1) 배가 된다. (2026-09-20)
+	/// 승리하거나 판을 떠날 때(홈으로 / 새로하기 / 새 게임 시작) 0 으로 돌아간다.
+	/// </summary>
+	public int loseCount = 0;
     public List<PlayerData> playerDataList = new List<PlayerData>();
     public ReactiveProperty<bool> gameStart = new ReactiveProperty<bool>(false);
 
@@ -78,6 +82,17 @@ public class DataManager : MonoSingleton<DataManager>
 	public bool leaveEarlyPopupOpenOn = false;
 
     public bool myBetrayWaitOn = false;
+
+    /// <summary> 신규 유저 시작 코인 (기획 시트 : Get Coin 삭제 대신 시작 시 200코인, 2026-09-26) </summary>
+    public const int StartCoin = 200;
+
+    /// <summary> 메인 씬에 들어가자마자 띄울 토스트 문구 (멀티 중 앱 이탈로 퇴장된 경우 등) </summary>
+    public string mainToastText = string.Empty;
+
+    //배신 패널티 집계 — 멀티 메뉴 팝업의 '예상 보상' 표시용 (2026-09-19)
+    //코인 경제는 그대로다. 실제 차감은 지금처럼 배신 시점에만 일어나고 여기 값은 표시 전용이다.
+    public int betrayReceivedCoin = 0;   //내 동맹원이 배신해서 물어낸 패널티 합계
+    public int betrayPaidCoin = 0;       //내가 배신해서 지불한 패널티 합계
 
     public PlayerEnum areaGetPlayerEnum = PlayerEnum.Player_None;
 	public int diceGetCount = 0;
@@ -130,7 +145,7 @@ public class DataManager : MonoSingleton<DataManager>
 		if (userData == null)
 		{
             UserDataRespons data = new UserDataRespons() { email = "fktkdals1@gmail.com" };
-			data.freeCoin = 1000;
+			data.freeCoin = StartCoin;
 			UserDataSave(data);
 		}
 	}
@@ -138,7 +153,7 @@ public class DataManager : MonoSingleton<DataManager>
 	public void UserDataSave(UserDataRespons data)
     {
 #if UNITY_STANDALONE
-        data.freeCoin = 1000;
+        data.freeCoin = StartCoin;
 #endif
 
 		userData = new UserData(data.email, data.snsType, data.freeCoin , data.chargeCoin);
@@ -148,6 +163,9 @@ public class DataManager : MonoSingleton<DataManager>
     {
 		GameDataClearOn();
 		SetPlayerColor();
+
+		//새 판이므로 연패 보너스도 처음부터
+		loseCount = 0;
     }
 
     void SetPlayerColor() 
@@ -274,121 +292,90 @@ public class DataManager : MonoSingleton<DataManager>
             onLineCnt = 0;
 		}
 
+        //플레이어당 시작 주사위 합 = (전체 땅 / 인원 * 2) 의 몫 (2026-09-26)
+        //  시트는 × 3 이었지만, Dice Setting 의 Max 가 3 이면 모든 땅이 3개로 고정돼서 사용자 결정으로 × 2 로 낮췄다
+        int diceTotalPerPlayer = areaDataList.Count * 2 / num_player;
+
         for (int i = 0; i < playerDataList.Count; i++)
         {
             bool isAI = isMultiOn == false ? playerData.ci != i :  i > onLineCnt;
 
 			playerDataList[i].isAI = isAI;
 
-			foreach (var area in GetAreaDtaList(playerDataList[i].pe))
-			{
-                int addMinCount = GetAddMinCount(i);
-				int addMaxCount = GetAddMaxCount(i);
+			//땅 하나의 주사위 최소/최대 : Dice Setting 팝업(DiceCountManager) 의 난이도별 · 유저/AI 별 값 (2026-09-26)
+			DiceCountData diceCountData = DiceCountManager.Instance.GetData(isAI, aiLevel);
 
-				int diceCount = GetDiceCount(isAI, addMinCount , addMaxCount);
-
-				area.SetDice(diceCount);
-
-                //if (playerData.pe == (PlayerEnum)i)
-                //{
-                    //Debug.LogWarning($"{area.player} , min = {addMinCount} , max = {addMaxCount} , result = {diceCount} ");
-                //}
-
-
-            }
+			SetInitDice(GetAreaDtaList(playerDataList[i].pe), diceTotalPerPlayer, diceCountData);
         }
     }
-	int GetAddMinCount(int index)
-	{
-        int minAddCount = 0;
 
-		////맵 보정 기능 사용 중 일때 1개 증가
-		//if (mapCompensation && index >= (num_player - 3))
-  //      {
-  //          minAddCount++;
-		//}
+    /// <summary>
+    /// 플레이어 한 명의 시작 주사위 배치. 합계(totalDiceCount)는 그대로 두고 땅마다 개수가 제각각이 되게 나눈다 (2026-09-26)
+    /// 모든 땅을 최소값(Dice Setting 의 Min)으로 깔고, 남은 주사위를 땅마다 다른 가중치로 하나씩 뿌린다.
+    /// 땅 하나는 최대값(Dice Setting 의 Max)을 넘지 않는다.
+    /// 합계가 '땅 수 × Min' 보다 작거나 '땅 수 × Max' 보다 크면 Min / Max 규칙이 우선이다 (합계가 그만큼 달라진다).
+    /// </summary>
+    void SetInitDice(List<AreaData> areaList, int totalDiceCount, DiceCountData diceCountData = null)
+    {
+        if (areaList.Count == 0)
+            return;
 
-		return minAddCount;
-	}
+        int minCount = 1;
+        int maxCount = diceMaxCount;
 
-	int GetAddMaxCount(int index)
-	{
-        if (isMultiOn == false && mapCompensation == false)
+        if (diceCountData != null)
         {
-            return 0;
+            minCount = Mathf.Clamp(diceCountData.minCount, 1, diceMaxCount);
+            maxCount = Mathf.Clamp(diceCountData.maxCount, minCount, diceMaxCount);
         }
 
-		switch (num_player)
-		{
-			case 3:
-				if (index == 1 || index == 2) return 1;
-				break;
+        foreach (var area in areaList)
+        {
+            area.SetDice(minCount);
+        }
 
-			case 4:
-				if (index == 2 || index == 3) return 1;
-				break;
+        //땅마다 주사위를 받을 확률(가중치)을 다르게 준다
+        Dictionary<AreaData, float> weightDic = new Dictionary<AreaData, float>();
 
-			case 5:
-				if (index == 2 || index == 3) return 1;
-				if (index == 4) return 2;
-				break;
+        foreach (var area in areaList)
+        {
+            weightDic[area] = UnityEngine.Random.Range(0.2f, 1.8f);
+        }
 
-			case 6:
-				if (index == 2 || index == 3 || index == 4) return 1;
-				if (index == 5) return 2;
-				break;
+        int remain = totalDiceCount - areaList.Count * minCount;
 
-			case 7:
-				if (index == 3 || index == 4 || index == 5) return 1;
-				if (index == 6) return 2;
-				break;
-		}
+        while (remain > 0)
+        {
+            List<AreaData> targetList = areaList.Where(area => area.dice < maxCount).ToList();
 
-		return 0;
-	}
+            //모든 땅이 최대치라면 더 놓을 곳이 없다
+            if (targetList.Count == 0)
+                break;
+
+            float weightSum = targetList.Sum(area => weightDic[area]);
+            float pick = UnityEngine.Random.Range(0f, weightSum);
+
+            AreaData selectArea = targetList[targetList.Count - 1];
+
+            foreach (var area in targetList)
+            {
+                pick -= weightDic[area];
+
+                if (pick <= 0f)
+                {
+                    selectArea = area;
+                    break;
+                }
+            }
+
+            selectArea.SetDice(selectArea.dice + 1);
+            remain--;
+        }
+    }
 
 	public List<AreaData> GetAreaDtaList(PlayerEnum playerEnum)
     {
 		return areaDataList.Where(data => data.player == playerEnum).ToList();
-	}
-
-    /// <summary>
-    /// 초기 주사위 설정
-    /// </summary>
-    /// <param name="isAi"></param>
-    /// <returns></returns>
-    int GetDiceCount(bool isAi ,int addMinCount, int addMaxCount)
-    {
-		//DiceCountData data = Resources.Load<DiceCount>("DiceCount").GetData(isAi, aiLevel);
-		DiceCountData data = DiceCountManager.Instance.GetData(isAi, aiLevel);
-
-        int minCount = data.minCount + addMinCount;
-		int maxCount = data.maxCount + addMaxCount;
-
-        int diceCount = Random.Range(minCount, maxCount+1);
-
-		//int dice = ;
-
-		//if (isAi)
-		//{
-		//	switch (aiLevel)
-		//	{
-		//		case AILevel.Easy: dice = Random.Range(1, 4); break;
-		//		case AILevel.Normal: dice = Random.Range(2, 5); break;
-		//		case AILevel.Hard: dice = Random.Range(3, 6); break;
-		//	}
-		//}
-		//else
-		//{
-		//	switch (aiLevel)
-		//	{
-		//		case AILevel.Easy: dice = Random.Range(3, 5); break;
-		//		case AILevel.Normal: dice = Random.Range(2, 5); break;
-		//		case AILevel.Hard: dice = Random.Range(1, 4); break;
-		//	}
-		//}
-
-		return diceCount;
 	}
 
 
@@ -599,6 +586,12 @@ public class DataManager : MonoSingleton<DataManager>
         this.num_player = playerMaxCnt;
     }
 
+    public void SetMatchingUserCnt(int matchingUserCnt)
+    {
+        this.matchingUserCnt = matchingUserCnt;
+    }
+
+
     public void SetOffLinePlayerCnt(int offLinePlayer)
     {
         this.off_line_num_player = offLinePlayer;
@@ -733,30 +726,18 @@ public class DataManager : MonoSingleton<DataManager>
         {
             resultCoin = Mathf.RoundToInt(resultCoin * 0.8f);
 		}
+        else
+        {
+			//연패 보너스 : 진 판을 '다시하기' 로 이기면 (연패 횟수 + 1) 배 (2026-09-20)
+			resultCoin *= loseCount + 1;
+		}
 
 		return resultCoin;
 	}
 
 	public int GetMultiRewardCoin(int resultPlayCount = 1)
 	{
-        int coinCount = 0;
-
-		if (resultPlayCount == 1)
-        {
-			int addCoin = 3;
-			coinCount = addCoin * num_player;
-		}
-        else
-        {
-			var allianceData = GetMyAllianceData();
-
-			if (allianceData != null)
-			{
-				coinCount = allianceData.coinCount;
-			}
-		}
-
-        return coinCount;
+        return 60;
 	}
 
     public int GetNeedBetrayCoin()
@@ -832,7 +813,7 @@ public class DataManager : MonoSingleton<DataManager>
 		AllianceData myAllianceData = GetMyAllianceData();
 
 		//총 획득 코인
-		int maxCoinCount = GetNeedCoin() * num_player;
+		int maxCoinCount = GetMultiRewardCoin();
 
 		//한명당 나눠질 코인 정보
 		int oneManCoinCount = Mathf.RoundToInt(myAllianceData.coinCount / (float)allDataList.Count);
@@ -864,7 +845,7 @@ public class DataManager : MonoSingleton<DataManager>
 
         if (isMultiOn)
         {
-            needCoin = 3;
+            needCoin = 10;
 		}
         else
         {
@@ -979,7 +960,7 @@ public class DataManager : MonoSingleton<DataManager>
 
     public List<AllianceData> GetAllianceDefaultData(PlayerEnum orderPlayer, List<PlayerEnum> playerList , PlayerIconController playerIconController)
     {
-	    int maxCoinCount = GetNeedCoin() * num_player;
+	    int maxCoinCount = GetMultiRewardCoin();
 		int oneManCoinCount = maxCoinCount / playerList.Count;
 
 		List<AllianceData> allianceDataList = new List<AllianceData>();
@@ -1005,7 +986,7 @@ public class DataManager : MonoSingleton<DataManager>
 		//AI가 동맹 주체라면
 		if (GetPlayerData(orderPlayer).isAI)
         {
-			List<PlayerIcon> allConnectedHigherList = playerIconController.GetActiveDiceHigherList(allianceDataList);
+			List<PlayerIconElement> allConnectedHigherList = playerIconController.GetActiveDiceHigherList(allianceDataList);
 
 			int allAreaCount = allConnectedHigherList.Sum(data => data.connectedCount);
 
@@ -1015,7 +996,7 @@ public class DataManager : MonoSingleton<DataManager>
 
 				if (allianceData != null)
 				{
-                    int coinCount = GetNeedCoin() * num_player * playerIcon.connectedCount / allAreaCount;
+                    int coinCount = GetMultiRewardCoin() * playerIcon.connectedCount / allAreaCount;
 
 					allianceData.coinCount += coinCount;
 					maxCoinCount -= coinCount;
@@ -1030,7 +1011,7 @@ public class DataManager : MonoSingleton<DataManager>
 		}
         else
         {
-			List<PlayerIcon> connectedHigherList = playerIconController.GetActiveDiceHigherList(otherPlayerList);
+			List<PlayerIconElement> connectedHigherList = playerIconController.GetActiveDiceHigherList(otherPlayerList);
 
 			while (true)
 			{
@@ -1092,6 +1073,12 @@ public class DataManager : MonoSingleton<DataManager>
     {
         this.allianceAllDataList.Add(allianceAllData);
     }
+
+	/// <summary> 이미 맺어진 동맹 묶음 전체. 동맹 제안 팝업의 좌하단 표시용이다 (2026-09-19) </summary>
+	public List<AllianceAllData> GetAllianceAllDataList()
+	{
+		return allianceAllDataList;
+	}
 
 	public int GetAllianceCount()
 	{
@@ -1198,7 +1185,7 @@ public class DataManager : MonoSingleton<DataManager>
         }
         else 
         {
-            int maxCoin = 3 * num_player;
+            int maxCoin = isMultiOn ? GetMultiRewardCoin() : 3 * num_player;
 
             resultData = new AllianceAllData();
 			resultData.allianceDataList.Add(new AllianceData(playerEnum, maxCoin));
@@ -1244,20 +1231,37 @@ public class DataManager : MonoSingleton<DataManager>
 		allianceAllDataList.Clear();
 	}
 
-    public void BetrayOn(PlayerEnum playerEnum)
+    public AllianceAllData BetrayOn(PlayerEnum playerEnum)
     {
-        foreach (var allianceData in allianceAllDataList)
+        AllianceAllData allianceAllData = null;
+
+		foreach (var allianceData in allianceAllDataList)
         {
 			foreach (var listData in allianceData.allianceDataList)
 			{
 				if (listData.playerEnum == playerEnum)
 				{
+                    allianceAllData = allianceData;
 					allianceData.allianceDataList.Remove(listData);
+
+					if (allianceAllData.orderData.playerEnum == playerEnum)
+                    {
+                        //가장 코인이 높은 플레이어 취득
+						var tempOrderData = allianceAllData.allianceDataList.OrderByDescending(data => data.coinCount).FirstOrDefault();
+
+                        if (tempOrderData != null)
+                        {
+							allianceAllData.orderData = tempOrderData;
+						}
+                    }
+
 					break;
 				}
 			}
         }
-    }
+
+        return allianceAllData;
+	}
 
     public int MyTurnAddOn()
     {
@@ -1305,6 +1309,9 @@ public class DataManager : MonoSingleton<DataManager>
 
 	public void GameDataClearOn()
     {
+		betrayReceivedCoin = 0;
+		betrayPaidCoin = 0;
+
 		PlayerDataClearOn();
 		AllianceClearOn();
         StashCountClearOn();
@@ -1427,7 +1434,8 @@ public class PlayerData
 [System.Serializable]
 public class AllianceAllData
 {
-    public List<AllianceData> allianceDataList = new List<AllianceData>();
+	public AllianceData orderData;
+	public List<AllianceData> allianceDataList = new List<AllianceData>();
 }
 
 [System.Serializable]

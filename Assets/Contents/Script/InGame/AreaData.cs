@@ -9,14 +9,14 @@ public class AreaData
 {
     public int id;
     public int dice = 0;     // 주사위 수
-    private MapDice mapDice;
+    private MapDiceElement mapDice;
 
     public PlayerEnum player = PlayerEnum.Player_None;
     public bool choisOn { get; set; }
 	public bool tradeOn { get; set; }
 
 	public List<int> adj = new List<int>();
-    private List<Hexagon> hexagonList = new List<Hexagon>();
+    private List<HexagonElement> hexagonList = new List<HexagonElement>();
 
     public List<int> cel = new List<int>();
 
@@ -196,11 +196,11 @@ public class AreaData
 	}
 
 
-	public void AddHexagon(Hexagon hexagon)
+	public void AddHexagon(HexagonElement hexagon)
     {
         if (hexagonList == null)
         {
-            hexagonList = new List<Hexagon>();
+            hexagonList = new List<HexagonElement>();
         }
 
         this.hexagonList.Add(hexagon);
@@ -220,7 +220,7 @@ public class AreaData
         return dice;
     }
 
-    public Hexagon SetCenterHexagon(MapDice mapDice , int diceCnt) 
+    public HexagonElement SetCenterHexagon(MapDiceElement mapDice , int diceCnt) 
     {
         this.mapDice = mapDice;
 
@@ -228,12 +228,12 @@ public class AreaData
 
         if (hexagonList == null)
         {
-            hexagonList = new List<Hexagon> { };
+            hexagonList = new List<HexagonElement> { };
         }
 
         if (hexagonList.Count == 0)
         {
-            mapDice.gameObject.SetActive(false);
+            mapDice.SetActive(false);
             return null;
         }
 
@@ -257,9 +257,9 @@ public class AreaData
         return SetCenterHexagon(checkList , centerValue);
     }
 
-    public Hexagon SetCenterHexagon(List<Hexagon> checkList , Vector2 centerValue)
+    public HexagonElement SetCenterHexagon(List<HexagonElement> checkList , Vector2 centerValue)
     {
-        Hexagon resultHexagon = null;
+        HexagonElement resultHexagon = null;
 
         float checkValue = 9999;
 

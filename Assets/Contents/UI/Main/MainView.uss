@@ -1,0 +1,213 @@
+﻿/* ===== 기본 폰트 (경기천년제목 Medium / normal, 2026-09-26 변경) =====
+   개별 규칙이 없는 요소가 Unity 기본 테마 폰트(NotInter)로 떨어지지 않도록
+   루트에 한 번 지정해 상속시킨다. (2026-09-19) */
+:root {
+    -unity-font-definition: url("/Assets/Contents/Font/GyeonggiTitle-Medium.ttf");
+    -unity-font-style: normal;
+}
+
+/* ===== Main 화면 (UGUI Canvas → UI Toolkit 이식) =====
+   좌표는 CanvasScaler 기준 해상도 1920x1080 기준이며,
+   기존 RectTransform 의 anchor / pivot / anchoredPosition 을 그대로 옮긴 값이다. */
+
+.main-root {
+    flex-grow: 1;
+    background-image: url("/Assets/Contents/Image/BG/Main/BG3.png");
+    -unity-background-scale-mode: scale-and-crop;
+}
+
+/* ---------- 버튼 공통 (유니티 기본 버튼 외형 제거) ---------- */
+.corner-btn,
+.dice-setting-btn,
+.play-btn,
+.get-coin-btn {
+    position: absolute;
+    margin: 0;
+    padding: 0;
+    background-color: rgba(0, 0, 0, 0);
+    border-width: 0;
+    border-radius: 0;
+    transition-property: scale;
+    transition-duration: 0.08s;
+}
+
+/* ---------- 좌상단 / 우상단 아이콘 버튼 ---------- */
+.corner-btn {
+    width: 138px;
+    height: 139px;
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.corner-btn:hover {
+    scale: 1.05 1.05;
+}
+
+.corner-btn:active {
+    scale: 0.95 0.95;
+}
+
+.corner-btn--info {
+    left: 20px;
+    top: 20px;
+    background-image: url("/Assets/Contents/Image/Button/info_btn.png");
+}
+
+.corner-btn--setting {
+    right: 20px;
+    top: 20px;
+    background-image: url("/Assets/Contents/Image/Button/setting_btn.png");
+}
+
+/* ---------- 좌하단 숨김 개발용 핫스팟 (주사위 설정 팝업) ----------
+   원본도 alpha 0 인 투명 버튼이었다. */
+.dice-setting-btn {
+    left: 0;
+    bottom: 0;
+    width: 298px;
+    height: 337px;
+}
+
+/* ---------- 플레이 버튼 3종 ----------
+   원본: anchor/pivot 중앙, size 440x105, anchoredPosition 으로 상하 배치 */
+.play-btn {
+    left: 50%;
+    top: 50%;
+    width: 440px;
+    height: 105px;
+    translate: -50% -50%;
+    background-image: url("/Assets/Contents/Image/Button/Btn_bg9.png");
+    -unity-background-scale-mode: stretch-to-fill;
+}
+
+.play-btn:hover {
+    scale: 1.03 1.03;
+}
+
+.play-btn:active {
+    scale: 0.97 0.97;
+}
+
+.play-btn__label {
+    flex-grow: 1;
+    margin: 0;
+    padding: 0;
+    font-size: 49px;
+    color: rgb(135, 233, 244);
+    -unity-font-definition: url("/Assets/Contents/Font/GyeonggiTitle-Medium.ttf");
+    -unity-font-style: normal;
+    -unity-text-align: middle-center;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+
+/* 시안 기준 : 가로는 화면 정중앙, 세로는 122.5px 간격 (top 551 / 673.5 / 796) */
+.play-btn--single {
+    margin-top: 63.5px;
+}
+
+.play-btn--multi {
+    margin-top: 186px;
+}
+
+.play-btn--tutorial {
+    margin-top: 308.5px;
+}
+
+/* ---------- 코인 패널 ----------
+   원본: 화면 하단 중앙 anchor, pivot(0.5,0), anchoredPosition (100,100), size 250x93 */
+.coin-panel {
+    position: absolute;
+    left: 50%;
+    bottom: 68px;
+    width: 250px;
+    height: 93px;
+    /* Get Coin 버튼 삭제로 코인 패널만 남아 버튼 열과 같은 가운데에 둔다 (2026-09-26) */
+    margin-left: 0;
+    translate: -50% 0;
+}
+
+/* 코인 보유량 배경 (시안 : x738 폭215, 모서리 반경이 버튼과 같다)
+   원본 coin_bg.png 는 코인 아이콘이 9슬라이스 왼쪽에 박혀 있어 크기를 못 줄인다.
+   그래서 PlaySetPopup 처럼 btn_bg8 + 별도 아이콘 요소로 바꿨다. */
+.coin-bg {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 215px;
+    height: 93px;
+    margin-left: 0;
+    translate: -50% -50%;
+    background-image: url("/Assets/Contents/Image/Button/btn_bg8.png");
+    -unity-slice-left: 40;
+    -unity-slice-right: 40;
+    -unity-slice-top: 40;
+    -unity-slice-bottom: 40;
+    -unity-background-image-tint-color: rgb(44, 48, 54);
+}
+
+/* 코인 아이콘 (시안 : 패널 왼쪽에서 26px, 46x46) */
+.coin-icon {
+    position: absolute;
+    left: 26px;
+    top: 50%;
+    translate: 0 -50%;
+    width: 46px;
+    height: 46px;
+    background-image: url("/Assets/Contents/Image/BG/Main/Coin.png");
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+/* 코인 숫자: 아이콘 오른쪽 남는 폭에 가운데 정렬 (5자리까지 안 넘친다) */
+.coin-text {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 130px;
+    height: 100px;
+    margin-left: 30px;
+    padding: 0;
+    translate: -50% -50%;
+    font-size: 45px;
+    color: rgb(255, 255, 255);
+    -unity-font-definition: url("/Assets/Contents/Font/GyeonggiTitle-Medium.ttf");
+    -unity-font-style: normal;
+    -unity-text-align: middle-center;
+}
+
+/* Get Coin 버튼: 패널 하단 중앙 기준 (-0.7, 0), size 250x93, 9-slice(30) */
+.get-coin-btn {
+    left: 50%;
+    bottom: 0;
+    width: 214px;
+    height: 93px;
+    margin-left: 9px;
+    translate: -50% 0;
+    background-image: url("/Assets/Contents/Image/Button/btn_bg2.png");
+    -unity-slice-left: 30;
+    -unity-slice-right: 30;
+    -unity-slice-top: 30;
+    -unity-slice-bottom: 30;
+}
+
+.get-coin-btn:hover {
+    scale: 1.03 1.03;
+}
+
+.get-coin-btn:active {
+    scale: 0.97 0.97;
+}
+
+.get-coin-label {
+    flex-grow: 1;
+    margin: 0;
+    padding: 0;
+    font-size: 40px;
+    color: rgb(255, 255, 255);
+    -unity-font-definition: url("/Assets/Contents/Font/GyeonggiTitle-Medium.ttf");
+    -unity-font-style: normal;
+    -unity-text-align: middle-center;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}

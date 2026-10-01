@@ -1,7 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
+using UnityEngine.UIElements;
 
 public class InGameBottomController : MonoBehaviour
 {
@@ -16,21 +16,28 @@ public class InGameBottomController : MonoBehaviour
     {   
 	}
 
+	/// <summary> UI Toolkit 요소 연결 </summary>
+	public void InitView(VisualElement root)
+	{
+		nonePlayPanel.InitView(root);
+		mapSelectPanel.InitView(root);
+	}
+
 	public void SetStatus(int status)
     {
         this.status = status;
 
-        mapSelectPanel.gameObject.SetActive(false);
-        nonePlayPanel.gameObject.SetActive(false);
+        mapSelectPanel.SetPanelActive(false);
+        nonePlayPanel.SetPanelActive(false);
 
         switch (status)
         {
             case 0:
-                mapSelectPanel.gameObject.SetActive(true);
+                mapSelectPanel.SetPanelActive(true);
 				mapSelectPanel.SetData();
 				break;
             case 1:
-                nonePlayPanel.gameObject.SetActive(true);
+                nonePlayPanel.SetPanelActive(true);
                 nonePlayPanel.SetData();
                 break;
         }

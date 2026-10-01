@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <style>
+        /* 배경 투명화 및 흰색 글씨 적용 */
+        html, body {
+            background-color: transparent !important;
+            color: #ffffff; /* 흰색 텍스트 */
+            font-family: 'Noto Sans KR', sans-serif; /* 깔끔한 고딕 폰트 */
+            margin: 0;
+            padding: 15px; /* 모바일 화면에 맞춘 여백 */
+            line-height: 1.6; /* 가독성을 위한 줄 간격 */
+        }
+    </style>
+</head>
+<body>
+    <div id="terms-content"></div>
+    <script>
+        // 같은 저장소에 올린 terms.md 파일을 읽어와서 렌더링
+		fetch('final_terms_ko.md')
+            .then(response => response.text())
+            .then(text => {
+                document.getElementById('terms-content').innerHTML = marked.parse(text);
+            });
+    </script>
+</body>
+</html>

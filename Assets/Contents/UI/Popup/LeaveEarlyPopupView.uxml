@@ -1,0 +1,19 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" editor-extension-mode="False">
+    <Style src="PopupView.uss" />
+    <ui:VisualElement name="leave-early-root" class="popup-root popup-open-anim">
+        <ui:VisualElement name="leave-early-popup" class="leave-early-popup">
+            <ui:VisualElement name="leave-early-coin-icon" class="leave-early__coin-icon" picking-mode="Ignore" />
+            <ui:Label name="leave-early-title" text="" class="leave-early__title" picking-mode="Ignore" />
+            <ui:Button name="leave-early-finish-btn" text="" class="popup-btn leave-early__finish-btn">
+                <ui:Label name="leave-early-finish-label" text="Finish" class="popup-btn__label leave-early__finish-label" picking-mode="Ignore" />
+                <ui:VisualElement name="leave-early-coin-bg" class="leave-early__coin-bg" picking-mode="Ignore">
+                    <ui:Label name="leave-early-coin-text" text="+0" class="leave-early__coin-value" />
+                    <ui:VisualElement class="leave-early__coin-value-icon" />
+                </ui:VisualElement>
+            </ui:Button>
+            <ui:Button name="leave-early-continue-btn" text="" class="popup-btn leave-early__continue-btn">
+                <ui:Label name="leave-early-continue-label" text="Continue" class="popup-btn__label leave-early__continue-label" picking-mode="Ignore" />
+            </ui:Button>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

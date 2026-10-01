@@ -1,0 +1,3962 @@
+﻿/* ===== 기본 폰트 (경기천년제목 Medium / normal, 2026-09-26 변경) =====
+   개별 규칙이 없는 요소가 Unity 기본 테마 폰트(NotInter)로 떨어지지 않도록
+   루트에 한 번 지정해 상속시킨다. (2026-09-19) */
+:root {
+    -unity-font-definition: url("/Assets/Contents/Font/GyeonggiTitle-Medium.ttf");
+    -unity-font-style: normal;
+}
+
+/* ===== 팝업 공통 스타일 (Resources 팝업 프리팹들이 함께 쓴다) =====
+   좌표/크기는 기존 프리팹의 실측값을 그대로 옮긴 것이다.
+   팝업은 UIPopupPanelSettings(SortingOrder 100) 를 쓰는 별도 패널이라
+   인게임 HUD 패널(-10) 과 uGUI Overlay 캔버스(0) 보다 위에 그려진다. */
+
+.popup-root {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+}
+
+/* 6.7 키프레임 애니메이션 (2026-09-29) : 팝업이 뜰 때.
+   예전에는 팝업 전체를 투명→불투명으로 페이드해서, 반투명한 동안 판 뒤로 메인 화면 버튼 등이 비쳐 잔상처럼 보였다.
+   → 뒤 막(dim/mask)만 0.12초 페이드(PopupDimIn.asset), 판·내용은 처음부터 불투명하게 24px 아래에서 0.2초 떠오른다(PopupPanelIn.asset).
+   곡선은 Assets/Contents/UI/Animation/ 의 UI Animation Clip — Animation 창에서 열어 고칠 수 있다.
+   첫 프레임 깜빡임 방지 : 애니메이션은 처음 그려진 다음 프레임부터 재생되므로 막은 기본 opacity 0 으로 두고,
+   재생 도중 PanelUI 가 --shown 을 붙여 1 로 남긴다. (막 규칙은 --ready 규칙보다 뒤에 있어야 한다 — 같은 우선순위) */
+.popup-open-anim > * {
+    /* translate 는 여기서 지정하지 않는다 : 가운데 정렬에 translate: -50% 를 쓰는 요소(.option__title 등)가 있어서
+       덮어쓰면 위치가 틀어진다. 키프레임은 Translate.y 만 움직이므로 x 는 각 요소 값이 유지된다 */
+    opacity: 0;
+    -unity-animation-clip: url("/Assets/Contents/UI/Animation/PopupPanelIn.asset");
+    animation-duration: 0.2s;
+}
+
+/* 글자(현지화)는 UI 가 준비된 뒤(OnUIReady)에 채워지므로 그 전 프레임에는 빈 판이 보인다 →
+   판·내용은 PanelUI 가 준비 직후 --ready 를 붙일 때 한 번에(반투명 없이) 나타난다 */
+.popup-open-anim.popup-open-anim--ready > * {
+    opacity: 1;
+}
+
+.popup-open-anim > .popup-dim,
+.popup-open-anim > .trade-popup__mask,
+.popup-open-anim > .buy-coin__mask,
+.popup-open-anim > .dice-set__mask,
+.popup-open-anim > .info__mask,
+.popup-open-anim > .main-info__mask,
+.popup-open-anim > .main-setting__mask,
+.popup-open-anim > .ok-popup__mask,
+.popup-open-anim > .play-set__mask,
+.popup-open-anim > .tutorial__mask {
+    opacity: 0;
+    -unity-animation-clip: url("/Assets/Contents/UI/Animation/PopupDimIn.asset");
+    animation-duration: 0.12s;
+}
+
+.popup-open-anim.popup-open-anim--shown > .popup-dim,
+.popup-open-anim.popup-open-anim--shown > .trade-popup__mask,
+.popup-open-anim.popup-open-anim--shown > .buy-coin__mask,
+.popup-open-anim.popup-open-anim--shown > .dice-set__mask,
+.popup-open-anim.popup-open-anim--shown > .info__mask,
+.popup-open-anim.popup-open-anim--shown > .main-info__mask,
+.popup-open-anim.popup-open-anim--shown > .main-setting__mask,
+.popup-open-anim.popup-open-anim--shown > .ok-popup__mask,
+.popup-open-anim.popup-open-anim--shown > .play-set__mask,
+.popup-open-anim.popup-open-anim--shown > .tutorial__mask {
+    opacity: 1;
+}
+
+/* ---------- 플레이어 아이콘 이미지 (Icon_bg_0~6) ---------- */
+.popup-player-icon--0 { background-image: url("/Assets/Contents/Image/BG/InGame/Icon_bg_0.png"); }
+.popup-player-icon--1 { background-image: url("/Assets/Contents/Image/BG/InGame/Icon_bg_1.png"); }
+.popup-player-icon--2 { background-image: url("/Assets/Contents/Image/BG/InGame/Icon_bg_2.png"); }
+.popup-player-icon--3 { background-image: url("/Assets/Contents/Image/BG/InGame/Icon_bg_3.png"); }
+.popup-player-icon--4 { background-image: url("/Assets/Contents/Image/BG/InGame/Icon_bg_4.png"); }
+.popup-player-icon--5 { background-image: url("/Assets/Contents/Image/BG/InGame/Icon_bg_5.png"); }
+.popup-player-icon--6 { background-image: url("/Assets/Contents/Image/BG/InGame/Icon_bg_6.png"); }
+
+/* ===================================================================
+   토스트 (YourTurnPopup / TimeOverPopup / InGameWarningPopup)
+   원본 : 화면 상단 중앙 pivot(0.5,1) ap(-8.3,-190) 679x161, snack_bar.png
+   =================================================================== */
+.toast-popup {
+    position: absolute;
+    left: 50%;
+    top: 190px;
+    translate: -50% 0;
+    margin-left: -8.3px;
+    width: 679px;
+    height: 161px;
+    opacity: 0;
+    background-image: url("/Assets/Contents/Image/BG/InGame/snack_bar.png");
+    -unity-background-scale-mode: stretch-to-fill;
+    transition-property: opacity;
+    transition-duration: 0s;
+    /* 6.7 키프레임 (2026-09-29) : 위에서 살짝 떨어지며 튕기듯 등장. 투명도는 기존대로 코드(트랜지션)가 맡는다.
+       곡선은 Assets/Contents/UI/Animation/ToastIn.asset */
+    -unity-animation-clip: url("/Assets/Contents/UI/Animation/ToastIn.asset");
+    animation-duration: 0.35s;
+}
+
+/* InGameWarningPopup 만 1000 폭 */
+.toast-popup--wide {
+    width: 1000px;
+}
+
+/* YourTurnPopup 의 PlayerIcon > Icon (73x78) */
+.toast-popup__icon {
+    position: absolute;
+    left: 102.5px;
+    top: 41.5px;
+    width: 73px;
+    height: 78px;
+    display: none;
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.toast-popup__text {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    margin: 0;
+    padding: 0;
+    font-size: 64px;
+    color: rgb(244, 248, 252);
+    /* ChakraPetch 에는 한글이 없어 시스템 폰트로 폴백돼 커 보였다 (2026-09-19) */
+    -unity-font-definition: url("/Assets/Contents/Font/GyeonggiTitle-Medium.ttf");
+    -unity-font-style: normal;
+    -unity-text-align: middle-center;
+    white-space: normal;
+}
+
+/* 아이콘이 있는 경우(YourTurnPopup) 텍스트는 우측 464px 영역에 좌측 정렬 */
+.toast-popup__text--with-icon {
+    left: 215px;
+    -unity-text-align: middle-left;
+}
+
+/* ---------- 팝업 공통 요소 ---------- */
+
+/* 화면 전체를 덮는 어두운 막 (원본은 루트 Image + Mask 두 겹, 각각 검정 78.4%) */
+.popup-dim {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.784);
+}
+
+/* URP + 6.6 backdrop-filter (2026-09-29) : 첫 막은 뒤 화면을 흐리게, 둘째 막은 옅게.
+   예전 두 겹 78.4% (합 95% 어둡게) → 흐림 + 45% / 35% (합 64%) 로 흐린 맵이 비친다 */
+.popup-dim--blur {
+    backdrop-filter: blur(10px);
+    background-color: rgba(0, 0, 0, 0.45);
+}
+
+.popup-dim--soft {
+    background-color: rgba(0, 0, 0, 0.35);
+}
+
+/* 6.7 (2026-09-29) : popupBG.png / popupBG_glow.png 를 대신하는 공용 판 (위치·크기는 팝업별 __plate) */
+.popup-plate {
+    position: absolute;
+    border-width: 2px;
+    border-color: rgb(69, 73, 79);
+    background-color: rgb(19, 23, 29);
+    filter: drop-shadow(0px 0px 20px rgba(120, 225, 230, 0.15));
+}
+
+/* btn_bg.png (Simple) 계열 버튼 */
+.popup-btn {
+    position: absolute;
+    margin: 0;
+    padding: 0;
+    background-color: rgba(0, 0, 0, 0);
+    border-width: 0;
+    border-radius: 0;
+    transition-property: scale;
+    transition-duration: 0.08s;
+}
+
+.popup-btn:hover { scale: 1.03 1.03; }
+.popup-btn:active { scale: 0.97 0.97; }
+
+.popup-btn__label {
+    position: absolute;
+    margin: 0;
+    padding: 0;
+    -unity-font-definition: url("/Assets/Contents/Font/GyeonggiTitle-Medium.ttf");
+    -unity-font-style: normal;
+    -unity-text-align: middle-center;
+}
+
+/* ===================================================================
+   NeedCoinPopup — 화면 중앙 toastsBG 771x419 (ToastPopup 을 상속해 페이드아웃)
+   =================================================================== */
+.need-coin-popup {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    translate: -50% -50%;
+    width: 771px;
+    height: 419px;
+    opacity: 0;
+    background-image: url("/Assets/Contents/Image/BG/InGame/toastsBG.png");
+    -unity-background-scale-mode: stretch-to-fill;
+    transition-property: opacity;
+    transition-duration: 0s;
+}
+
+.need-coin__coin-icon {
+    position: absolute;
+    left: 222.4px;
+    top: 121.3px;
+    width: 60px;
+    height: 60px;
+    background-image: url("/Assets/Contents/Image/BG/Main/Coin.png");
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.need-coin__coin-text {
+    position: absolute;
+    left: 300.45px;
+    top: 83.95px;
+    width: 280.1px;
+    height: 136.9px;
+    margin: 0;
+    padding: 0;
+    font-size: 65px;
+    color: rgb(255, 69, 73);
+    -unity-font-definition: url("/Assets/Contents/Font/GyeonggiTitle-Medium.ttf");
+    -unity-font-style: normal;
+    -unity-text-align: middle-left;
+}
+
+.need-coin__desc {
+    position: absolute;
+    left: -0.5px;
+    top: 66.5px;
+    width: 772px;
+    height: 420px;
+    margin: 0;
+    padding: 0;
+    font-size: 37px;
+    color: rgb(244, 248, 252);
+    -unity-font-definition: url("/Assets/Contents/Font/GyeonggiTitle-Medium.ttf");
+    -unity-font-style: normal;
+    -unity-text-align: middle-center;
+    white-space: normal;
+}
+
+/* ===================================================================
+   LeaveEarlyPopup — 하단 중앙 Snack bar2 846x390
+   =================================================================== */
+.leave-early-popup {
+    position: absolute;
+    left: 459px;
+    top: 535px;
+    width: 846px;
+    height: 390px;
+    background-image: url("/Assets/Contents/Image/BG/InGame/Snack bar2.png");
+    -unity-slice-left: 100;
+    -unity-slice-right: 100;
+    -unity-slice-top: 100;
+    -unity-slice-bottom: 100;
+}
+
+.leave-early__coin-icon {
+    position: absolute;
+    left: 689.1px;
+    top: 100.5px;
+    width: 50px;
+    height: 50px;
+    background-image: url("/Assets/Contents/Image/BG/Main/Coin.png");
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.leave-early__title {
+    position: absolute;
+    left: 108.5px;
+    top: 75px;
+    width: 585px;
+    height: 100px;
+    margin: 0;
+    padding: 0;
+    font-size: 48px;
+    color: rgb(255, 255, 255);
+    -unity-font-definition: url("/Assets/Contents/Font/GyeonggiTitle-Medium.ttf");
+    -unity-font-style: normal;
+    -unity-text-align: middle-left;
+}
+
+/* FinishBtn : popup_toggle_bg(ppu 1.5 → slice 13) 회색 */
+.leave-early__finish-btn {
+    left: 100px;
+    top: 195.5px;
+    width: 330px;
+    height: 95px;
+    background-image: url("/Assets/Contents/Image/Button/popup_toggle_bg.png");
+    -unity-slice-left: 13;
+    -unity-slice-right: 13;
+    -unity-slice-top: 13;
+    -unity-slice-bottom: 13;
+    -unity-background-image-tint-color: rgb(94, 98, 104);
+}
+
+.leave-early__finish-label {
+    left: 24.4px;
+    top: 15.76px;
+    width: 136.2px;
+    height: 61.49px;
+    font-size: 46px;
+    color: rgb(255, 255, 255);
+    -unity-text-align: middle-left;
+}
+
+.leave-early__coin-bg {
+    position: absolute;
+    left: 167.05px;
+    top: 15px;
+    width: 136.5px;
+    height: 65px;
+    background-image: url("/Assets/Contents/Image/Button/popup_toggle_bg.png");
+    -unity-slice-left: 20;
+    -unity-slice-right: 20;
+    -unity-slice-top: 20;
+    -unity-slice-bottom: 20;
+    -unity-background-image-tint-color: rgb(69, 73, 79);
+}
+
+.leave-early__coin-value {
+    position: absolute;
+    left: 4.75px;
+    top: 0.5px;
+    width: 87px;
+    height: 62px;
+    margin: 0;
+    padding: 0;
+    font-size: 46px;
+    color: rgb(255, 255, 255);
+    -unity-font-definition: url("/Assets/Contents/Font/GyeonggiTitle-Medium.ttf");
+    -unity-font-style: normal;
+    -unity-text-align: middle-center;
+}
+
+.leave-early__coin-value-icon {
+    position: absolute;
+    left: 93.25px;
+    top: 14.8px;
+    width: 35px;
+    height: 35px;
+    background-image: url("/Assets/Contents/Image/BG/Main/Coin.png");
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+/* ContinueBtn : btn_bg3 빨강 */
+.leave-early__continue-btn {
+    left: 452.85px;
+    top: 195.5px;
+    width: 291.3px;
+    height: 95px;
+    background-image: url("/Assets/Contents/Image/Button/btn_bg3.png");
+    -unity-slice-left: 20;
+    -unity-slice-right: 20;
+    -unity-slice-top: 20;
+    -unity-slice-bottom: 20;
+    -unity-background-image-tint-color: rgb(255, 69, 73);
+}
+
+.leave-early__continue-label {
+    left: 26.25px;
+    top: -3.2px;
+    width: 241.5px;
+    height: 100px;
+    font-size: 46px;
+    color: rgb(255, 255, 255);
+}
+
+.popup__coin-image {
+    position: absolute;
+    width: 261px;
+    height: 261px;
+    background-image: url("/Assets/Contents/Image/BG/Main/coin_image.png");
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+/* ===================================================================
+   GiveUpPopup — 멀티 '동맹을 배신 하시겠습니까?' (2026-09-19 Figma 시안)
+   시안 683x366, 보이는 판 645x345 @(13,4) -> 화면 1379.8x738 @(269.6,172.8)
+   배율 S = 2.1392 (OptionPopup 멀티와 동일 — 버튼을 415x87 로 맞추는 값)
+   화면 x = 269.6 + (시안x - 13) * 2.1392
+   화면 y = 172.8 + (시안y -  4) * 2.1392
+   버튼/가격 배지는 OptionPopup 의 .option__btn / .option__play-* / .option__need-coin-*
+   클래스를 그대로 재사용한다 (위치가 없는 규칙들이라 공유 가능).
+   =================================================================== */
+.give-up__bg {
+    position: absolute;
+    /* 6.7 : popupBG_glow.png 대신 USS 로 그린다 (2026-09-29). 이미지의 투명 여백을 뺀 '보이는 판' 크기 */
+    left: 269.6px;
+    top: 168.1px;
+    width: 1380.8px;
+    height: 739.1px;
+    border-radius: 18px;
+    border-width: 2px;
+    border-color: rgb(69, 73, 79);
+    background-color: rgb(19, 23, 29);
+    background-image: radial-gradient(ellipse at center, rgb(28, 61, 108) 0%, rgb(19, 23, 29) 66%);
+    filter: drop-shadow(0px 0px 20px rgba(120, 225, 230, 0.15));
+}
+
+.give-up__title {
+    position: absolute;
+    left: 50%;
+    top: 221px;
+    width: 1000px;
+    height: 100px;
+    translate: -50% 0;
+    margin: 0;
+    padding: 0;
+    font-size: 46px;
+    color: rgb(255, 255, 255);
+    -unity-font-definition: url("/Assets/Contents/Font/GyeonggiTitle-Medium.ttf");
+    -unity-font-style: normal;
+    -unity-text-align: middle-center;
+}
+
+.give-up__sub-title {
+    position: absolute;
+    left: 50%;
+    top: 299.3px;
+    width: 1000px;
+    height: 100px;
+    translate: -50% 0;
+    margin: 0;
+    padding: 0;
+    font-size: 36px;
+    color: rgb(135, 233, 244);
+    -unity-font-definition: url("/Assets/Contents/Font/GyeonggiTitle-Medium.ttf");
+    -unity-font-style: normal;
+    -unity-text-align: middle-center;
+    white-space: normal;
+}
+
+.give-up__close-btn {
+    position: absolute;
+    left: 1491px;
+    top: 227px;
+    width: 100px;
+    height: 101px;
+    margin: 0;
+    padding: 0;
+    background-color: rgba(0, 0, 0, 0);
+    border-width: 0;
+    border-radius: 0;
+    background-image: url("/Assets/Contents/Image/Button/close_btn.png");
+    -unity-background-scale-mode: scale-to-fit;
+    transition-property: scale;
+    transition-duration: 0.08s;
+}
+
+.give-up__close-btn:hover { scale: 1.03 1.03; }
+.give-up__close-btn:active { scale: 0.97 0.97; }
+
+/* 보상 영역 — popup-root(전체 화면) 기준 절대좌표다 */
+.give-up__reward-panel {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+}
+
+.give-up__reward-title {
+    position: absolute;
+    left: 367px;
+    top: 498px;
+    width: 400px;
+    height: 100px;
+    margin: 0;
+    padding: 0;
+    font-size: 46px;
+    color: rgb(255, 255, 255);
+    -unity-font-definition: url("/Assets/Contents/Font/GyeonggiTitle-Medium.ttf");
+    -unity-font-style: normal;
+    -unity-text-align: middle-left;
+}
+
+.give-up__reward-coins {
+    position: absolute;
+    left: 853.6px;
+    top: 538.6px;
+    width: 150px;
+    height: 92px;
+}
+
+.give-up__reward-coin--left   { left: 0;    top: 21px; width: 72px; height: 72px; }
+.give-up__reward-coin--right  { left: 78px; top: 21px; width: 72px; height: 72px; }
+.give-up__reward-coin--center { left: 32px; top: 0;    width: 87px; height: 87px; }
+
+.give-up__reward-text {
+    position: absolute;
+    left: 925.3px;
+    top: 676.8px;
+    width: 420px;
+    height: 100px;
+    translate: -50% 0;
+    margin: 0;
+    padding: 0;
+    font-size: 44px;
+    color: rgb(255, 255, 255);
+    -unity-font-definition: url("/Assets/Contents/Font/GyeonggiTitle-Medium.ttf");
+    -unity-font-style: normal;
+    -unity-text-align: middle-center;
+}
+
+/* 내역 3줄 — 라벨은 왼쪽, 값은 오른쪽 끝(x 748.8)에 붙는다 */
+.give-up__reward-row {
+    position: absolute;
+    left: 367px;
+    width: 381.8px;
+    height: 60px;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.give-up__reward-row--1 { top: 597.4px; }
+.give-up__reward-row--2 { top: 651.9px; }
+.give-up__reward-row--3 { top: 705.4px; }
+
+.give-up__reward-label {
+    margin: 0;
+    padding: 0;
+    font-size: 30px;
+    color: rgb(135, 233, 244);
+    -unity-font-definition: url("/Assets/Contents/Font/GyeonggiTitle-Medium.ttf");
+    -unity-font-style: normal;
+    -unity-text-align: middle-left;
+}
+
+.give-up__reward-value {
+    margin: 0;
+    padding: 0;
+    font-size: 30px;
+    color: rgb(255, 255, 255);
+    -unity-font-definition: url("/Assets/Contents/Font/GyeonggiTitle-Medium.ttf");
+    -unity-font-style: normal;
+    -unity-text-align: middle-right;
+}
+
+.give-up__reward-value--minus { color: rgb(255, 69, 73); }
+.give-up__reward-value--free { color: rgb(194, 198, 204); }
+
+.give-up__btn-panel {
+    position: absolute;
+    left: 1131.7px;
+    top: 442.3px;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+/* 시안 간격: 계속하기 -> 새로하기 18, 새로하기 -> 그만하기 90
+   .option__btn 이 margin:0 을 뒤에서 덮어쓰므로 자식 선택자로 우선순위를 올린다 */
+.give-up__btn-panel > .give-up__btn-gap { margin-top: 18px; }
+.give-up__btn-panel > .give-up__btn-gap--wide { margin-top: 90px; }
+
+/* btn_bg.png (Simple) — GoMain / NewGame 공용 */
+.popup-btn--main {
+    left: 740px;
+    top: 624.3px;
+    width: 440px;
+    height: 105px;
+    background-image: url("/Assets/Contents/Image/Button/btn_bg.png");
+    -unity-background-scale-mode: stretch-to-fill;
+}
+
+.popup-btn--main .popup-btn__label,
+.popup-btn__label--main {
+    left: 7.4px;
+    top: 0.5px;
+    width: 425.2px;
+    height: 100px;
+    font-size: 46px;
+    color: rgb(135, 233, 244);
+}
+
+/* btn_bg3 빨강 — Return */
+.popup-btn--return {
+    left: 739.5px;
+    top: 742.5px;
+    width: 441px;
+    height: 105px;
+    background-image: url("/Assets/Contents/Image/Button/btn_bg3.png");
+    -unity-slice-left: 20;
+    -unity-slice-right: 20;
+    -unity-slice-top: 20;
+    -unity-slice-bottom: 20;
+    -unity-background-image-tint-color: rgb(255, 69, 73);
+}
+
+.popup-btn__label--return {
+    left: 100.5px;
+    top: 2.5px;
+    width: 240px;
+    height: 100px;
+    font-size: 46px;
+    color: rgb(255, 255, 255);
+}
+
+/* ===================================================================
+   GameResultPopup — 화면 중앙 1500x950 (vitory_popup_bg Sliced 85)
+   =================================================================== */
+.game-result__bg {
+    position: absolute;
+    left: 210px;
+    top: 65px;
+    width: 1500px;
+    height: 950px;
+    background-image: url("/Assets/Contents/Image/BG/Main/vitory_popup_bg.png");
+    -unity-slice-left: 85;
+    -unity-slice-right: 85;
+    -unity-slice-top: 85;
+    -unity-slice-bottom: 85;
+}
+
+.game-result__coin-image {
+    left: 829.5px;
+    top: 311.5px;
+}
+
+.game-result__title {
+    position: absolute;
+    left: 747.4px;
+    top: 231.9px;
+    width: 425.2px;
+    height: 100px;
+    margin: 0;
+    padding: 0;
+    font-size: 63px;
+    color: rgb(255, 255, 255);
+    -unity-font-definition: url("/Assets/Contents/Font/GyeonggiTitle-Medium.ttf");
+    -unity-font-style: normal;
+    -unity-text-align: middle-center;
+}
+
+.game-result__coin-text {
+    position: absolute;
+    left: 747.4px;
+    top: 474.3px;
+    width: 425.2px;
+    height: 100px;
+    margin: 0;
+    padding: 0;
+    font-size: 38px;
+    color: rgb(255, 255, 255);
+    -unity-font-definition: url("/Assets/Contents/Font/GyeonggiTitle-Medium.ttf");
+    -unity-font-style: normal;
+    -unity-text-align: middle-center;
+}
+
+/* NewGameBtn(PlayCoinBtn) 441x105 : 광고 버튼 위에 Play 버튼이 겹친다 */
+.game-result__play-group {
+    position: absolute;
+    left: 739.5px;
+    top: 742.5px;
+    width: 441px;
+    height: 105px;
+}
+
+.game-result__ad-btn {
+    position: absolute;
+    left: 3px;
+    top: 3px;
+    right: 3px;
+    bottom: 3px;
+    margin: 0;
+    padding: 0;
+    background-color: rgba(0, 0, 0, 0);
+    border-width: 0;
+    border-radius: 0;
+    background-image: url("/Assets/Contents/Image/Button/btn_bg4.png");
+    -unity-slice-left: 15;
+    -unity-slice-right: 15;
+    -unity-slice-top: 15;
+    -unity-slice-bottom: 15;
+    transition-property: scale;
+    transition-duration: 0.08s;
+}
+
+.game-result__ad-btn:hover { scale: 1.03 1.03; }
+.game-result__ad-btn:active { scale: 0.97 0.97; }
+.game-result__ad-btn:disabled { -unity-background-image-tint-color: rgba(200, 200, 200, 0.502); opacity: 0.8; }
+
+.game-result__ad-icon {
+    position: absolute;
+    left: 76.5px;
+    top: 28.6px;
+    width: 40px;
+    height: 40px;
+    background-image: url("/Assets/Contents/Image/Button/adIcon.png");
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.game-result__ad-label {
+    position: absolute;
+    left: 140.1px;
+    top: -1px;
+    width: 216.58px;
+    height: 100px;
+    margin: 0;
+    padding: 0;
+    font-size: 46px;
+    color: rgb(126, 215, 226);
+    -unity-font-definition: url("/Assets/Contents/Font/GyeonggiTitle-Medium.ttf");
+    -unity-font-style: normal;
+    -unity-text-align: middle-center;
+}
+
+.game-result__play-btn {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    margin: 0;
+    padding: 0;
+    background-color: rgba(0, 0, 0, 0);
+    border-width: 0;
+    border-radius: 0;
+    background-image: url("/Assets/Contents/Image/Button/btn_bg3.png");
+    -unity-slice-left: 20;
+    -unity-slice-right: 20;
+    -unity-slice-top: 20;
+    -unity-slice-bottom: 20;
+    -unity-background-image-tint-color: rgb(255, 69, 73);
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    transition-property: scale;
+    transition-duration: 0.08s;
+}
+
+.game-result__play-btn:hover { scale: 1.03 1.03; }
+.game-result__play-btn:active { scale: 0.97 0.97; }
+.game-result__play-btn:disabled { -unity-background-image-tint-color: rgb(94, 98, 104); }
+
+.game-result__play-label {
+    width: 240px;
+    height: 100px;
+    margin: 0;
+    padding: 0;
+    font-size: 46px;
+    color: rgb(255, 255, 255);
+    -unity-font-definition: url("/Assets/Contents/Font/GyeonggiTitle-Medium.ttf");
+    -unity-font-style: normal;
+    -unity-text-align: middle-center;
+}
+
+/* ===================================================================
+   GameResultPopup - 멀티 전용 (.game-result--multi 를 root 에 붙인다)
+   시안 (승리/패배 3종), 보이는 판 417x279 -> 화면 1067x714
+   배율 S = 2.5588 (시안 버튼 높이 34 -> 87. 다른 팝업과 버튼 높이를 맞춘 값)
+   요소: 1179 x 824 @ left 371, top 128   (화면 중앙 960,540)
+   보이는 판: 1067.3 x 714 @ (426.4, 184.9)
+   화면 x = 426.4 + (시안x - 21) * 2.5588
+   화면 y = 184.9 + (시안y - 34) * 2.5588
+   =================================================================== */
+.game-result__reward-panel {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    display: none;
+}
+
+.game-result--multi .game-result__reward-panel {
+    display: flex;
+}
+
+.game-result--multi .game-result__bg {
+    /* 6.7 : popupBG_glow.png 대신 USS 로 그린다 (2026-09-29). 이미지의 투명 여백을 뺀 '보이는 판' 크기 */
+    left: 426.4px;
+    top: 180.3px;
+    width: 1068.2px;
+    height: 714.8px;
+    -unity-slice-left: 0;
+    -unity-slice-right: 0;
+    -unity-slice-top: 0;
+    -unity-slice-bottom: 0;
+    border-radius: 18px;
+    border-width: 2px;
+    border-color: rgb(69, 73, 79);
+    background-color: rgb(19, 23, 29);
+    background-image: radial-gradient(ellipse at center, rgb(28, 61, 108) 0%, rgb(19, 23, 29) 66%);
+    filter: drop-shadow(0px 0px 20px rgba(120, 225, 230, 0.15));
+}
+
+.game-result--multi .game-result__title {
+    left: 50%;
+    top: 243.7px;
+    width: 800px;
+    height: 100px;
+    translate: -50% 0;
+    font-size: 58px;
+    -unity-font-definition: url("/Assets/Contents/Font/GyeonggiTitle-Medium.ttf");
+    -unity-font-style: normal;
+}
+
+/* 싱글용 코인 이미지 / "N coin" 은 멀티에서 안 쓴다 */
+.game-result--multi .game-result__coin-image,
+.game-result--multi .game-result__coin-text {
+    display: none;
+}
+
+.game-result__reward-title {
+    position: absolute;
+    left: 623px;
+    top: 380.5px;
+    width: 400px;
+    height: 100px;
+    margin: 0;
+    padding: 0;
+    font-size: 40px;
+    color: rgb(255, 255, 255);
+    -unity-font-definition: url("/Assets/Contents/Font/GyeonggiTitle-Medium.ttf");
+    -unity-font-style: normal;
+    -unity-text-align: middle-left;
+}
+
+/* 금화 더미(이득) / 회색 코인(손해) 은 둘 중 하나만 보인다 */
+.game-result__reward-coins {
+    position: absolute;
+    left: 1109.7px;
+    top: 420.3px;
+    width: 150px;
+    height: 92px;
+}
+
+.game-result__reward-coin--left   { left: 0;    top: 21px; width: 72px; height: 72px; }
+.game-result__reward-coin--right  { left: 78px; top: 21px; width: 72px; height: 72px; }
+.game-result__reward-coin--center { left: 32px; top: 0;    width: 87px; height: 87px; }
+
+/* coin_image.png 은 261x261 중 실제 동전이 99x99(중심 130,126) 뿐이다.
+   시안의 동전 지름 95px 에 맞추려면 요소를 250 으로 키워야 한다 */
+.game-result__lose-coin {
+    position: absolute;
+    left: 1060.2px;
+    top: 345.7px;
+    width: 250px;
+    height: 250px;
+    display: none;
+    background-image: url("/Assets/Contents/Image/BG/Main/coin_image.png");
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.game-result__reward-text {
+    position: absolute;
+    left: 1182.1px;
+    top: 561px;
+    width: 420px;
+    height: 100px;
+    translate: -50% 0;
+    margin: 0;
+    padding: 0;
+    font-size: 44px;
+    color: rgb(255, 255, 255);
+    -unity-font-definition: url("/Assets/Contents/Font/GyeonggiTitle-Medium.ttf");
+    -unity-font-style: normal;
+    -unity-text-align: middle-center;
+}
+
+/* 내역 줄 — 세로로 쌓는다. 승리 줄을 숨기면 나머지가 위로 올라온다 (시안 패배 화면) */
+.game-result__rows {
+    position: absolute;
+    left: 623px;
+    top: 484.2px;
+    width: 381.3px;
+    flex-direction: column;
+}
+
+.game-result__reward-row {
+    height: 53.8px;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.game-result__reward-label {
+    margin: 0;
+    padding: 0;
+    font-size: 30px;
+    color: rgb(135, 233, 244);
+    -unity-font-definition: url("/Assets/Contents/Font/GyeonggiTitle-Medium.ttf");
+    -unity-font-style: normal;
+    -unity-text-align: middle-left;
+}
+
+.game-result__reward-value {
+    margin: 0;
+    padding: 0;
+    font-size: 30px;
+    color: rgb(255, 255, 255);
+    -unity-font-definition: url("/Assets/Contents/Font/GyeonggiTitle-Medium.ttf");
+    -unity-font-style: normal;
+    -unity-text-align: middle-right;
+}
+
+.game-result__reward-value--minus { color: rgb(255, 69, 73); }
+
+/* 버튼 2개를 가로로 — 홈으로(외곽선) / 새로하기(빨강), 425x87, 간격 13 */
+.game-result--multi .popup-btn--main {
+    left: 528.4px;
+    top: 732.5px;
+    width: 425px;
+    height: 87px;
+}
+
+.game-result--multi .popup-btn__label--main {
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: auto;
+    height: auto;
+    font-size: 36px;
+    -unity-font-definition: url("/Assets/Contents/Font/GyeonggiTitle-Medium.ttf");
+    -unity-font-style: normal;
+}
+
+.game-result--multi .game-result__play-group {
+    left: 966.4px;
+    top: 732.5px;
+    width: 425px;
+    height: 87px;
+}
+
+/* 멀티 새로하기는 코인도 광고도 안 쓴다 (씬 재진입) */
+.game-result--multi .game-result__ad-btn,
+.game-result--multi .popup__need-coin-panel {
+    display: none;
+}
+
+.game-result--multi .game-result__play-label {
+    width: 425px;
+    height: 87px;
+    font-size: 36px;
+    -unity-font-definition: url("/Assets/Contents/Font/GyeonggiTitle-Medium.ttf");
+    -unity-font-style: normal;
+}
+
+/* NeedCoinTextPanel (맵 선택 바와 동일 규격) */
+.popup__need-coin-panel {
+    width: 112.1px;
+    height: 65px;
+    margin-left: 7.6px;
+    flex-shrink: 0;
+    background-image: url("/Assets/Contents/Image/Button/btn_bg3.png");
+    -unity-slice-left: 20;
+    -unity-slice-right: 20;
+    -unity-slice-top: 20;
+    -unity-slice-bottom: 20;
+    -unity-background-image-tint-color: rgba(0, 0, 0, 0.271);
+}
+
+.popup__need-coin-text {
+    position: absolute;
+    left: 17.75px;
+    top: 0.25px;
+    width: 80px;
+    height: 61.5px;
+    margin: 0;
+    padding: 0;
+    font-size: 42px;
+    color: rgb(255, 255, 255);
+    -unity-font-definition: url("/Assets/Contents/Font/GyeonggiTitle-Medium.ttf");
+    -unity-font-style: normal;
+    -unity-text-align: middle-left;
+}
+
+.popup__need-coin-icon {
+    position: absolute;
+    left: 61.15px;
+    top: 14.3px;
+    width: 35px;
+    height: 35px;
+    background-image: url("/Assets/Contents/Image/BG/Main/Coin.png");
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+/* ===================================================================
+   TutorialPopup — 전체 화면. Figma 시안(2026-09-18) 기준 좌표.
+   헤더(제목+탭+Skip+X) / 이미지 1659x628 / 하단 설명 카드 1685x277
+   =================================================================== */
+.tutorial__mask {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgb(0, 0, 0);
+}
+
+.tutorial__title {
+    position: absolute;
+    left: 118px;
+    top: 36px;
+    width: 400px;
+    height: 73px;
+    margin: 0;
+    padding: 0;
+    font-size: 46px;
+    color: rgb(255, 255, 255);
+    -unity-font-definition: url("/Assets/Contents/Font/GyeonggiTitle-Medium.ttf");
+    -unity-font-style: normal;
+    -unity-text-align: middle-left;
+}
+
+/* 공통룰 / 멀티플레이 룰 탭 (SMToggleElement 재사용) */
+.tutorial__tabs {
+    position: absolute;
+    left: 335px;
+    top: 38px;
+    height: 73px;
+    flex-direction: row;
+    align-items: center;
+    /* 6.7 gap: 형제 간격 (2026-09-29) */
+    gap: 13px;
+}
+
+/* .sm-toggle--auto 보다 뒤에 정의돼 있지 않으므로 클래스 2개로 특이도를 올린다 */
+.sm-toggle--auto.tutorial__tab {
+    height: 73px;
+    padding-left: 47px;
+    padding-right: 47px;
+}
+
+.tutorial__tab .sm-toggle__label {
+    font-size: 33px;
+}
+
+.tutorial__skip-btn {
+    position: absolute;
+    left: 1650px;
+    top: 42px;
+    width: 110px;
+    height: 62px;
+    margin: 0;
+    padding: 0;
+    background-color: rgba(0, 0, 0, 0);
+    border-width: 0;
+    border-radius: 0;
+    background-image: url("/Assets/Contents/Image/Button/btn_bg8.png");
+    -unity-slice-left: 40;
+    -unity-slice-right: 40;
+    -unity-slice-top: 40;
+    -unity-slice-bottom: 40;
+    -unity-background-image-tint-color: rgb(37, 40, 45);
+    transition-property: scale;
+    transition-duration: 0.08s;
+}
+
+.tutorial__skip-btn:hover { scale: 1.05 1.05; }
+.tutorial__skip-btn:active { scale: 0.95 0.95; }
+
+.tutorial__skip-label {
+    flex-grow: 1;
+    margin: 0;
+    padding: 0;
+    font-size: 30px;
+    color: rgb(219, 223, 229);
+    -unity-font-definition: url("/Assets/Contents/Font/GyeonggiTitle-Medium.ttf");
+    -unity-font-style: normal;
+    -unity-text-align: middle-center;
+}
+
+.tutorial__close-btn {
+    position: absolute;
+    left: 1800px;
+    top: 28px;
+    width: 100px;
+    height: 101px;
+    margin: 0;
+    padding: 0;
+    background-color: rgba(0, 0, 0, 0);
+    border-width: 0;
+    border-radius: 0;
+    background-image: url("/Assets/Contents/Image/Button/close_btn.png");
+    -unity-background-scale-mode: scale-to-fit;
+    transition-property: scale;
+    transition-duration: 0.08s;
+}
+
+.tutorial__close-btn:hover { scale: 1.05 1.05; }
+.tutorial__close-btn:active { scale: 0.95 0.95; }
+
+.tutorial__image {
+    position: absolute;
+    left: 131px;
+    top: 132px;
+    width: 1659px;
+    height: 628px;
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+/* 하단 설명 카드 */
+.tutorial__card {
+    position: absolute;
+    left: 118px;
+    top: 756px;
+    width: 1685px;
+    height: 277px;
+    background-color: rgb(23, 33, 50);
+    border-radius: 24px;
+}
+
+.tutorial__page-title {
+    position: absolute;
+    left: 78px;
+    top: 47px;
+    width: 1200px;
+    height: 55px;
+    margin: 0;
+    padding: 0;
+    font-size: 40px;
+    color: rgb(135, 233, 244);
+    -unity-font-definition: url("/Assets/Contents/Font/GyeonggiTitle-Medium.ttf");
+    -unity-font-style: normal;
+    -unity-text-align: middle-left;
+}
+
+.tutorial__page-body {
+    position: absolute;
+    left: 74px;
+    top: 110px;
+    width: 1400px;
+    height: 160px;
+    margin: 0;
+    padding: 0;
+    font-size: 31px;
+    color: rgb(200, 205, 212);
+    -unity-font-definition: url("/Assets/Contents/Font/GyeonggiTitle-Medium.ttf");
+    -unity-font-style: normal;
+    -unity-text-align: upper-left;
+    white-space: normal;
+}
+
+.tutorial__page-index {
+    position: absolute;
+    right: 58px;
+    top: 47px;
+    width: 200px;
+    height: 55px;
+    margin: 0;
+    padding: 0;
+    font-size: 33px;
+    color: rgb(150, 160, 175);
+    -unity-font-definition: url("/Assets/Contents/Font/GyeonggiTitle-Medium.ttf");
+    -unity-font-style: normal;
+    -unity-text-align: middle-right;
+}
+
+/* 다음 페이지 버튼 (시안에는 '다음' 한 개뿐이다) */
+.tutorial__nav-btn {
+    position: absolute;
+    left: 1541px;
+    top: 149px;
+    width: 108px;
+    height: 108px;
+    margin: 0;
+    padding: 0;
+    border-width: 0;
+    border-radius: 54px;
+    background-color: rgb(60, 78, 105);
+    transition-property: scale;
+    transition-duration: 0.08s;
+}
+
+.tutorial__nav-btn:hover { scale: 1.05 1.05; }
+.tutorial__nav-btn:active { scale: 0.95 0.95; }
+
+.tutorial__nav-icon {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    translate: -50% -50%;
+    width: 42px;
+    height: 42px;
+    background-image: url("/Assets/Contents/Image/Button/arrow_forward_ios.png");
+    -unity-background-scale-mode: scale-to-fit;
+    -unity-background-image-tint-color: rgb(255, 255, 255);
+}
+
+/* ===================================================================
+   OptionPopup — Figma 시안(2026-09-19) 기준.
+   패널 1277x868(=보이는 판 1157x753), 왼쪽 '승리 보상' 열 + 오른쪽 버튼 4개.
+   배경은 popupBG 에 시안의 파란 방사형 글로우를 구워넣은 popupBG_glow.png.
+   =================================================================== */
+.option__bg {
+    position: absolute;
+    /* 6.7 : popupBG_glow.png 대신 USS 로 그린다 (2026-09-29).
+       예전 이미지의 투명 여백을 빼고 '보이는 판' 크기로 맞춤 (이미지 1277x913 중 판 60,58 ~ 1216,849) */
+    left: 381.5px;
+    top: 161.1px;
+    width: 1157px;
+    height: 753px;
+    border-radius: 18px;
+    border-width: 2px;
+    border-color: rgb(69, 73, 79);
+    background-color: rgb(19, 23, 29);
+    background-image: radial-gradient(ellipse at center, rgb(28, 61, 108) 0%, rgb(19, 23, 29) 66%);
+    filter: drop-shadow(0px 0px 20px rgba(120, 225, 230, 0.15));
+}
+
+.option__title {
+    position: absolute;
+    left: 50%;
+    top: 222px;
+    width: 425.2px;
+    height: 100px;
+    margin: 0;
+    padding: 0;
+    translate: -50% 0;
+    font-size: 60px;
+    color: rgb(255, 255, 255);
+    -unity-font-definition: url("/Assets/Contents/Font/GyeonggiTitle-Medium.ttf");
+    -unity-font-style: normal;
+    -unity-text-align: middle-center;
+}
+
+/* 우상단 닫기 (close_btn.png 100x101, X 글리프 52x52) */
+.option__close-btn {
+    position: absolute;
+    left: 1380.4px;
+    top: 220.5px;
+    width: 100px;
+    height: 101px;
+    margin: 0;
+    padding: 0;
+    background-color: rgba(0, 0, 0, 0);
+    border-width: 0;
+    border-radius: 0;
+    background-image: url("/Assets/Contents/Image/Button/close_btn.png");
+    -unity-background-scale-mode: scale-to-fit;
+    transition-property: scale;
+    transition-duration: 0.08s;
+}
+
+.option__close-btn:hover { scale: 1.03 1.03; }
+.option__close-btn:active { scale: 0.97 0.97; }
+
+/* ---------- 왼쪽 : 승리 보상 (세로 중심 x = 350) ---------- */
+.option__reward-panel {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+}
+
+.option__reward-title {
+    position: absolute;
+    left: 671.5px;
+    top: 379.3px;
+    width: 420px;
+    height: 100px;
+    margin: 0;
+    padding: 0;
+    translate: -50% 0;
+    font-size: 46px;
+    color: rgb(255, 255, 255);
+    -unity-font-definition: url("/Assets/Contents/Font/GyeonggiTitle-Medium.ttf");
+    -unity-font-style: normal;
+    -unity-text-align: middle-center;
+}
+
+/* 코인 3개를 겹쳐 쌓는다 (시안의 코인 더미) */
+.option__reward-coins {
+    position: absolute;
+    left: 671.5px;
+    top: 551.6px;
+    width: 123px;
+    height: 76px;
+    translate: -50% 0;
+}
+
+.option__reward-coin {
+    position: absolute;
+    background-image: url("/Assets/Contents/Image/BG/Main/Coin.png");
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.option__reward-coin--left   { left: 0;    top: 17px; width: 59px; height: 59px; }
+.option__reward-coin--right  { left: 64px; top: 17px; width: 59px; height: 59px; }
+.option__reward-coin--center { left: 26px; top: 0;    width: 71px; height: 71px; }
+
+.option__reward-text {
+    position: absolute;
+    left: 671.5px;
+    top: 706.7px;
+    width: 420px;
+    height: 100px;
+    margin: 0;
+    padding: 0;
+    translate: -50% 0;
+    font-size: 42px;
+    color: rgb(255, 255, 255);
+    -unity-font-definition: url("/Assets/Contents/Font/GyeonggiTitle-Medium.ttf");
+    -unity-font-style: normal;
+    -unity-text-align: middle-center;
+}
+
+/* ---------- 오른쪽 : 버튼 목록 ---------- */
+.option__btn-panel {
+    position: absolute;
+    left: 993.2px;
+    top: 369.8px;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+/* 공용 세로 버튼 (btn_bg.png Simple) */
+.option__btn {
+    width: 415px;
+    height: 87px;
+    margin: 0;
+    padding: 0;
+    flex-shrink: 0;
+    background-color: rgba(0, 0, 0, 0);
+    border-width: 0;
+    border-radius: 0;
+    background-image: url("/Assets/Contents/Image/Button/btn_bg.png");
+    -unity-background-scale-mode: stretch-to-fill;
+    transition-property: scale;
+    transition-duration: 0.08s;
+}
+
+.option__btn:hover { scale: 1.03 1.03; }
+.option__btn:active { scale: 0.97 0.97; }
+
+.option__btn-label {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    margin: 0;
+    padding: 0;
+    font-size: 38px;
+    color: rgb(135, 233, 244);
+    -unity-font-definition: url("/Assets/Contents/Font/GyeonggiTitle-Medium.ttf");
+    -unity-font-style: normal;
+    -unity-text-align: middle-center;
+}
+
+/* 계속하기 : btn_bg2 (Sliced 30) 빨강 + 흰 글자 */
+.option__continue-btn {
+    background-image: url("/Assets/Contents/Image/Button/btn_bg2.png");
+    -unity-slice-left: 30;
+    -unity-slice-right: 30;
+    -unity-slice-top: 30;
+    -unity-slice-bottom: 30;
+}
+
+.option__continue-label {
+    color: rgb(255, 255, 255);
+}
+
+/* 새로하기 : 광고 버튼 위에 Play 버튼이 겹친다 */
+.option__play-group {
+    width: 415px;
+    height: 87px;
+    flex-shrink: 0;
+}
+
+.option__ad-btn {
+    position: absolute;
+    left: 3px;
+    top: 3px;
+    right: 3px;
+    bottom: 3px;
+    margin: 0;
+    padding: 0;
+    background-color: rgba(0, 0, 0, 0);
+    border-width: 0;
+    border-radius: 0;
+    background-image: url("/Assets/Contents/Image/Button/btn_bg4.png");
+    -unity-slice-left: 15;
+    -unity-slice-right: 15;
+    -unity-slice-top: 15;
+    -unity-slice-bottom: 15;
+    transition-property: scale;
+    transition-duration: 0.08s;
+}
+
+.option__ad-btn:hover { scale: 1.03 1.03; }
+.option__ad-btn:active { scale: 0.97 0.97; }
+.option__ad-btn:disabled { -unity-background-image-tint-color: rgba(200, 200, 200, 0.502); opacity: 0.8; }
+
+.option__ad-icon {
+    position: absolute;
+    left: 96px;
+    top: 20.5px;
+    width: 40px;
+    height: 40px;
+    background-image: url("/Assets/Contents/Image/Button/adIcon.png");
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.option__ad-label {
+    position: absolute;
+    left: 146px;
+    top: -9.5px;
+    width: 216px;
+    height: 100px;
+    margin: 0;
+    padding: 0;
+    font-size: 38px;
+    color: rgb(126, 215, 226);
+    -unity-font-definition: url("/Assets/Contents/Font/GyeonggiTitle-Medium.ttf");
+    -unity-font-style: normal;
+    -unity-text-align: middle-center;
+}
+
+.option__play-btn {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    margin: 0;
+    padding: 0;
+    background-color: rgba(0, 0, 0, 0);
+    border-width: 0;
+    border-radius: 0;
+    background-image: url("/Assets/Contents/Image/Button/btn_bg.png");
+    -unity-background-scale-mode: stretch-to-fill;
+    transition-property: scale;
+    transition-duration: 0.08s;
+}
+
+.option__play-btn:hover { scale: 1.03 1.03; }
+.option__play-btn:active { scale: 0.97 0.97; }
+
+/* 라벨은 다른 버튼과 똑같이 버튼 한가운데. 가격은 오른쪽에 따로 붙는다 (시안) */
+.option__play-label {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    margin: 0;
+    padding: 0;
+    font-size: 38px;
+    color: rgb(135, 233, 244);
+    -unity-font-definition: url("/Assets/Contents/Font/GyeonggiTitle-Medium.ttf");
+    -unity-font-style: normal;
+    -unity-text-align: middle-center;
+}
+
+/* 시안에는 가격 배지 바탕이 없다 — 숫자 + 코인만 오른쪽에 둔다 */
+.option__need-coin-panel {
+    position: absolute;
+    right: 17px;
+    top: 0;
+    bottom: 0;
+    flex-direction: row;
+    align-items: center;
+}
+
+.option__need-coin-text {
+    margin: 0;
+    padding: 0;
+    font-size: 42px;
+    color: rgb(255, 255, 255);
+    -unity-font-definition: url("/Assets/Contents/Font/GyeonggiTitle-Medium.ttf");
+    -unity-font-style: normal;
+    -unity-text-align: middle-right;
+}
+
+.option__need-coin-icon {
+    width: 32px;
+    height: 32px;
+    margin-left: 7px;
+    flex-shrink: 0;
+    background-image: url("/Assets/Contents/Image/BG/Main/Coin.png");
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+/* -------------------------------------------------------------------
+   OptionPopup - 멀티 전용 (.option--multi 를 option-root 에 붙인다)
+   시안: 653x365, 보이는 패널 631x352 @(9,3) -> 화면 1350x753 @(285,165.9)
+   scale S = 2.1392 (버튼 크기를 싱글과 동일하게 유지하도록 맞춘 값)
+   좌표는 전부 popup-root(전체 화면) 기준이다. 패널 기준 값이 아니다!
+   ------------------------------------------------------------------- */
+.option__reward-rows {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    display: none;
+}
+
+.option--multi .option__reward-rows {
+    display: flex;
+}
+
+.option--multi .option__bg {
+    left: 225px;
+    width: 1470px;
+}
+
+.option--multi .option__close-btn {
+    left: 1477.9px;
+    top: 220.7px;
+}
+
+.option--multi .option__btn-panel {
+    left: 1157.8px;
+    top: 407.6px;
+}
+
+/* 예상 보상 제목 - 멀티에서는 왼쪽 정렬 */
+.option--multi .option__reward-title {
+    left: 383.4px;
+    top: 449.5px;
+    width: 400px;
+    translate: 0 0;
+    -unity-text-align: middle-left;
+}
+
+/* 코인 더미 + 합계는 오른쪽 열로 이동 */
+.option--multi .option__reward-coins {
+    left: 943.9px;
+    top: 473.9px;
+    width: 150px;
+    height: 92px;
+}
+
+.option--multi .option__reward-coin--left   { left: 0;    top: 21px; width: 72px; height: 72px; }
+.option--multi .option__reward-coin--right  { left: 78px; top: 21px; width: 72px; height: 72px; }
+.option--multi .option__reward-coin--center { left: 32px; top: 0;    width: 87px; height: 87px; }
+
+.option--multi .option__reward-text {
+    left: 940.7px;
+    top: 625.9px;
+}
+
+/* 보상 내역 줄 - 라벨은 왼쪽, 값은 오른쪽(x 764.2) 끝에 맞춘다 */
+.option__reward-row {
+    position: absolute;
+    left: 383.4px;
+    width: 380.8px;
+    height: 60px;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.option__reward-row--1 { top: 542.3px; }
+.option__reward-row--2 { top: 596.8px; }
+.option__reward-row--3 { top: 651.3px; }
+.option__reward-row--4 { top: 792.6px; }
+
+.option__reward-label {
+    font-size: 32px;
+    color: rgb(135, 233, 244);
+    -unity-font-definition: url("/Assets/Contents/Font/GyeonggiTitle-Medium.ttf");
+    -unity-font-style: normal;
+    -unity-text-align: middle-left;
+    margin: 0;
+    padding: 0;
+}
+
+.option__reward-value {
+    font-size: 32px;
+    color: rgb(244, 248, 252);
+    -unity-font-definition: url("/Assets/Contents/Font/GyeonggiTitle-Medium.ttf");
+    -unity-font-style: normal;
+    -unity-text-align: middle-right;
+    margin: 0;
+    padding: 0;
+}
+
+.option__reward-row--3 .option__reward-value {
+    color: rgb(255, 69, 73);
+}
+
+.option__reward-row--4 .option__reward-label,
+.option__reward-row--4 .option__reward-value {
+    color: rgb(169, 173, 179);
+}
+/* ===================================================================
+   PlayerToggleIcon (원본 프리팹 120x120) + CoinBox
+   LandTrade / Alliance / Betray 팝업이 공유한다
+   =================================================================== */
+.player-toggle {
+    position: relative;
+    width: 120px;
+    height: 120px;
+    flex-shrink: 0;
+}
+
+.player-toggle__bg {
+    position: absolute;
+    left: 5px;
+    top: 5px;
+    width: 110px;
+    height: 110px;
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+/* 선택 강조 (Toggle.graphic) 190x200, 아이콘 중앙 기준 */
+.player-toggle__fg {
+    position: absolute;
+    left: -35px;
+    top: -40px;
+    width: 190px;
+    height: 200px;
+    display: none;
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.player-toggle__bg--0 { background-image: url("/Assets/Contents/Image/BG/InGame/PlayerIcon/player_none_0.png"); }
+.player-toggle__bg--1 { background-image: url("/Assets/Contents/Image/BG/InGame/PlayerIcon/player_none_1.png"); }
+.player-toggle__bg--2 { background-image: url("/Assets/Contents/Image/BG/InGame/PlayerIcon/player_none_2.png"); }
+.player-toggle__bg--3 { background-image: url("/Assets/Contents/Image/BG/InGame/PlayerIcon/player_none_3.png"); }
+.player-toggle__bg--4 { background-image: url("/Assets/Contents/Image/BG/InGame/PlayerIcon/player_none_4.png"); }
+.player-toggle__bg--5 { background-image: url("/Assets/Contents/Image/BG/InGame/PlayerIcon/player_none_5.png"); }
+.player-toggle__bg--6 { background-image: url("/Assets/Contents/Image/BG/InGame/PlayerIcon/player_none_6.png"); }
+
+.player-toggle__fg--0 { background-image: url("/Assets/Contents/Image/BG/InGame/PlayerIcon/player_select_0.png"); }
+.player-toggle__fg--1 { background-image: url("/Assets/Contents/Image/BG/InGame/PlayerIcon/player_select_1.png"); }
+.player-toggle__fg--2 { background-image: url("/Assets/Contents/Image/BG/InGame/PlayerIcon/player_select_2.png"); }
+.player-toggle__fg--3 { background-image: url("/Assets/Contents/Image/BG/InGame/PlayerIcon/player_select_3.png"); }
+.player-toggle__fg--4 { background-image: url("/Assets/Contents/Image/BG/InGame/PlayerIcon/player_select_4.png"); }
+.player-toggle__fg--5 { background-image: url("/Assets/Contents/Image/BG/InGame/PlayerIcon/player_select_5.png"); }
+.player-toggle__fg--6 { background-image: url("/Assets/Contents/Image/BG/InGame/PlayerIcon/player_select_6.png"); }
+
+/* 아이콘 밑 설명 — 동맹 제안에서는 "me" / "기존 보상 : N" 이 들어간다 (2026-09-19) */
+.player-toggle__discript {
+    position: absolute;
+    left: -90px;
+    top: 114.7px;
+    width: 300px;
+    height: 104px;
+    margin: 0;
+    padding: 0;
+    font-size: 34px;
+    color: rgb(219, 223, 229);
+    -unity-font-definition: url("/Assets/Contents/Font/GyeonggiTitle-Medium.ttf");
+    -unity-font-style: normal;
+    -unity-text-align: middle-center;
+}
+
+/* CoinPanel 215x118, 아이콘 아래 220px */
+.coin-box {
+    position: absolute;
+    left: -47.5px;
+    top: 220px;
+    width: 215px;
+    height: 118px;
+}
+
+/* BetrayPopup 인스턴스는 (2, -31) 만큼 밀려 있다 */
+.coin-box__contens {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    display: none;
+}
+
+.coin-box__contens--betray {
+    left: 2px;
+    top: -31px;
+    right: -2px;
+    bottom: 31px;
+}
+
+.coin-box__current {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    margin: 0;
+    padding: 0;
+    background-color: rgba(0, 0, 0, 0);
+    border-width: 0;
+    border-radius: 0;
+}
+
+.coin-box__bg {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    background-image: url("/Assets/Contents/Image/Button/btn_bg7.png");
+    -unity-background-scale-mode: stretch-to-fill;
+}
+
+.coin-box__fg {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    background-image: url("/Assets/Contents/Image/Button/btn_bg6.png");
+    -unity-slice-left: 25;
+    -unity-slice-right: 25;
+    -unity-slice-top: 25;
+    -unity-slice-bottom: 25;
+}
+
+.coin-box__icon {
+    position: absolute;
+    left: 112.4px;
+    top: 21.5px;
+    width: 75px;
+    height: 75px;
+    background-image: url("/Assets/Contents/Image/BG/Main/Coin.png");
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.coin-box__text {
+    position: absolute;
+    left: 9.93px;
+    top: 7px;
+    width: 103.74px;
+    height: 104px;
+    margin: 0;
+    padding: 0;
+    font-size: 53px;
+    color: rgb(255, 243, 241);
+    -unity-font-definition: url("/Assets/Contents/Font/GyeonggiTitle-Medium.ttf");
+    -unity-font-style: normal;
+    -unity-text-align: middle-center;
+}
+
+.coin-box__add-panel {
+    position: absolute;
+    left: 57.5px;
+    top: 138px;
+    width: 100px;
+    height: 100px;
+    display: none;
+}
+
+.coin-box__step-btn {
+    position: absolute;
+    top: -1px;
+    width: 102px;
+    height: 102px;
+    margin: 0;
+    padding: 0;
+    background-color: rgba(0, 0, 0, 0);
+    border-width: 0;
+    border-radius: 0;
+    background-image: url("/Assets/Contents/Image/Button/btn_bg6.png");
+    -unity-slice-left: 25;
+    -unity-slice-right: 25;
+    -unity-slice-top: 25;
+    -unity-slice-bottom: 25;
+    transition-property: scale;
+    transition-duration: 0.08s;
+}
+
+.coin-box__step-btn:active { scale: 0.95 0.95; }
+
+.coin-box__step-btn--minus { left: -57px; }
+.coin-box__step-btn--plus { left: 55.1px; }
+
+.coin-box__step-icon--minus {
+    position: absolute;
+    left: 35.95px;
+    top: 48.3px;
+    width: 31.5px;
+    height: 5px;
+    background-image: url("/Assets/Contents/Image/BG/InGame/remove.png");
+    -unity-background-scale-mode: stretch-to-fill;
+}
+
+.coin-box__step-icon--plus {
+    position: absolute;
+    left: 31px;
+    top: 31px;
+    width: 40px;
+    height: 40px;
+    background-image: url("/Assets/Contents/Image/BG/InGame/add.png");
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+/* ---------- 내 코인 표시 (원본 MyCoinPanel 과 같은 모양) ---------- */
+.my-coin-panel {
+    position: absolute;
+    background-image: url("/Assets/Contents/Image/BG/Main/coin_bg.png");
+    -unity-background-scale-mode: stretch-to-fill;
+}
+
+.my-coin-panel__text {
+    position: absolute;
+    margin: 0;
+    padding: 0;
+    font-size: 53px;
+    color: rgb(255, 243, 241);
+    -unity-font-definition: url("/Assets/Contents/Font/GyeonggiTitle-Medium.ttf");
+    -unity-font-style: normal;
+    -unity-text-align: middle-center;
+}
+
+.my-coin-panel__plus-btn {
+    position: absolute;
+    margin: 0;
+    padding: 0;
+    background-color: rgba(0, 0, 0, 0);
+    border-width: 0;
+    border-radius: 0;
+    background-image: url("/Assets/Contents/Image/Button/btn_bg3.png");
+    -unity-slice-left: 40;
+    -unity-slice-right: 40;
+    -unity-slice-top: 40;
+    -unity-slice-bottom: 40;
+    -unity-background-image-tint-color: rgb(69, 73, 79);
+}
+
+.my-coin-panel__plus-icon {
+    position: absolute;
+    background-image: url("/Assets/Contents/Image/Button/close_btn.png");
+    -unity-background-scale-mode: scale-to-fit;
+    rotate: 45deg;
+}
+
+/* ---------- 플레이어 아이콘 가로 목록 (HorizontalLayoutGroup spacing 142) ---------- */
+.player-toggle-panel {
+    position: absolute;
+    top: 382px;
+    width: 1920px;
+    height: 100px;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+}
+
+/* ===================================================================
+   LandTradePopup / AlliancePopup 공용 (전체 화면, 불투명 검정 배경)
+   =================================================================== */
+.trade-popup__mask {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgb(0, 0, 0);
+}
+
+.trade-popup__title {
+    position: absolute;
+    left: 617.1px;
+    top: 51.6px;
+    width: 679px;
+    height: 161px;
+    margin: 0;
+    padding: 0;
+    font-size: 73px;
+    color: rgb(255, 255, 255);
+    -unity-font-definition: url("/Assets/Contents/Font/GyeonggiTitle-Medium.ttf");
+    -unity-font-style: normal;
+    -unity-text-align: middle-center;
+}
+
+.trade-popup__sub-title {
+    position: absolute;
+    top: 162.9px;
+    height: 161px;
+    margin: 0;
+    padding: 0;
+    font-size: 44px;
+    color: rgb(219, 223, 229);
+    -unity-font-definition: url("/Assets/Contents/Font/GyeonggiTitle-Medium.ttf");
+    -unity-font-style: normal;
+    -unity-text-align: middle-center;
+    white-space: normal;
+}
+
+.trade-popup__back-btn {
+    position: absolute;
+    left: 1732.5px;
+    top: 75.5px;
+    width: 115px;
+    height: 115px;
+    margin: 0;
+    padding: 0;
+    background-color: rgba(0, 0, 0, 0);
+    border-width: 0;
+    border-radius: 0;
+    background-image: url("/Assets/Contents/Image/Button/close_btn.png");
+    -unity-background-scale-mode: scale-to-fit;
+    transition-property: scale;
+    transition-duration: 0.08s;
+}
+
+.trade-popup__back-btn:hover { scale: 1.05 1.05; }
+.trade-popup__back-btn:active { scale: 0.95 0.95; }
+
+.trade-popup__btn {
+    position: absolute;
+    top: 902.6px;
+    width: 340px;
+    height: 108px;
+    margin: 0;
+    padding: 0;
+    background-color: rgba(0, 0, 0, 0);
+    border-width: 0;
+    border-radius: 0;
+    transition-property: scale;
+    transition-duration: 0.08s;
+}
+
+.trade-popup__btn:hover { scale: 1.03 1.03; }
+.trade-popup__btn:active { scale: 0.97 0.97; }
+
+.trade-popup__propose-btn {
+    left: 1510.5px;
+    background-image: url("/Assets/Contents/Image/Button/btn_bg2.png");
+    -unity-slice-left: 30;
+    -unity-slice-right: 30;
+    -unity-slice-top: 30;
+    -unity-slice-bottom: 30;
+}
+
+/* AlliancePopup 의 Propose 는 btn_bg3 빨강 + 비활성 회색 */
+.trade-popup__propose-btn--alliance {
+    background-image: url("/Assets/Contents/Image/Button/btn_bg3.png");
+    -unity-slice-left: 20;
+    -unity-slice-right: 20;
+    -unity-slice-top: 20;
+    -unity-slice-bottom: 20;
+    -unity-background-image-tint-color: rgb(246, 77, 81);
+}
+
+.trade-popup__propose-btn--alliance:disabled {
+    -unity-background-image-tint-color: rgba(200, 200, 200, 0.502);
+    opacity: 0.8;
+}
+
+.trade-popup__cancel-btn {
+    left: 1149px;
+    background-image: url("/Assets/Contents/Image/Button/btn_bg3.png");
+    -unity-slice-left: 20;
+    -unity-slice-right: 20;
+    -unity-slice-top: 20;
+    -unity-slice-bottom: 20;
+    -unity-background-image-tint-color: rgb(69, 73, 79);
+}
+
+.trade-popup__btn-label {
+    flex-grow: 1;
+    margin: 0;
+    padding: 0;
+    font-size: 53px;
+    color: rgb(255, 243, 241);
+    -unity-font-definition: url("/Assets/Contents/Font/GyeonggiTitle-Medium.ttf");
+    -unity-font-style: normal;
+    -unity-text-align: middle-center;
+}
+
+/* LandTrade / Alliance 의 내 코인 패널 (94.8, 909.5 234.04x107.9) */
+.trade-popup__my-coin {
+    left: 94.8px;
+    top: 909.5px;
+    width: 234.04px;
+    height: 107.9px;
+}
+
+.trade-popup__my-coin-text {
+    left: 112.1px;
+    top: 1.95px;
+    width: 102.74px;
+    height: 104px;
+}
+
+.trade-popup__my-coin-plus {
+    left: 246px;
+    top: 1.7px;
+    width: 106.84px;
+    height: 108px;
+}
+
+.trade-popup__my-coin-plus-icon {
+    left: 18.42px;
+    top: 19px;
+    width: 70px;
+    height: 70px;
+}
+
+/* AlliancePopup 의 남은 코인 표시 (1679, 794 70x70) */
+.alliance__left-coin {
+    position: absolute;
+    left: 1679px;
+    top: 794px;
+    width: 70px;
+    height: 70px;
+    background-image: url("/Assets/Contents/Image/BG/Main/Coin.png");
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+/* 코인 아이콘 왼쪽의 "나머지 :" (2026-09-19 시안) */
+.alliance__left-coin-label {
+    position: absolute;
+    left: -400px;
+    top: -17px;
+    width: 280px;
+    height: 104px;
+    margin: 0;
+    padding: 0;
+    font-size: 46px;
+    color: rgb(244, 248, 252);
+    -unity-font-definition: url("/Assets/Contents/Font/GyeonggiTitle-Medium.ttf");
+    -unity-font-style: normal;
+    -unity-text-align: middle-right;
+}
+
+.alliance__left-coin-text {
+    position: absolute;
+    left: -110px;
+    top: -17px;
+    width: 90px;
+    height: 104px;
+    margin: 0;
+    padding: 0;
+    font-size: 46px;
+    color: rgb(244, 248, 252);
+    -unity-font-definition: url("/Assets/Contents/Font/GyeonggiTitle-Medium.ttf");
+    -unity-font-style: normal;
+    -unity-text-align: middle-right;
+}
+
+/* -------------------------------------------------------------------
+   좌하단 요약 줄 (2026-09-19 시안)
+   [필요 코인 (선택한 플레이어 묶음) N 🪙]  [이미 맺은 동맹 묶음]
+   기존의 "내 코인 + 충전" 패널을 대체한다
+   ------------------------------------------------------------------- */
+.alliance__bottom-row {
+    position: absolute;
+    left: 94.8px;
+    top: 909.5px;
+    height: 105px;
+    flex-direction: row;
+    align-items: center;
+}
+
+.alliance__need-coin {
+    height: 105px;
+    flex-direction: row;
+    align-items: center;
+    padding-left: 28px;
+    padding-right: 24px;
+    background-color: rgb(44, 48, 54);
+    border-radius: 30px;
+}
+
+.alliance__need-coin-label {
+    margin: 0;
+    margin-right: 22px;
+    padding: 0;
+    flex-shrink: 0;
+    font-size: 46px;
+    color: rgb(244, 248, 252);
+    -unity-font-definition: url("/Assets/Contents/Font/GyeonggiTitle-Medium.ttf");
+    -unity-font-style: normal;
+    -unity-text-align: middle-left;
+}
+
+.alliance__need-coin-text {
+    margin: 0;
+    margin-left: 26px;
+    padding: 0;
+    flex-shrink: 0;
+    font-size: 46px;
+    color: rgb(244, 248, 252);
+    -unity-font-definition: url("/Assets/Contents/Font/GyeonggiTitle-Medium.ttf");
+    -unity-font-style: normal;
+    -unity-text-align: middle-left;
+}
+
+.alliance__need-coin-icon {
+    width: 55px;
+    height: 55px;
+    margin-left: 18px;
+    flex-shrink: 0;
+    background-image: url("/Assets/Contents/Image/BG/Main/Coin.png");
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+/* 플레이어 묶음 — 선택한 사람들 / 이미 맺은 동맹 둘 다 이 모양이다 */
+.alliance__group {
+    height: 62px;
+    flex-direction: row;
+    align-items: center;
+    padding-left: 12px;
+    padding-right: 12px;
+    border-width: 2px;
+    border-color: rgb(92, 97, 107);
+    border-radius: 26px;
+}
+
+.alliance__exist-groups {
+    margin-left: 20px;
+    flex-direction: row;
+    align-items: center;
+    /* 6.7 gap: 형제 간격 (2026-09-29) */
+    gap: 12px;
+}
+
+.alliance__group-icon {
+    width: 36px;
+    height: 38.5px;
+    margin-right: 6px;
+    flex-shrink: 0;
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.alliance__group-icon--0 { background-image: url("/Assets/Contents/Image/BG/InGame/Icon_bg_0.png"); }
+.alliance__group-icon--1 { background-image: url("/Assets/Contents/Image/BG/InGame/Icon_bg_1.png"); }
+.alliance__group-icon--2 { background-image: url("/Assets/Contents/Image/BG/InGame/Icon_bg_2.png"); }
+.alliance__group-icon--3 { background-image: url("/Assets/Contents/Image/BG/InGame/Icon_bg_3.png"); }
+.alliance__group-icon--4 { background-image: url("/Assets/Contents/Image/BG/InGame/Icon_bg_4.png"); }
+.alliance__group-icon--5 { background-image: url("/Assets/Contents/Image/BG/InGame/Icon_bg_5.png"); }
+.alliance__group-icon--6 { background-image: url("/Assets/Contents/Image/BG/InGame/Icon_bg_6.png"); }
+
+/* ===================================================================
+   BetrayPopup — 화면 중앙 ingame_popup_bg 1150x834.1
+   =================================================================== */
+.betray__bg {
+    position: absolute;
+    left: 385px;
+    top: 122.95px;
+    width: 1150px;
+    height: 834.1px;
+    background-image: url("/Assets/Contents/Image/BG/InGame/ingame_popup_bg.png");
+    -unity-background-scale-mode: stretch-to-fill;
+}
+
+.betray__title {
+    position: absolute;
+    left: 747.4px;
+    top: 187.95px;
+    width: 425.2px;
+    height: 100px;
+    margin: 0;
+    padding: 0;
+    font-size: 63px;
+    color: rgb(255, 255, 255);
+    -unity-font-definition: url("/Assets/Contents/Font/GyeonggiTitle-Medium.ttf");
+    -unity-font-style: normal;
+    -unity-text-align: middle-center;
+}
+
+.betray__sub-text {
+    position: absolute;
+    left: 747.4px;
+    top: 282.7px;
+    width: 425.2px;
+    height: 100px;
+    margin: 0;
+    padding: 0;
+    font-size: 38px;
+    color: rgb(255, 255, 255);
+    -unity-font-definition: url("/Assets/Contents/Font/GyeonggiTitle-Medium.ttf");
+    -unity-font-style: normal;
+    -unity-text-align: middle-center;
+}
+
+.betray__btn {
+    position: absolute;
+    top: 805.1px;
+    width: 290px;
+    height: 92px;
+    margin: 0;
+    padding: 0;
+    background-color: rgba(0, 0, 0, 0);
+    border-width: 0;
+    border-radius: 0;
+    transition-property: scale;
+    transition-duration: 0.08s;
+}
+
+.betray__btn:hover { scale: 1.03 1.03; }
+.betray__btn:active { scale: 0.97 0.97; }
+
+.betray__cancel-btn {
+    left: 878.5px;
+    background-image: url("/Assets/Contents/Image/Button/btn_bg3.png");
+    -unity-slice-left: 20;
+    -unity-slice-right: 20;
+    -unity-slice-top: 20;
+    -unity-slice-bottom: 20;
+    -unity-background-image-tint-color: rgb(69, 73, 79);
+}
+
+.betray__ok-btn {
+    left: 1183.8px;
+    background-image: url("/Assets/Contents/Image/Button/btn_bg2.png");
+    -unity-slice-left: 30;
+    -unity-slice-right: 30;
+    -unity-slice-top: 30;
+    -unity-slice-bottom: 30;
+}
+
+.betray__btn-label {
+    flex-grow: 1;
+    margin: 0;
+    padding: 0;
+    font-size: 46px;
+    color: rgb(219, 223, 229);
+    -unity-font-definition: url("/Assets/Contents/Font/GyeonggiTitle-Medium.ttf");
+    -unity-font-style: normal;
+    -unity-text-align: middle-center;
+}
+
+.betray__back-btn {
+    position: absolute;
+    left: 1375.9px;
+    top: 186.35px;
+    width: 100px;
+    height: 100px;
+    margin: 0;
+    padding: 0;
+    background-color: rgba(0, 0, 0, 0);
+    border-width: 0;
+    border-radius: 0;
+    background-image: url("/Assets/Contents/Image/Button/close_btn.png");
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.betray__my-coin {
+    left: 462.8px;
+    top: 810.55px;
+    width: 201.2px;
+    height: 95.2px;
+}
+
+.betray__my-coin-text {
+    left: 105.4px;
+    top: -0.4px;
+    width: 69.9px;
+    height: 104px;
+}
+
+.betray__my-coin-plus {
+    left: 210.8px;
+    top: 0.1px;
+    width: 91.4px;
+    height: 94.8px;
+}
+
+.betray__my-coin-plus-icon {
+    left: 15.7px;
+    top: 17.4px;
+    width: 60px;
+    height: 60px;
+}
+
+/* PlayerToggleIcon (960, 477 중심) */
+.betray__player-toggle {
+    position: absolute;
+    left: 900px;
+    top: 417px;
+}
+
+.trade-popup__sub-title--narrow { left: 620.5px; width: 679px; }
+.trade-popup__sub-title--wide { left: 510px; width: 900px; }
+
+/* ===================================================================
+   OkPopup (Popup/Common) — 화면 중앙 popupBG 600x350
+   =================================================================== */
+.ok-popup__mask {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    /* URP backdrop-filter (2026-09-29) : 뒤 화면 흐림 + 예전보다 옅게 */
+    backdrop-filter: blur(10px);
+    background-color: rgba(0, 0, 0, 0.65);
+    margin: 0;
+    padding: 0;
+    border-width: 0;
+    border-radius: 0;
+}
+
+/* 6.7 (2026-09-29) : popupBG.png 대신 뒤의 .ok-popup__plate 가 판을 그린다.
+   이 요소는 자식 배치 기준(예전 이미지 크기)만 유지하는 투명 컨테이너 */
+.ok-popup__bg {
+    position: absolute;
+    left: 660px;
+    top: 365px;
+    width: 600px;
+    height: 350px;
+}
+
+/* 판 + 빛 번짐. 자식이 없는 별도 요소라 drop-shadow 가 글자를 흐리게 하지 않는다 */
+.ok-popup__plate {
+    left: 688.2px;
+    top: 387.2px;
+    width: 543.6px;
+    height: 303.6px;
+    border-radius: 8px;
+}
+
+.ok-popup__contens-text {
+    position: absolute;
+    left: 40px;
+    top: 20px;
+    width: 520px;
+    height: 255px;
+    margin: 0;
+    padding: 0;
+    font-size: 36px;
+    color: rgb(255, 255, 255);
+    -unity-font-definition: url("/Assets/Contents/Font/GyeonggiTitle-Medium.ttf");
+    -unity-font-style: normal;
+    -unity-text-align: middle-center;
+    white-space: normal;
+}
+
+.ok-popup__btn {
+    position: absolute;
+    top: 240px;
+    width: 170px;
+    height: 60px;
+    margin: 0;
+    padding: 0;
+    background-color: rgba(0, 0, 0, 0);
+    border-width: 0;
+    border-radius: 0;
+    transition-property: scale;
+    transition-duration: 0.08s;
+}
+
+.ok-popup__btn:hover { scale: 1.03 1.03; }
+.ok-popup__btn:active { scale: 0.97 0.97; }
+
+.ok-popup__cancel-btn {
+    left: 120px;
+    background-image: url("/Assets/Contents/Image/Button/btn_bg2.png");
+    -unity-slice-left: 30;
+    -unity-slice-right: 30;
+    -unity-slice-top: 30;
+    -unity-slice-bottom: 30;
+}
+
+.ok-popup__ok-btn {
+    left: 310px;
+    background-image: url("/Assets/Contents/Image/Button/btn_bg3.png");
+    -unity-slice-left: 20;
+    -unity-slice-right: 20;
+    -unity-slice-top: 20;
+    -unity-slice-bottom: 20;
+    -unity-background-image-tint-color: rgb(94, 98, 104);
+}
+
+/* okBtnOnly 일 때는 확인 버튼만 가운데 (원본 offsetMin 조정 대체) */
+.ok-popup__ok-btn--only {
+    left: 215px;
+}
+
+.ok-popup__btn-label {
+    flex-grow: 1;
+    margin: 0;
+    padding: 0;
+    font-size: 30px;
+    color: rgb(255, 255, 255);
+    -unity-font-definition: url("/Assets/Contents/Font/GyeonggiTitle-Medium.ttf");
+    -unity-font-style: normal;
+    -unity-text-align: middle-center;
+}
+
+/* ===================================================================
+   BuyCoinPopup (Popup/Common) — 전체 화면, 좌 구매 / 우 광고
+   =================================================================== */
+.buy-coin__mask {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgb(0, 0, 0);
+}
+
+/* Contens_0 : BG4.png 1080x850 */
+.buy-coin__left {
+    position: absolute;
+    left: 175px;
+    top: 80px;
+    width: 1080px;
+    height: 850px;
+    background-image: url("/Assets/Contents/Image/BG/Main/BG4.png");
+    -unity-background-scale-mode: stretch-to-fill;
+}
+
+/* Contens_1 : BG5.png 540x850 */
+.buy-coin__right {
+    position: absolute;
+    left: 1285px;
+    top: 80px;
+    width: 540px;
+    height: 850px;
+    background-image: url("/Assets/Contents/Image/BG/Main/BG5.png");
+    -unity-background-scale-mode: stretch-to-fill;
+}
+
+/* BG6.png 465x464 상품 카드 */
+.buy-coin__card {
+    position: absolute;
+    top: 322.9px;
+    width: 465px;
+    height: 464px;
+    background-image: url("/Assets/Contents/Image/BG/Main/BG6.png");
+    -unity-background-scale-mode: stretch-to-fill;
+}
+
+.buy-coin__card--0 { left: 68.5px; }
+.buy-coin__card--1 { left: 551.5px; }
+
+.buy-coin__coin-icon {
+    position: absolute;
+    background-image: url("/Assets/Contents/Image/BG/Main/Coin.png");
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.buy-coin__coin-icon--0 { left: 185px; top: 111px; width: 101px; height: 100px; }
+.buy-coin__coin-icon--1 { left: 157.5px; top: 86px; width: 150px; height: 150px; }
+.buy-coin__coin-icon--free { left: 195px; top: 281px; width: 150px; height: 150px; }
+
+.buy-coin__card-text {
+    position: absolute;
+    width: 287.6px;
+    height: 100px;
+    margin: 0;
+    padding: 0;
+    color: rgb(255, 255, 255);
+    -unity-font-definition: url("/Assets/Contents/Font/GyeonggiTitle-Medium.ttf");
+    -unity-font-style: normal;
+    -unity-text-align: middle-center;
+}
+
+.buy-coin__card-text--0 { left: 91.8px; top: 205.7px; font-size: 46px; }
+.buy-coin__card-text--1 { left: 81.8px; top: 233.2px; font-size: 45px; }
+.buy-coin__card-text--free { left: 122.2px; top: 438.5px; font-size: 45px; }
+
+/* BuyCoinBtn : btn_bg4.png (Simple) 249x92 */
+.buy-coin__buy-btn {
+    position: absolute;
+    top: 353.8px;
+    width: 249px;
+    height: 92px;
+    margin: 0;
+    padding: 0;
+    background-color: rgba(0, 0, 0, 0);
+    border-width: 0;
+    border-radius: 0;
+    background-image: url("/Assets/Contents/Image/Button/btn_bg4.png");
+    -unity-background-scale-mode: stretch-to-fill;
+    transition-property: scale;
+    transition-duration: 0.08s;
+}
+
+.buy-coin__buy-btn:hover { scale: 1.03 1.03; }
+.buy-coin__buy-btn:active { scale: 0.97 0.97; }
+
+.buy-coin__buy-btn--0 { left: 108px; }
+.buy-coin__buy-btn--1 { left: 104.6px; }
+
+.buy-coin__buy-label {
+    position: absolute;
+    left: 2.65px;
+    top: -6.2px;
+    width: 246.7px;
+    height: 100px;
+    margin: 0;
+    padding: 0;
+    font-size: 45px;
+    color: rgb(135, 233, 244);
+    -unity-font-definition: url("/Assets/Contents/Font/GyeonggiTitle-Medium.ttf");
+    -unity-font-style: normal;
+    -unity-text-align: middle-center;
+}
+
+.buy-coin__title {
+    position: absolute;
+    margin: 0;
+    padding: 0;
+    height: 100px;
+    font-size: 64px;
+    color: rgb(255, 255, 255);
+    -unity-font-definition: url("/Assets/Contents/Font/GyeonggiTitle-Medium.ttf");
+    -unity-font-style: normal;
+    -unity-text-align: middle-center;
+}
+
+.buy-coin__title--left { left: 292px; top: 48px; width: 500px; }
+.buy-coin__title--right { left: 70px; top: 50px; width: 400px; }
+
+.buy-coin__my-coin-label {
+    position: absolute;
+    left: 53.67px;
+    top: 182px;
+    width: 218.27px;
+    height: 100px;
+    margin: 0;
+    padding: 0;
+    font-size: 47px;
+    color: rgb(255, 255, 255);
+    -unity-font-definition: url("/Assets/Contents/Font/GyeonggiTitle-Medium.ttf");
+    -unity-font-style: normal;
+    -unity-text-align: middle-center;
+}
+
+/* CoinBG : coin_bg.png 9-slice(100/0/35/0) 200x93 */
+.buy-coin__coin-bg {
+    position: absolute;
+    left: 276.7px;
+    top: 185.7px;
+    width: 200px;
+    height: 93px;
+    background-image: url("/Assets/Contents/Image/BG/Main/coin_bg.png");
+    -unity-slice-left: 100;
+    -unity-slice-right: 35;
+    -unity-slice-top: 0;
+    -unity-slice-bottom: 0;
+}
+
+.buy-coin__coin-bg-text {
+    position: absolute;
+    left: 100.15px;
+    top: -3.7px;
+    width: 82.9px;
+    height: 100px;
+    margin: 0;
+    padding: 0;
+    font-size: 47px;
+    color: rgb(255, 255, 255);
+    -unity-font-definition: url("/Assets/Contents/Font/GyeonggiTitle-Medium.ttf");
+    -unity-font-style: normal;
+    -unity-text-align: middle-center;
+}
+
+/* 광고 시간 바 btn_bg5.png 441x43 */
+.buy-coin__time-bar {
+    position: absolute;
+    left: 49.3px;
+    top: 609.5px;
+    width: 441px;
+    height: 43px;
+    background-image: url("/Assets/Contents/Image/Button/btn_bg5.png");
+    -unity-background-scale-mode: stretch-to-fill;
+}
+
+.buy-coin__time-arrow {
+    position: absolute;
+    left: 161.9px;
+    top: 7px;
+    width: 23px;
+    height: 29px;
+    background-image: url("/Assets/Contents/Image/Button/Arrow.png");
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.buy-coin__time-text {
+    position: absolute;
+    left: 134.17px;
+    top: -28.8px;
+    width: 218.27px;
+    height: 100px;
+    margin: 0;
+    padding: 0;
+    font-size: 30px;
+    color: rgb(135, 233, 244);
+    -unity-font-definition: url("/Assets/Contents/Font/GyeonggiTitle-Medium.ttf");
+    -unity-font-style: normal;
+    -unity-text-align: middle-center;
+}
+
+.buy-coin__ads-btn {
+    position: absolute;
+    left: 49.5px;
+    top: 665.3px;
+    width: 441px;
+    height: 105px;
+    margin: 0;
+    padding: 0;
+    background-color: rgba(0, 0, 0, 0);
+    border-width: 0;
+    border-radius: 0;
+    background-image: url("/Assets/Contents/Image/Button/btn_bg3.png");
+    -unity-slice-left: 20;
+    -unity-slice-right: 20;
+    -unity-slice-top: 20;
+    -unity-slice-bottom: 20;
+    -unity-background-image-tint-color: rgb(255, 69, 73);
+    transition-property: scale;
+    transition-duration: 0.08s;
+}
+
+.buy-coin__ads-btn:hover { scale: 1.03 1.03; }
+.buy-coin__ads-btn:active { scale: 0.97 0.97; }
+.buy-coin__ads-btn:disabled { -unity-background-image-tint-color: rgb(94, 98, 104); }
+
+.buy-coin__ads-label {
+    position: absolute;
+    left: 20.5px;
+    top: 2.5px;
+    width: 400px;
+    height: 100px;
+    margin: 0;
+    padding: 0;
+    font-size: 46px;
+    color: rgb(255, 255, 255);
+    -unity-font-definition: url("/Assets/Contents/Font/GyeonggiTitle-Medium.ttf");
+    -unity-font-style: normal;
+    -unity-text-align: middle-center;
+}
+
+/* BackBtn 138x138 */
+.buy-coin__back-btn {
+    position: absolute;
+    left: 19.7px;
+    top: 80.4px;
+    width: 138px;
+    height: 138px;
+    margin: 0;
+    padding: 0;
+    background-color: rgba(0, 0, 0, 0);
+    border-width: 0;
+    border-radius: 0;
+    background-image: url("/Assets/Contents/Image/Button/back_btn.png");
+    -unity-background-scale-mode: scale-to-fit;
+    transition-property: scale;
+    transition-duration: 0.08s;
+}
+
+.buy-coin__back-btn:hover { scale: 1.05 1.05; }
+.buy-coin__back-btn:active { scale: 0.95 0.95; }
+
+/* ===================================================================
+   SMToggle (설정 토글) — popup_toggle_bg.png, 색은 스크립트가 지정
+   =================================================================== */
+.sm-toggle {
+    position: absolute;
+    top: 10px;
+    height: 80px;
+    margin: 0;
+    padding: 0;
+    background-color: rgba(0, 0, 0, 0);
+    border-width: 0;
+    border-radius: 0;
+    background-image: url("/Assets/Contents/Image/Button/popup_toggle_bg.png");
+    -unity-slice-left: 20;
+    -unity-slice-right: 20;
+    -unity-slice-top: 20;
+    -unity-slice-bottom: 20;
+    transition-property: scale;
+    transition-duration: 0.08s;
+}
+
+.sm-toggle:hover { scale: 1.03 1.03; }
+.sm-toggle:active { scale: 0.97 0.97; }
+
+.sm-toggle__label {
+    position: absolute;
+    left: 50%;
+    top: -10.1px;
+    translate: -50% 0;
+    width: 350px;
+    height: 100px;
+    margin: 0;
+    padding: 0;
+    font-size: 42px;
+    -unity-font-definition: url("/Assets/Contents/Font/GyeonggiTitle-Medium.ttf");
+    -unity-font-style: normal;
+    -unity-text-align: middle-center;
+}
+
+/* 플레이어 수 토글은 top 이 2px 더 아래 */
+.sm-toggle--count { top: 12px; }
+
+/* 글자 길이에 맞춰 폭이 정해지는 토글 (PlaySetPopup).
+   좌우 여백 33.5px + 버튼 사이 12px 는 Figma 시안 실측값.
+   .sm-toggle--count 뒤에 와야 top 을 이긴다. */
+.sm-toggle--auto {
+    position: relative;
+    left: auto;
+    top: 0;
+    width: auto;
+    height: 80px;
+    flex-shrink: 0;
+    padding-left: 33.5px;
+    padding-right: 33.5px;
+    align-items: center;
+    justify-content: center;
+}
+
+.sm-toggle--auto .sm-toggle__label {
+    position: relative;
+    left: auto;
+    top: 0;
+    translate: none;
+    width: auto;
+    height: auto;
+}
+
+/* ===================================================================
+   PlaySetPopup (Popup/Main) — 좌 설정 1194x770 / 우 색상 440x770
+   =================================================================== */
+.play-set__mask {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgb(0, 0, 0);
+}
+
+.play-set__left {
+    position: absolute;
+    left: 176px;
+    top: 81px;
+    width: 1194px;
+    height: 770px;
+    background-image: url("/Assets/Contents/Image/BG/Main/BG4.png");
+    -unity-background-scale-mode: stretch-to-fill;
+}
+
+.play-set__right {
+    position: absolute;
+    left: 1385px;
+    top: 81px;
+    width: 440px;
+    height: 770px;
+    background-image: url("/Assets/Contents/Image/BG/Main/BG5.png");
+    -unity-background-scale-mode: stretch-to-fill;
+}
+
+.play-set__title {
+    position: absolute;
+    top: 47.4px;
+    height: 100px;
+    margin: 0;
+    padding: 0;
+    font-size: 65px;
+    color: rgb(255, 255, 255);
+    -unity-font-definition: url("/Assets/Contents/Font/GyeonggiTitle-Medium.ttf");
+    -unity-font-style: normal;
+    -unity-text-align: middle-center;
+}
+
+.play-set__title--left { left: 345.7px; width: 500px; }
+.play-set__title--right { left: 20px; width: 400px; }
+
+/* SelectPanel : VerticalLayoutGroup(가운데 정렬, spacing 45) */
+.play-set__select-panel {
+    position: absolute;
+    left: 0;
+    top: 122.9px;
+    width: 1194px;
+    height: 647.1px;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.play-set__row {
+    position: relative;
+    width: 100%;
+    height: 100px;
+    flex-shrink: 0;
+    margin-top: 45px;
+}
+
+.play-set__row--first { margin-top: 0; }
+
+.play-set__row-label {
+    position: absolute;
+    left: 89.3px;
+    top: 0;
+    width: 350px;
+    height: 100px;
+    margin: 0;
+    padding: 0;
+    font-size: 47px;
+    color: rgb(219, 223, 229);
+    -unity-font-definition: url("/Assets/Contents/Font/GyeonggiTitle-Medium.ttf");
+    -unity-font-style: normal;
+    -unity-text-align: middle-left;
+}
+
+.play-set__row-label--ai { top: -1.8px; }
+
+/* 토글 묶음 : 글자 길이에 맞춰 왼쪽부터 나열 */
+.play-set__toggle-group {
+    position: absolute;
+    top: 10px;
+    height: 80px;
+    flex-direction: row;
+    align-items: center;
+    /* 6.7 gap: 형제 간격 (2026-09-29) */
+    gap: 12px;
+}
+
+.play-set__toggle-group--count { top: 12px; }
+
+/* 우측 색상 패널 */
+.play-set__player-icon {
+    position: absolute;
+    left: 219.1px;
+    top: 408.5px;
+    translate: -50% -50%;
+    width: 168px;
+    height: 179px;
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.play-set__arrow-btn {
+    position: absolute;
+    top: 356.5px;
+    width: 100px;
+    height: 100px;
+    margin: 0;
+    padding: 0;
+    background-color: rgba(0, 0, 0, 0);
+    border-width: 0;
+    border-radius: 0;
+    transition-property: scale;
+    transition-duration: 0.08s;
+}
+
+.play-set__arrow-btn:active { scale: 0.95 0.95; }
+
+.play-set__arrow-btn--next { left: 273px; }
+
+.play-set__arrow-btn--before {
+    left: 44.4px;
+    top: 358.1px;
+    rotate: 180deg;
+}
+
+.play-set__arrow-icon {
+    position: absolute;
+    left: 25px;
+    top: 25px;
+    width: 50px;
+    height: 50px;
+    background-image: url("/Assets/Contents/Image/Button/arrow_forward_ios.png");
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.play-set__random-text {
+    position: absolute;
+    left: 31.4px;
+    top: 654.4px;
+    width: 393.84px;
+    height: 100px;
+    margin: 0;
+    padding: 0;
+    font-size: 33px;
+    color: rgb(144, 148, 154);
+    -unity-font-definition: url("/Assets/Contents/Font/GyeonggiTitle-Medium.ttf");
+    -unity-font-style: normal;
+    -unity-text-align: middle-center;
+}
+
+/* PlayCoinBtn (1386.9, 865.1 441x105) */
+.play-set__play-group {
+    position: absolute;
+    left: 1386.9px;
+    top: 865.1px;
+    width: 441px;
+    height: 105px;
+}
+
+.play-set__ad-btn {
+    position: absolute;
+    left: 3px;
+    top: 3px;
+    right: 3px;
+    bottom: 3px;
+    margin: 0;
+    padding: 0;
+    background-color: rgba(0, 0, 0, 0);
+    border-width: 0;
+    border-radius: 0;
+    background-image: url("/Assets/Contents/Image/Button/btn_bg4.png");
+    -unity-slice-left: 15;
+    -unity-slice-right: 15;
+    -unity-slice-top: 15;
+    -unity-slice-bottom: 15;
+    transition-property: scale;
+    transition-duration: 0.08s;
+}
+
+.play-set__ad-btn:hover { scale: 1.03 1.03; }
+.play-set__ad-btn:active { scale: 0.97 0.97; }
+.play-set__ad-btn:disabled { -unity-background-image-tint-color: rgba(200, 200, 200, 0.502); opacity: 0.8; }
+
+.play-set__ad-icon {
+    position: absolute;
+    left: 87.9px;
+    top: 28.6px;
+    width: 40px;
+    height: 40px;
+    background-image: url("/Assets/Contents/Image/Button/adIcon.png");
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.play-set__ad-label {
+    position: absolute;
+    left: 142.8px;
+    top: -1px;
+    width: 216.58px;
+    height: 100px;
+    margin: 0;
+    padding: 0;
+    font-size: 46px;
+    color: rgb(126, 215, 226);
+    -unity-font-definition: url("/Assets/Contents/Font/GyeonggiTitle-Medium.ttf");
+    -unity-font-style: normal;
+    -unity-text-align: middle-center;
+}
+
+.play-set__play-btn {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    margin: 0;
+    padding: 0;
+    background-color: rgba(0, 0, 0, 0);
+    border-width: 0;
+    border-radius: 0;
+    background-image: url("/Assets/Contents/Image/Button/btn_bg3.png");
+    -unity-slice-left: 20;
+    -unity-slice-right: 20;
+    -unity-slice-top: 20;
+    -unity-slice-bottom: 20;
+    -unity-background-image-tint-color: rgb(255, 69, 73);
+    transition-property: scale;
+    transition-duration: 0.08s;
+}
+
+.play-set__play-btn:hover { scale: 1.03 1.03; }
+.play-set__play-btn:active { scale: 0.97 0.97; }
+
+.play-set__play-label {
+    position: absolute;
+    left: 35.7px;
+    top: 2.5px;
+    width: 250px;
+    height: 100px;
+    margin: 0;
+    padding: 0;
+    font-size: 47px;
+    color: rgb(255, 255, 255);
+    -unity-font-definition: url("/Assets/Contents/Font/GyeonggiTitle-Medium.ttf");
+    -unity-font-style: normal;
+    -unity-text-align: middle-center;
+}
+
+/* 가격 배지(-N)가 없을 때는 버튼 전체를 기준으로 가운데 정렬한다.
+   기본 규칙과 같은 특이도(클래스 1개)라 반드시 뒤에 와야 이긴다. */
+.play-set__play-label--full {
+    left: 0;
+    right: 0;
+    width: auto;
+}
+
+.play-set__need-coin-panel {
+    position: absolute;
+    left: 293.2px;
+    top: 20px;
+    width: 112.1px;
+    height: 65px;
+    background-image: url("/Assets/Contents/Image/Button/btn_bg3.png");
+    -unity-slice-left: 20;
+    -unity-slice-right: 20;
+    -unity-slice-top: 20;
+    -unity-slice-bottom: 20;
+    -unity-background-image-tint-color: rgba(0, 0, 0, 0.271);
+}
+
+/* 내 코인 (1149.9, 866.7 218x104) */
+.play-set__coin-panel {
+    position: absolute;
+    left: 1149.9px;
+    top: 866.7px;
+    width: 218px;
+    height: 104px;
+}
+
+.play-set__need-coin-bg {
+    position: absolute;
+    left: -2px;
+    top: -2px;
+    width: 222px;
+    height: 108px;
+    background-image: url("/Assets/Contents/Image/Button/btn_bg8.png");
+    -unity-slice-left: 40;
+    -unity-slice-right: 40;
+    -unity-slice-top: 40;
+    -unity-slice-bottom: 40;
+    -unity-background-image-tint-color: rgb(255, 0, 0);
+}
+
+.play-set__coin-bg {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 218px;
+    height: 104px;
+    background-image: url("/Assets/Contents/Image/Button/btn_bg8.png");
+    -unity-slice-left: 40;
+    -unity-slice-right: 40;
+    -unity-slice-top: 40;
+    -unity-slice-bottom: 40;
+    -unity-background-image-tint-color: rgb(44, 48, 54);
+}
+
+.play-set__coin-icon {
+    position: absolute;
+    left: 23.3px;
+    top: 19.5px;
+    width: 65px;
+    height: 65px;
+    background-image: url("/Assets/Contents/Image/BG/Main/Coin.png");
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.play-set__coin-text {
+    position: absolute;
+    left: 98px;
+    top: 0;
+    width: 112px;
+    height: 100px;
+    margin: 0;
+    padding: 0;
+    font-size: 44px;
+    color: rgb(255, 255, 255);
+    -unity-font-definition: url("/Assets/Contents/Font/GyeonggiTitle-Medium.ttf");
+    -unity-font-style: normal;
+    -unity-text-align: middle-center;
+}
+
+/* 승리 보상 (176.3, 867.6) */
+.play-set__reward-row {
+    position: absolute;
+    left: 176.3px;
+    top: 867.6px;
+    flex-direction: row;
+    align-items: center;
+}
+
+.play-set__reward-label {
+    margin: 0;
+    padding: 0;
+    height: 100px;
+    font-size: 46px;
+    color: rgb(255, 255, 255);
+    -unity-font-definition: url("/Assets/Contents/Font/GyeonggiTitle-Medium.ttf");
+    -unity-font-style: normal;
+    -unity-text-align: middle-left;
+}
+
+.play-set__reward-value {
+    width: auto;
+    height: 100px;
+    margin: 0;
+    margin-left: 10px;
+    padding: 0;
+    font-size: 46px;
+    color: rgb(255, 255, 255);
+    -unity-font-definition: url("/Assets/Contents/Font/GyeonggiTitle-Medium.ttf");
+    -unity-font-style: normal;
+    -unity-text-align: middle-left;
+}
+
+/* 보상 숫자 뒤의 코인 아이콘 (시안 : 숫자와 16px 떨어진 46x46) */
+.play-set__reward-coin {
+    width: 46px;
+    height: 46px;
+    margin-left: 16px;
+    flex-shrink: 0;
+    background-image: url("/Assets/Contents/Image/BG/Main/Coin.png");
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+/* ===================================================================
+   MainSettingPopup (Popup/Main) — 화면 중앙 popupBG 1277x850
+   =================================================================== */
+.main-setting__mask {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    /* URP backdrop-filter (2026-09-29) : 뒤 화면 흐림 + 예전보다 옅게 */
+    backdrop-filter: blur(10px);
+    background-color: rgba(0, 0, 0, 0.65);
+}
+
+/* 6.7 (2026-09-29) : popupBG.png 대신 뒤의 .main-setting__plate 가 판을 그린다.
+   이 요소는 자식 배치 기준(예전 이미지 크기)만 유지하는 투명 컨테이너 */
+.main-setting__bg {
+    position: absolute;
+    left: 321.5px;
+    top: 113px;
+    width: 1277px;
+    height: 850px;
+}
+
+/* 판 + 빛 번짐. 자식이 없는 별도 요소라 drop-shadow 가 글자를 흐리게 하지 않는다 */
+.main-setting__plate {
+    left: 381.5px;
+    top: 167.0px;
+    width: 1157px;
+    height: 737.3px;
+    border-radius: 18px;
+}
+
+.main-setting__title {
+    position: absolute;
+    left: 424.7px;
+    top: 110px;
+    width: 427.5px;
+    height: 100px;
+    margin: 0;
+    padding: 0;
+    font-size: 67px;
+    color: rgb(255, 255, 255);
+    -unity-font-definition: url("/Assets/Contents/Font/GyeonggiTitle-Medium.ttf");
+    -unity-font-style: normal;
+    -unity-text-align: middle-center;
+}
+
+.main-setting__row {
+    position: absolute;
+    left: 0;
+    width: 1277px;
+    height: 200px;
+}
+
+.main-setting__row--sound { top: 225px; }
+.main-setting__row--lang { top: 385px; }
+
+.main-setting__row-label {
+    position: absolute;
+    left: 150px;
+    top: 50px;
+    width: 427.5px;
+    height: 100px;
+    margin: 0;
+    padding: 0;
+    font-size: 46px;
+    color: rgb(219, 223, 229);
+    -unity-font-definition: url("/Assets/Contents/Font/GyeonggiTitle-Medium.ttf");
+    -unity-font-style: normal;
+    -unity-text-align: middle-left;
+}
+
+/* SoundToggle : toggle_off.png 161x89, 켜지면 toggle_on_soft.png 를 덮는다 */
+.main-setting__sound-btn {
+    position: absolute;
+    left: 975.5px;
+    top: 58.5px;
+    width: 161px;
+    height: 89px;
+    margin: 0;
+    padding: 0;
+    background-color: rgba(0, 0, 0, 0);
+    border-width: 0;
+    border-radius: 0;
+    background-image: url("/Assets/Contents/Image/Button/toggle_off.png");
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.main-setting__sound-check {
+    position: absolute;
+    left: -50px;
+    top: -50px;
+    width: 261px;
+    height: 189px;
+    background-image: url("/Assets/Contents/Image/Button/toggle_on_soft.png");
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+/* LanguageToggle 250x93 */
+.sm-toggle--lang {
+    top: 64.5px;
+    height: 93px;
+}
+
+.sm-toggle--lang .sm-toggle__label {
+    top: -3.5px;
+    font-size: 46px;
+}
+
+.main-setting__logout-btn {
+    position: absolute;
+    left: 918px;
+    top: 632.3px;
+    width: 250px;
+    height: 93px;
+    margin: 0;
+    padding: 0;
+    background-color: rgba(0, 0, 0, 0);
+    border-width: 0;
+    border-radius: 0;
+    background-image: url("/Assets/Contents/Image/Button/btn_bg3.png");
+    -unity-slice-left: 20;
+    -unity-slice-right: 20;
+    -unity-slice-top: 20;
+    -unity-slice-bottom: 20;
+    -unity-background-image-tint-color: rgb(94, 98, 104);
+    transition-property: scale;
+    transition-duration: 0.08s;
+}
+
+.main-setting__logout-btn:hover { scale: 1.03 1.03; }
+.main-setting__logout-btn:active { scale: 0.97 0.97; }
+
+.main-setting__logout-label {
+    flex-grow: 1;
+    margin: 0;
+    padding: 0;
+    font-size: 40px;
+    color: rgb(219, 223, 229);
+    -unity-font-definition: url("/Assets/Contents/Font/GyeonggiTitle-Medium.ttf");
+    -unity-font-style: normal;
+    -unity-text-align: middle-center;
+}
+
+.main-setting__close-btn {
+    position: absolute;
+    left: 1070.8px;
+    top: 112px;
+    width: 100px;
+    height: 101px;
+    margin: 0;
+    padding: 0;
+    background-color: rgba(0, 0, 0, 0);
+    border-width: 0;
+    border-radius: 0;
+    background-image: url("/Assets/Contents/Image/Button/close_btn.png");
+    -unity-background-scale-mode: scale-to-fit;
+    transition-property: scale;
+    transition-duration: 0.08s;
+}
+
+.main-setting__close-btn:hover { scale: 1.05 1.05; }
+.main-setting__close-btn:active { scale: 0.95 0.95; }
+
+/* ===================================================================
+   MainInfoPopup — 정보 팝업
+   원본 : Mask 검정 86.3% / ContensPanel(321.5,83) 1277x910 popupBG
+   아래 좌표는 ContensPanel 기준(실측값에서 321.5, 83 을 뺀 값)
+   =================================================================== */
+.main-info__mask {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    /* URP backdrop-filter (2026-09-29) : 뒤 화면 흐림 + 예전보다 옅게 */
+    backdrop-filter: blur(10px);
+    background-color: rgba(0, 0, 0, 0.65);
+}
+
+/* 6.7 (2026-09-29) : popupBG.png 대신 뒤의 .main-info__plate 가 판을 그린다.
+   이 요소는 자식 배치 기준(예전 이미지 크기)만 유지하는 투명 컨테이너 */
+.main-info__bg {
+    position: absolute;
+    left: 321.5px;
+    top: 83px;
+    width: 1277px;
+    height: 910px;
+}
+
+/* 판 + 빛 번짐. 자식이 없는 별도 요소라 drop-shadow 가 글자를 흐리게 하지 않는다 */
+.main-info__plate {
+    left: 381.5px;
+    top: 140.8px;
+    width: 1157px;
+    height: 789.4px;
+    border-radius: 18px;
+}
+
+/* 버튼 뒤를 가로지르는 가는 구분선 (985x2) */
+.main-info__line {
+    position: absolute;
+    left: 150px;
+    top: 437.1px;
+    width: 985px;
+    height: 2px;
+    background-color: rgb(69, 73, 79);
+}
+
+.main-info__title {
+    position: absolute;
+    left: 424.7px;
+    top: 128.6px;
+    width: 427.5px;
+    height: 100px;
+    margin: 0;
+    padding: 0;
+    font-size: 63px;
+    color: rgb(255, 255, 255);
+    -unity-font-definition: url("/Assets/Contents/Font/GyeonggiTitle-Medium.ttf");
+    -unity-font-style: normal;
+    -unity-text-align: middle-center;
+}
+
+/* 원본 Image.type 은 Simple 이라 btn_bg2 에 border 가 있어도 9슬라이스가 아니다 */
+.main-info__btn {
+    position: absolute;
+    left: 369px;
+    width: 538.8px;
+    height: 104.5px;
+    margin: 0;
+    padding: 0;
+    background-color: rgba(0, 0, 0, 0);
+    border-width: 0;
+    border-radius: 0;
+    background-image: url("/Assets/Contents/Image/Button/btn_bg.png");
+    -unity-background-scale-mode: stretch-to-fill;
+    transition-property: scale;
+    transition-duration: 0.08s;
+}
+
+.main-info__btn:hover { scale: 1.03 1.03; }
+.main-info__btn:active { scale: 0.97 0.97; }
+
+.main-info__btn--contact { top: 298.5px; }
+.main-info__btn--terms { top: 418.4px; }
+.main-info__btn--privacy { top: 539.2px; }
+.main-info__btn--rate {
+    top: 658.1px;
+    background-image: url("/Assets/Contents/Image/Button/btn_bg2.png");
+}
+
+.main-info__btn-label {
+    position: absolute;
+    left: 0.4px;
+    top: 0.3px;
+    width: 538px;
+    height: 104px;
+    margin: 0;
+    padding: 0;
+    font-size: 45px;
+    color: rgb(135, 233, 244);
+    -unity-font-definition: url("/Assets/Contents/Font/GyeonggiTitle-Medium.ttf");
+    -unity-font-style: normal;
+    -unity-text-align: middle-center;
+}
+
+.main-info__close-btn {
+    position: absolute;
+    left: 1057.1px;
+    top: 118.7px;
+    width: 100px;
+    height: 101px;
+    margin: 0;
+    padding: 0;
+    background-color: rgba(0, 0, 0, 0);
+    border-width: 0;
+    border-radius: 0;
+    background-image: url("/Assets/Contents/Image/Button/close_btn.png");
+    -unity-background-scale-mode: scale-to-fit;
+    transition-property: scale;
+    transition-duration: 0.08s;
+}
+
+.main-info__close-btn:hover { scale: 1.05 1.05; }
+.main-info__close-btn:active { scale: 0.95 0.95; }
+
+/* ===================================================================
+   InfoPopup (TeamOfConditionsPopup / PrivatePolicyPopup) — 약관 본문
+   원본 : Mask 검정 100% / ContensPanel(175,80) 1645x890 BG4
+          Viewport 는 스크롤바 자리 17px 를 뺀 1628 폭
+          Content 는 VLG(padding top 48 / bottom 50, spacing 42.5, 가운데 정렬)
+   =================================================================== */
+.info__mask {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgb(0, 0, 0);
+}
+
+.info__panel {
+    position: absolute;
+    left: 175px;
+    top: 80px;
+    width: 1645px;
+    height: 890px;
+}
+
+.info__bg {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    background-image: url("/Assets/Contents/Image/BG/Main/BG4.png");
+    -unity-background-scale-mode: stretch-to-fill;
+}
+
+.info__scroll {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 17px;
+    bottom: 0;
+}
+
+/* ---------- 약관 / 개인정보 세로 스크롤 바 (2026-09-29) ----------
+   기본 Scroller 를 가늘고 둥근 막대로 : 위아래 화살표 버튼은 숨기고, 가는 선 트랙 + 시안 그라데이션 손잡이(빛 번짐).
+   커서를 올리거나 잡으면 조금 밝아진다. 크기는 ScrollView 가 내용 길이에 맞춰 정한다. */
+.info__scroll .unity-scroller--vertical {
+    width: 8px;
+    min-width: 8px;
+    margin: 48px 26px 48px 0;
+    padding: 0;
+    border-width: 0;
+    background-color: rgba(0, 0, 0, 0);
+}
+
+.info__scroll .unity-scroller--vertical > .unity-scroller__low-button,
+.info__scroll .unity-scroller--vertical > .unity-scroller__high-button {
+    display: none;
+}
+
+.info__scroll .unity-scroller--vertical > .unity-scroller__slider {
+    flex-grow: 1;
+    width: 8px;
+    min-width: 8px;
+    margin: 0;
+    padding: 0;
+    background-color: rgba(0, 0, 0, 0);
+}
+
+.info__scroll .unity-scroller--vertical > .unity-scroller__slider .unity-base-slider__input,
+.info__scroll .unity-scroller--vertical > .unity-scroller__slider .unity-base-slider__drag-container {
+    margin: 0;
+    padding: 0;
+    border-width: 0;
+    background-color: rgba(0, 0, 0, 0);
+}
+
+.info__scroll .unity-scroller--vertical > .unity-scroller__slider .unity-base-slider__tracker {
+    /* 트랙은 가운데 2px 가는 선, 손잡이만 8px */
+    position: absolute;
+    left: 3px;
+    right: 3px;
+    top: 4px;
+    bottom: 4px;
+    width: auto;
+    margin: 0;
+    border-width: 0;
+    border-radius: 1px;
+    background-color: rgba(255, 255, 255, 0.12);
+}
+
+.info__scroll .unity-scroller--vertical > .unity-scroller__slider .unity-base-slider__dragger {
+    left: 0;
+    width: 8px;
+    min-height: 60px;
+    margin: 0;
+    border-width: 0;
+    border-radius: 4px;
+    background-color: rgb(100, 200, 220);
+    background-image: linear-gradient(to bottom, rgb(160, 242, 246), rgb(62, 148, 204));
+    filter: drop-shadow(0px 0px 8px rgba(120, 225, 230, 0.45));
+    opacity: 0.85;
+    transition-property: opacity;
+    transition-duration: 0.15s;
+}
+
+.info__scroll .unity-scroller--vertical > .unity-scroller__slider .unity-base-slider__dragger:hover,
+.info__scroll .unity-scroller--vertical > .unity-scroller__slider .unity-base-slider__dragger:active {
+    opacity: 1;
+}
+
+.info__scroll .unity-scroller--vertical > .unity-scroller__slider .unity-base-slider__dragger-border {
+    display: none;
+}
+
+.info__title {
+    width: 799.47px;
+    height: 100px;
+    flex-shrink: 0;
+    margin: 0 0 22px 0;
+    padding: 0;
+    font-size: 63px;
+    color: rgb(255, 255, 255);
+    -unity-font-definition: url("/Assets/Contents/Font/GyeonggiTitle-Medium.ttf");
+    -unity-font-style: normal;
+    -unity-text-align: middle-center;
+}
+
+/* 원본은 TextMeshProUGUI(WantedSans-SemiBold 36). UI Toolkit 은 .ttf 를 직접 문다.
+   크기는 같은 문서를 뽑은 HTML(final_terms_ko.html) 의 본문 비율에 맞췄다 —
+   HTML 은 본문 폭 712px 에 16px 이라 한 줄에 44.5em, 여기는 1245px 이므로 28px 이 같은 비율이다.
+   (제목 Label 63px = 28 x 2.25 라 HTML 의 h1(2.25rem)과도 맞는다)
+   제목/줄간격 비율은 Utils.ConvertMarkdownToRichText 가 % 태그로 넣는다. */
+.info__contents {
+    /* 블록 요소(.md-*)를 담는 세로 컨테이너. 글꼴·색은 자식이 상속 */
+    width: 1180px;
+    flex-shrink: 0;
+    margin: 0;
+    padding: 0;
+    color: rgb(214, 223, 233);
+    font-size: 27px;
+    -unity-font-definition: url("/Assets/Contents/Font/GyeonggiTitle-Medium.ttf");
+    -unity-font-style: normal;
+}
+
+/* ---------- 약관 / 개인정보 문서 (InfoDocumentBuilder, 2026-09-29) ---------- */
+.md-title-rule {
+    align-self: center;
+    width: 160px;
+    height: 3px;
+    margin: 0 0 30px 0;
+    border-radius: 2px;
+    background-image: linear-gradient(to right, rgba(120, 225, 230, 0), rgb(120, 225, 230), rgba(120, 225, 230, 0));
+}
+
+.md-meta {
+    flex-direction: row;
+    justify-content: center;
+    margin: 0 0 44px 0;
+}
+
+.md-meta__item {
+    margin: 0 8px;
+    padding: 8px 22px;
+    border-radius: 22px;
+    border-width: 1px;
+    border-color: rgba(120, 225, 230, 0.3);
+    background-color: rgba(6, 18, 28, 0.6);
+    font-size: 21px;
+    color: rgb(135, 158, 180);
+    -unity-text-align: middle-center;
+}
+
+.md-section__head {
+    flex-direction: row;
+    align-items: center;
+    margin: 58px 0 22px 0;
+    padding: 0 0 16px 0;
+    border-bottom-width: 1px;
+    border-bottom-color: rgba(255, 255, 255, 0.09);
+}
+
+.md-section__head--first {
+    margin-top: 14px;
+}
+
+.md-section__num {
+    min-width: 58px;
+    margin: 0 18px 0 0;
+    padding: 4px 0;
+    border-radius: 8px;
+    background-color: rgba(120, 225, 230, 0.12);
+    font-size: 21px;
+    color: rgb(139, 230, 234);
+    letter-spacing: 2px;
+    -unity-text-align: middle-center;
+    -unity-font-definition: url("/Assets/Contents/Font/GyeonggiTitle-Bold.ttf");
+}
+
+.md-section__title {
+    font-size: 36px;
+    color: rgb(255, 255, 255);
+    letter-spacing: 1px;
+    -unity-font-definition: url("/Assets/Contents/Font/GyeonggiTitle-Bold.ttf");
+}
+
+.md-paragraph {
+    margin: 0 0 22px 0;
+    white-space: normal;
+}
+
+.md-paragraph--lead {
+    padding-left: 22px;
+    border-left-width: 3px;
+    border-left-color: rgba(120, 225, 230, 0.45);
+}
+
+.md-list {
+    margin: 2px 0 24px 0;
+    padding: 20px 30px;
+    border-radius: 14px;
+    border-width: 1px;
+    /* 선형 색공간이라 흰색 저알파가 생각보다 밝게 보인다 → 어두운 남색 판 + 옅은 시안 테두리 */
+    border-color: rgba(120, 225, 230, 0.14);
+    background-color: rgba(6, 14, 24, 0.55);
+}
+
+.md-list__item {
+    flex-direction: row;
+    align-items: flex-start;
+}
+
+.md-list__dot {
+    flex-shrink: 0;
+    width: 8px;
+    height: 8px;
+    margin: 18px 18px 0 0;
+    border-radius: 4px;
+    background-color: rgb(120, 225, 230);
+}
+
+.md-list__text {
+    flex-grow: 1;
+    flex-shrink: 1;
+    white-space: normal;
+}
+
+.md-contact {
+    flex-direction: row;
+    align-items: center;
+    margin: 4px 0 10px 0;
+    padding: 26px 32px;
+    border-radius: 16px;
+    border-width: 1px;
+    border-color: rgba(120, 225, 230, 0.4);
+    background-color: rgba(6, 18, 28, 0.6);
+}
+
+.md-contact__icon {
+    flex-shrink: 0;
+    width: 10px;
+    height: 44px;
+    margin-right: 24px;
+    border-radius: 5px;
+    background-image: linear-gradient(to bottom, rgb(160, 242, 246), rgb(62, 148, 204));
+}
+
+.md-contact__text {
+    flex-grow: 1;
+    flex-shrink: 1;
+    white-space: normal;
+}
+
+.md-end-rule {
+    align-self: center;
+    width: 60px;
+    height: 3px;
+    margin: 56px 0 0 0;
+    border-radius: 2px;
+    background-color: rgba(120, 225, 230, 0.35);
+}
+
+.info__back-btn {
+    position: absolute;
+    left: -155px;
+    top: 0;
+    width: 138px;
+    height: 138px;
+    margin: 0;
+    padding: 0;
+    background-color: rgba(0, 0, 0, 0);
+    border-width: 0;
+    border-radius: 0;
+    background-image: url("/Assets/Contents/Image/Button/back_btn.png");
+    -unity-background-scale-mode: scale-to-fit;
+    transition-property: scale;
+    transition-duration: 0.08s;
+}
+
+.info__back-btn:hover { scale: 1.05 1.05; }
+.info__back-btn:active { scale: 0.95 0.95; }
+
+/* ===================================================================
+   DiceSetPopup — 개발용 주사위 개수 조정 패널
+   Main 씬 좌하단 투명 핫스팟(dice-setting-btn)으로만 열린다.
+   원본 : Mask 검정 86.3% / ContensPanel(321.5,33) 1277x1010 popupBG
+   아래 좌표는 ContensPanel 기준
+   =================================================================== */
+.dice-set__mask {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    /* URP backdrop-filter (2026-09-29) : 뒤 화면 흐림 + 예전보다 옅게 */
+    backdrop-filter: blur(10px);
+    background-color: rgba(0, 0, 0, 0.65);
+}
+
+/* 6.7 (2026-09-29) : popupBG.png 대신 뒤의 .dice-set__plate 가 판을 그린다.
+   이 요소는 자식 배치 기준(예전 이미지 크기)만 유지하는 투명 컨테이너 */
+.dice-set__bg {
+    position: absolute;
+    left: 321.5px;
+    top: 33px;
+    width: 1277px;
+    height: 1010px;
+}
+
+/* 판 + 빛 번짐. 자식이 없는 별도 요소라 drop-shadow 가 글자를 흐리게 하지 않는다 */
+.dice-set__plate {
+    left: 381.5px;
+    top: 97.2px;
+    width: 1157px;
+    height: 876.2px;
+    border-radius: 18px;
+}
+
+.dice-set__title {
+    position: absolute;
+    left: 424.7px;
+    top: 103px;
+    width: 427.5px;
+    height: 100px;
+    margin: 0;
+    padding: 0;
+    font-size: 63px;
+    color: rgb(255, 255, 255);
+    -unity-font-definition: url("/Assets/Contents/Font/GyeonggiTitle-Medium.ttf");
+    -unity-font-style: normal;
+    -unity-text-align: middle-center;
+}
+
+/* 한 줄(난이도 하나). top 은 스크립트가 넣는다 */
+.dice-set__row {
+    position: absolute;
+    left: 0;
+    width: 1277px;
+    height: 117.5px;
+}
+
+.dice-set__row-label {
+    position: absolute;
+    top: 0;
+    width: 427.5px;
+    height: 100px;
+    margin: 0;
+    padding: 0;
+    font-size: 63px;
+    color: rgb(255, 255, 255);
+    -unity-font-definition: url("/Assets/Contents/Font/GyeonggiTitle-Medium.ttf");
+    -unity-font-style: normal;
+    -unity-text-align: middle-left;
+}
+
+.dice-set__row-label--title { left: 161.7px; }
+.dice-set__row-label--min { left: 503.7px; }
+.dice-set__row-label--max { left: 821.7px; }
+
+/* 원본은 uGUI InputField(IntegerNumber). 배경 스프라이트(InputFieldBackground)는
+   유니티 내장 리소스라 USS url() 로 못 물어서 같은 색의 단색으로 대체했다. */
+.dice-set__input {
+    position: absolute;
+    top: 17px;
+    width: 100px;
+    height: 70px;
+    margin: 0;
+    padding: 0;
+    /* font-size 는 상속되므로 여기서 한 번만 준다 (안쪽 TextElement 까지 내려간다) */
+    font-size: 40px;
+    color: rgb(50, 50, 50);
+    -unity-font-definition: url("/Assets/Contents/Font/GyeonggiTitle-Medium.ttf");
+    -unity-font-style: normal;
+}
+
+.dice-set__input--min { left: 644.2px; }
+.dice-set__input--max { left: 980.5px; }
+
+.dice-set__input .unity-text-field__input {
+    margin: 0;
+    padding: 0;
+    background-color: rgb(161, 161, 161);
+    border-width: 0;
+    /* URP(6.7b2)에서 overflow:hidden + border-radius 조합(스텐실 마스크)이 흰 사각형으로 그려지는 문제 → 모서리 0 (2026-09-29) */
+    border-radius: 0;
+    -unity-text-align: middle-center;
+}
+
+.dice-set__line {
+    position: absolute;
+    left: 137px;
+    top: 112.5px;
+    width: 985px;
+    height: 5px;
+    background-color: rgb(69, 73, 79);
+}
+
+.dice-set__close-btn {
+    position: absolute;
+    left: 1057.1px;
+    top: 102px;
+    width: 100px;
+    height: 101px;
+    margin: 0;
+    padding: 0;
+    background-color: rgba(0, 0, 0, 0);
+    border-width: 0;
+    border-radius: 0;
+    background-image: url("/Assets/Contents/Image/Button/close_btn.png");
+    -unity-background-scale-mode: scale-to-fit;
+    transition-property: scale;
+    transition-duration: 0.08s;
+}
+
+.dice-set__close-btn:hover { scale: 1.05 1.05; }
+.dice-set__close-btn:active { scale: 0.95 0.95; }
+
+/* ===================================================================
+   GameResultPopup — 싱글 전용 (.game-result--single 를 root 에 붙인다)
+   시안 (승리/패배 2종), 보이는 판 312x207 -> 화면 945.1 x 627.0
+   배율 S = 3.0292 (시안 버튼 폭 137 -> 415. 다른 팝업과 버튼 크기를 맞춘 값)
+   요소: 1044 x 723.7 @ left 438.4, top 176.6   (화면 중앙 960,540)
+   보이는 판: 945.1 x 627.0 @ (487.45, 226.5)
+   화면 x = 487.45 + 시안x * 3.0292
+   화면 y = 226.5  + 시안y * 3.0292
+
+   보상/버튼은 OptionPopup 의 .option__* 클래스를 그대로 재사용하고
+   여기서는 위치만 덮어쓴다.
+   =================================================================== */
+
+/* 싱글에서만 보이는 요소들 (기본 숨김) */
+.game-result__single-only,
+.game-result__retry-reward {
+    display: none;
+}
+
+.game-result--single .game-result__single-only {
+    display: flex;
+}
+
+/* 멀티/구버전 싱글 레이아웃은 싱글 시안에서 전부 숨긴다 */
+.game-result--single .game-result__coin-image,
+.game-result--single .game-result__coin-text,
+.game-result--single .popup-btn--main,
+.game-result--single .game-result__play-group {
+    display: none;
+}
+
+.game-result--single .game-result__bg {
+    /* 6.7 : popupBG_glow.png 대신 USS 로 그린다 (2026-09-29). 이미지의 투명 여백을 뺀 '보이는 판' 크기 */
+    left: 487.5px;
+    top: 222.6px;
+    width: 945.9px;
+    height: 627.8px;
+    -unity-slice-left: 0;
+    -unity-slice-right: 0;
+    -unity-slice-top: 0;
+    -unity-slice-bottom: 0;
+    border-radius: 18px;
+    border-width: 2px;
+    border-color: rgb(69, 73, 79);
+    background-color: rgb(19, 23, 29);
+    background-image: radial-gradient(ellipse at center, rgb(28, 61, 108) 0%, rgb(19, 23, 29) 66%);
+    filter: drop-shadow(0px 0px 20px rgba(120, 225, 230, 0.15));
+}
+
+.game-result--single .game-result__title {
+    left: 50%;
+    top: 281px;
+    width: 800px;
+    height: 100px;
+    translate: -50% 0;
+    font-size: 60px;
+    color: rgb(255, 255, 255);
+    -unity-font-definition: url("/Assets/Contents/Font/GyeonggiTitle-Medium.ttf");
+    -unity-font-style: normal;
+    -unity-text-align: middle-center;
+}
+
+.game-result--single .option__close-btn {
+    left: 1279.6px;
+    top: 280.5px;
+}
+
+/* ---------- 왼쪽 : 보상 ---------- */
+.game-result__single-reward {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+}
+
+.game-result--single .game-result__single-reward-title {
+    left: 723px;
+    top: 427.9px;
+}
+
+/* .option__reward-coins 가 translate:-50% 0 을 갖고 있으므로 left 는 '중심 x' 다 */
+.game-result--single .game-result__single-coins {
+    left: 723px;
+    top: 550.6px;
+    width: 182px;
+    height: 115px;
+}
+
+.game-result--single .game-result__single-coin--left   { left: 0;    top: 26px; width: 87px;  height: 87px; }
+.game-result--single .game-result__single-coin--right  { left: 95px; top: 26px; width: 87px;  height: 87px; }
+.game-result--single .game-result__single-coin--center { left: 39px; top: 0;    width: 105px; height: 105px; }
+
+/* 패배(보상 0) 일 때 금화 더미 대신 회색 코인 한 장.
+   coin_image.png 은 261x261 중 실제 동전이 99x99(중심 130,126) 뿐이라
+   시안의 동전 지름 94px 에 맞추려면 요소를 248 로 키워야 한다 */
+.game-result__single-lose-coin {
+    position: absolute;
+    left: 599.5px;
+    top: 470.3px;
+    width: 248px;
+    height: 248px;
+    display: none;
+    background-image: url("/Assets/Contents/Image/BG/Main/coin_image.png");
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.game-result--single .game-result__single-reward-text {
+    left: 723px;
+    top: 696px;
+}
+
+/* ---------- 오른쪽 : 버튼 3개 ---------- */
+.game-result--single .game-result__single-btn-panel {
+    left: 941.8px;
+    top: 465.8px;
+}
+
+/* .option__btn { margin: 0 } 이 파일 앞쪽에 있으므로 자식 선택자로 특이도를 올린다 */
+.game-result__single-btn-panel > .game-result__single-gap { margin-top: 13px; }
+.game-result__single-btn-panel > .game-result__single-gap--wide { margin-top: 16px; }
+
+/* ---------- 패배 전용 : 다시하기 보상 안내 ---------- */
+.game-result--single .game-result__retry-reward {
+    position: absolute;
+    left: 756.8px;
+    top: 763px;
+    width: 600px;
+    height: 60px;
+    margin: 0;
+    padding: 0;
+    font-size: 30px;
+    color: rgb(194, 198, 204);
+    -unity-font-definition: url("/Assets/Contents/Font/GyeonggiTitle-Medium.ttf");
+    -unity-font-style: normal;
+    -unity-text-align: middle-right;
+}

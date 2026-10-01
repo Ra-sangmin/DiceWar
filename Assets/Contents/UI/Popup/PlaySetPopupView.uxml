@@ -1,0 +1,52 @@
+﻿<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" editor-extension-mode="False">
+    <Style src="PopupView.uss" />
+    <ui:VisualElement name="play-set-root" class="popup-root popup-open-anim">
+        <ui:VisualElement name="play-set-mask" class="play-set__mask" />
+        <ui:VisualElement name="play-set-left" class="play-set__left">
+            <ui:Label name="play-set-title" text="" class="play-set__title play-set__title--left" picking-mode="Ignore" />
+            <ui:VisualElement name="play-set-select-panel" class="play-set__select-panel" />
+        </ui:VisualElement>
+        <ui:VisualElement name="play-set-right" class="play-set__right">
+            <ui:Label name="play-set-color-title" text="" class="play-set__title play-set__title--right" picking-mode="Ignore" />
+            <ui:VisualElement name="play-set-player-icon" class="play-set__player-icon" picking-mode="Ignore" />
+            <ui:VisualElement name="play-set-single-color-panel" class="popup-root">
+                <ui:Button name="play-set-next-btn" text="" class="play-set__arrow-btn play-set__arrow-btn--next">
+                    <ui:VisualElement class="play-set__arrow-icon" picking-mode="Ignore" />
+                </ui:Button>
+                <ui:Button name="play-set-before-btn" text="" class="play-set__arrow-btn play-set__arrow-btn--before">
+                    <ui:VisualElement class="play-set__arrow-icon" picking-mode="Ignore" />
+                </ui:Button>
+            </ui:VisualElement>
+            <ui:VisualElement name="play-set-multi-color-panel" class="popup-root" picking-mode="Ignore">
+                <ui:Label name="play-set-multi-random-text" text="" class="play-set__random-text" />
+            </ui:VisualElement>
+            <ui:Label name="play-set-random-text" text="" class="play-set__random-text" picking-mode="Ignore" />
+        </ui:VisualElement>
+        <ui:VisualElement name="play-set-play-group" class="play-set__play-group">
+            <ui:Button name="play-set-ad-btn" text="" class="play-set__ad-btn">
+                <ui:VisualElement class="play-set__ad-icon" picking-mode="Ignore" />
+                <ui:Label name="play-set-ad-label" text="" class="play-set__ad-label" picking-mode="Ignore" />
+            </ui:Button>
+            <ui:Button name="play-set-play-btn" text="" class="play-set__play-btn">
+                <ui:Label name="play-set-play-label" text="" class="play-set__play-label" picking-mode="Ignore" />
+                <ui:VisualElement name="play-set-need-coin-panel" class="play-set__need-coin-panel" picking-mode="Ignore">
+                    <ui:Label name="play-set-need-coin-text" text="" class="popup__need-coin-text" />
+                    <ui:VisualElement class="popup__need-coin-icon" />
+                </ui:VisualElement>
+            </ui:Button>
+        </ui:VisualElement>
+        <ui:VisualElement name="play-set-coin-panel" class="play-set__coin-panel">
+            <ui:VisualElement name="play-set-need-coin-bg" class="play-set__need-coin-bg" picking-mode="Ignore" />
+            <ui:VisualElement name="play-set-coin-bg" class="play-set__coin-bg" picking-mode="Ignore">
+                <ui:VisualElement class="play-set__coin-icon" />
+                <ui:Label name="my-coin-text" text="0" class="play-set__coin-text" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+        <ui:VisualElement name="play-set-reward-row" class="play-set__reward-row" picking-mode="Ignore">
+            <ui:Label name="play-set-reward-label" text="" class="play-set__reward-label" />
+            <ui:Label name="play-set-reward-value" text="" class="play-set__reward-value" />
+            <ui:VisualElement name="play-set-reward-coin" class="play-set__reward-coin" picking-mode="Ignore" />
+        </ui:VisualElement>
+        <ui:Button name="play-set-back-btn" text="" class="buy-coin__back-btn" />
+    </ui:VisualElement>
+</ui:UXML>

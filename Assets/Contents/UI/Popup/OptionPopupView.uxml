@@ -1,0 +1,61 @@
+﻿<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" editor-extension-mode="False">
+    <Style src="PopupView.uss" />
+    <ui:VisualElement name="option-root" class="popup-root popup-open-anim">
+        <ui:VisualElement name="option-dim-0" class="popup-dim popup-dim--blur" />
+        <ui:VisualElement name="option-dim-1" class="popup-dim popup-dim--soft" />
+        <ui:VisualElement name="option-bg" class="option__bg" picking-mode="Ignore" />
+        <ui:Label name="option-title" text="" class="option__title" picking-mode="Ignore" />
+        <ui:Button name="option-close-btn" text="" class="option__close-btn" />
+        <ui:VisualElement name="option-reward-panel" class="option__reward-panel" picking-mode="Ignore">
+            <ui:Label name="option-reward-title" text="" class="option__reward-title" picking-mode="Ignore" />
+            <ui:VisualElement name="option-reward-coins" class="option__reward-coins" picking-mode="Ignore">
+                <ui:VisualElement class="option__reward-coin option__reward-coin--left" />
+                <ui:VisualElement class="option__reward-coin option__reward-coin--right" />
+                <ui:VisualElement class="option__reward-coin option__reward-coin--center" />
+            </ui:VisualElement>
+            <ui:Label name="option-reward-text" text="" class="option__reward-text" picking-mode="Ignore" />
+            <ui:VisualElement name="option-reward-rows" class="option__reward-rows" picking-mode="Ignore">
+            <ui:VisualElement name="option-reward-row-1" class="option__reward-row option__reward-row--1" picking-mode="Ignore">
+                <ui:Label name="option-row1-label" text="" class="option__reward-label" picking-mode="Ignore" />
+                <ui:Label name="option-row1-value" text="" class="option__reward-value" picking-mode="Ignore" />
+            </ui:VisualElement>
+            <ui:VisualElement name="option-reward-row-2" class="option__reward-row option__reward-row--2" picking-mode="Ignore">
+                <ui:Label name="option-row2-label" text="" class="option__reward-label" picking-mode="Ignore" />
+                <ui:Label name="option-row2-value" text="" class="option__reward-value" picking-mode="Ignore" />
+            </ui:VisualElement>
+            <ui:VisualElement name="option-reward-row-3" class="option__reward-row option__reward-row--3" picking-mode="Ignore">
+                <ui:Label name="option-row3-label" text="" class="option__reward-label" picking-mode="Ignore" />
+                <ui:Label name="option-row3-value" text="" class="option__reward-value" picking-mode="Ignore" />
+            </ui:VisualElement>
+            <ui:VisualElement name="option-reward-row-4" class="option__reward-row option__reward-row--4" picking-mode="Ignore">
+                <ui:Label name="option-row4-label" text="" class="option__reward-label" picking-mode="Ignore" />
+                <ui:Label name="option-row4-value" text="" class="option__reward-value" picking-mode="Ignore" />
+            </ui:VisualElement>
+            </ui:VisualElement>
+        </ui:VisualElement>
+        <ui:VisualElement name="option-btn-panel" class="option__btn-panel">
+            <ui:Button name="option-home-btn" text="" class="option__btn">
+                <ui:Label name="option-home-label" text="" class="option__btn-label" picking-mode="Ignore" />
+            </ui:Button>
+            <ui:Button name="option-restart-btn" text="" class="option__btn">
+                <ui:Label name="option-restart-label" text="" class="option__btn-label" picking-mode="Ignore" />
+            </ui:Button>
+            <ui:VisualElement name="option-play-group" class="option__play-group">
+                <ui:Button name="option-ad-btn" text="" class="option__ad-btn">
+                    <ui:VisualElement name="option-ad-icon" class="option__ad-icon" picking-mode="Ignore" />
+                    <ui:Label name="option-ad-label" text="" class="option__ad-label" picking-mode="Ignore" />
+                </ui:Button>
+                <ui:Button name="option-play-btn" text="" class="option__play-btn">
+                    <ui:Label name="option-play-label" text="" class="option__play-label" picking-mode="Ignore" />
+                    <ui:VisualElement name="option-need-coin-panel" class="option__need-coin-panel" picking-mode="Ignore">
+                        <ui:Label name="option-need-coin-text" text="" class="option__need-coin-text" />
+                        <ui:VisualElement class="option__need-coin-icon" />
+                    </ui:VisualElement>
+                </ui:Button>
+            </ui:VisualElement>
+            <ui:Button name="option-continue-btn" text="" class="option__btn option__continue-btn">
+                <ui:Label name="option-continue-label" text="" class="option__btn-label option__continue-label" picking-mode="Ignore" />
+            </ui:Button>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

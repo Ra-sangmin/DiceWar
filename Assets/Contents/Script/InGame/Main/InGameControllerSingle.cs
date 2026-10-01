@@ -15,9 +15,9 @@ public class InGameControllerSingle : InGameControllerBase
 	}
 
 	// Start is called once before the first execution of Update after the MonoBehaviour is created
-	protected override void Start()
+	protected override void StartReady()
 	{
-		base.Start();
+		base.StartReady();
 	}
 
 	protected override void Update()
@@ -27,7 +27,7 @@ public class InGameControllerSingle : InGameControllerBase
 
 	protected override void MyTurnPlayOn()
 	{
-		endTurnBtn.interactable = true;
+		endTurnBtn.SetEnabled(true);
 	}
 
 	protected override async UniTask OtherTurnPlayOn()

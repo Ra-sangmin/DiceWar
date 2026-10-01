@@ -1,126 +1,163 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
-using UnityEngine.UI;
-using UniRx;
+using UnityEngine.UIElements;
 
+/// <summary>
+/// 영토 거래 제안 팝업. (uGUI Canvas → UI Toolkit 이식)
+/// </summary>
+[RequireComponent(typeof(PanelRenderer))]
 public class LandTradePopup : BasePopup
 {
-    [SerializeField] PlayerToggleIcon playerToggleIconPrefab;
-    [SerializeField] RectTransform playerToggleIconParant;
+	private PanelUI panelUI;
 
-    private List<PlayerToggleIcon> playerToggleIconList = new List<PlayerToggleIcon>();
+	private VisualElement iconPanel;
 
-    private AreaData selectAreaData;
+	private readonly List<PlayerToggleIconElement> playerToggleIconList = new List<PlayerToggleIconElement>();
 
-    public bool buyOn = false;
+	private AreaData selectAreaData;
 
-    private PlayerToggleIcon selectPlayer;
+	public bool buyOn = false;
 
-    private UnityAction proposeBtnClickEventOn;
+	private PlayerToggleIconElement selectPlayer;
 
-    private void Awake()
-    {
-        CreatePlayerToggleIcon();
-    }
+	private UnityAction proposeBtnClickEventOn;
 
-    void CreatePlayerToggleIcon()
-    {
-        PlayerEnum myPlayerEnum = DataManager.Instance.playerData.pe;
+	private void Awake()
+	{
+		panelUI = new PanelUI(this, OnUIReady);
+	}
 
-        for (int i = 0; i < DataManager.Instance.num_player; i++)
-        {
-            PlayerEnum currentPlayerEnum = (PlayerEnum)i;
+	/// <summary> PanelRenderer 의 UI 가 준비되면 한 번 호출된다 (예전 Awake 의 요소 찾기 / 이벤트 등록, 2026-09-29) </summary>
+	private void OnUIReady(VisualElement root)
+	{
+		iconPanel = root.Q<VisualElement>("land-trade-icon-panel");
 
-            if (currentPlayerEnum == myPlayerEnum)
-            {
-                continue;
-            }
+		UnityEngine.UIElements.Button backBtn = root.Q<UnityEngine.UIElements.Button>("land-trade-back-btn");
+		UnityEngine.UIElements.Button cancelBtn = root.Q<UnityEngine.UIElements.Button>("land-trade-cancel-btn");
+		UnityEngine.UIElements.Button proposeBtn = root.Q<UnityEngine.UIElements.Button>("land-trade-propose-btn");
 
-            PlayerToggleIcon playerToggleIcon = Instantiate(playerToggleIconPrefab, playerToggleIconParant);
-            playerToggleIcon.gameObject.SetActive(true);
-            playerToggleIcon.SetPlayerData((PlayerEnum)i);
+		if (backBtn != null) backBtn.clicked += () => { PlayClickSe(); CloseBtnClickOn(); };
+		if (cancelBtn != null) cancelBtn.clicked += () => { PlayClickSe(); CloseBtnClickOn(); };
+		if (proposeBtn != null) proposeBtn.clicked += () => { PlayClickSe(); ProposeBtnClickOn(); };
 
-            int index = playerToggleIconList.Count;
+		PopupMyCoinView.Bind(root, gameObject);
 
-            playerToggleIcon.GetComponent<Button>()
-                .OnClickAsObservable()
-                .Subscribe(_ => PlayerSelectOn(index))
-                .AddTo(gameObject);
+		CreatePlayerToggleIcon();
+	}
 
-            playerToggleIconList.Add(playerToggleIcon);
-        }   
-    }
+	private void OnDestroy()
+	{
+		panelUI?.Dispose();
+	}
 
-    public void PlayerSelectOn(int selectIndex)
-    {
-        PlayerToggleIcon currentSelectPlayer = playerToggleIconList[selectIndex];
+	void PlayClickSe()
+	{
+		SoundManager.Instance.PlaySe(SeEnum.Yes);
+	}
 
-        if (selectPlayer != null && selectPlayer == currentSelectPlayer)
-        {
-            return;
-        }
+	void CreatePlayerToggleIcon()
+	{
+		PlayerEnum myPlayerEnum = DataManager.Instance.playerData.pe;
 
-        if (buyOn && selectAreaData.player != currentSelectPlayer.playerEnum) 
-        {
-            return;
-        }
+		for (int i = 0; i < DataManager.Instance.num_player; i++)
+		{
+			PlayerEnum currentPlayerEnum = (PlayerEnum)i;
 
-        selectPlayer = currentSelectPlayer;
+			if (currentPlayerEnum == myPlayerEnum)
+			{
+				continue;
+			}
 
-        foreach (var playerToggleIcon in playerToggleIconList)
-        {
-            bool selectOn = playerToggleIcon.playerEnum == selectPlayer.playerEnum;
+			PlayerToggleIconElement playerToggleIcon = new PlayerToggleIconElement();
+			playerToggleIcon.SetPlayerData(currentPlayerEnum);
 
-            playerToggleIcon.SelectOn(selectOn);
-        }
-    }
+			int index = playerToggleIconList.Count;
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
+			playerToggleIcon.clickOn = () => PlayerSelectOn(index);
 
-    public void SetDataOn(AreaData selectAreaData , bool buyOn , UnityAction proposeBtnClickEventOn)
-    {
-        this.selectAreaData = selectAreaData;
+			//원본 HorizontalLayoutGroup spacing 142
+			if (index > 0)
+			{
+				playerToggleIcon.Root.style.marginLeft = 142;
+			}
 
-        this.buyOn = buyOn;
+			iconPanel.Add(playerToggleIcon.Root);
 
-        this.proposeBtnClickEventOn = proposeBtnClickEventOn;
+			playerToggleIconList.Add(playerToggleIcon);
+		}
+	}
 
-        if (buyOn)
-        {
-            int index = playerToggleIconList.FindIndex(0, data => data.playerEnum == selectAreaData.player);
-            PlayerSelectOn(index);
-        }
-    }
+	public void PlayerSelectOn(int selectIndex)
+	{
+		PlayerToggleIconElement currentSelectPlayer = playerToggleIconList[selectIndex];
 
-    public void ProposeBtnClickOn()
-    {
-        if (selectPlayer == null)
-        {
-            return;
-        }
+		if (selectPlayer != null && selectPlayer == currentSelectPlayer)
+		{
+			return;
+		}
 
-        PlayerEnum fromPlayerEnum = DataManager.Instance.playerData.pe;
-        PlayerEnum toPlayerEnum = selectPlayer.playerEnum;
+		if (buyOn && selectAreaData.player != currentSelectPlayer.playerEnum)
+		{
+			return;
+		}
 
-        LandTradeRequest request = new LandTradeRequest()
-        {
-            fromPlayerEnum = fromPlayerEnum,
-            toPlayerEnum = toPlayerEnum,
-            areaData = selectAreaData,
-            coinCount = selectPlayer.coinBox.coinCount.Value,
-            buyOn = buyOn,
-        };
+		selectPlayer = currentSelectPlayer;
 
-        ServerManager.Instance.SendMessageOn(request);
+		foreach (var playerToggleIcon in playerToggleIconList)
+		{
+			bool selectOn = playerToggleIcon.playerEnum == selectPlayer.playerEnum;
 
-        proposeBtnClickEventOn();
+			playerToggleIcon.SelectOn(selectOn);
+		}
+	}
 
-        CloseBtnClickOn();
-    }
+	public void SetDataOn(AreaData selectAreaData, bool buyOn, UnityAction proposeBtnClickEventOn)
+	{
+		this.selectAreaData = selectAreaData;
+
+		this.buyOn = buyOn;
+
+		this.proposeBtnClickEventOn = proposeBtnClickEventOn;
+
+		if (buyOn)
+		{
+			//아이콘 목록은 UI 가 준비될 때 만들어진다 (PanelRenderer, 2026-09-29)
+			panelUI.Run(() =>
+			{
+				int index = playerToggleIconList.FindIndex(0, data => data.playerEnum == selectAreaData.player);
+
+				if (index >= 0)
+				{
+					PlayerSelectOn(index);
+				}
+			});
+		}
+	}
+
+	public void ProposeBtnClickOn()
+	{
+		if (selectPlayer == null)
+		{
+			return;
+		}
+
+		PlayerEnum fromPlayerEnum = DataManager.Instance.playerData.pe;
+		PlayerEnum toPlayerEnum = selectPlayer.playerEnum;
+
+		LandTradeRequest request = new LandTradeRequest()
+		{
+			fromPlayerEnum = fromPlayerEnum,
+			toPlayerEnum = toPlayerEnum,
+			areaData = selectAreaData,
+			coinCount = selectPlayer.coinBox.coinCount.Value,
+			buyOn = buyOn,
+		};
+
+		ServerManager.Instance.SendMessageOn(request);
+
+		proposeBtnClickEventOn();
+
+		CloseBtnClickOn();
+	}
 }

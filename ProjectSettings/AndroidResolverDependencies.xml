@@ -2,7 +2,7 @@
   <packages>
     <package>com.google.android.gms:play-services-auth:16+</package>
     <package>com.google.signin:google-signin-support:1.0.4</package>
-    <package>com.unity3d.ads:unity-ads:[4.16.3,4.17[</package>
+    <package>com.unity3d.ads:unity-ads:[4.19.0,4.20[</package>
   </packages>
   <files>
     <file>Assets/GeneratedLocalRepo/GoogleSignIn/Editor/m2repository/com/google/signin/google-signin-support/1.0.4/google-signin-support-1.0.4.aar</file>

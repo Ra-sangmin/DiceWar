@@ -7,11 +7,24 @@ using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.UIElements;
 
 public class DiceWarUIController : MonoBehaviour
 {
-    [SerializeField] DiceWarUI myDiceWarUI;
-    [SerializeField] DiceWarUI enemyDiceWarUI;
+    private DiceWarRowView myDiceWarUI;
+    private DiceWarRowView enemyDiceWarUI;
+
+    /// <summary> UI Toolkit 요소 연결 (기존 MyPanel/EnemyPanel 의 DiceWarUI 대체) </summary>
+    public void InitView(VisualElement root, string myRowName, string myResultName, string enemyRowName, string enemyResultName)
+    {
+        myDiceWarUI = new DiceWarRowView(root.Q<VisualElement>(myRowName), root.Q<Label>(myResultName));
+        enemyDiceWarUI = new DiceWarRowView(root.Q<VisualElement>(enemyRowName), root.Q<Label>(enemyResultName));
+
+        float spacingValue = DataManager.Instance.isMultiOn ? 12 : 20;
+
+        myDiceWarUI.SetSpacing(spacingValue);
+        enemyDiceWarUI.SetSpacing(spacingValue);
+    }
 
     // Start is called before the first frame update
     void Start()
@@ -23,22 +36,6 @@ public class DiceWarUIController : MonoBehaviour
     void Update()
     {
         
-    }
-
-    public void SetTransform(Transform parent)
-    {
-        transform.SetParent(parent);
-        RectTransform rt = transform as RectTransform;
-        //Left 값 설정
-        rt.offsetMin = new Vector2(0, rt.offsetMin.y);
-        //Right 값 설정
-        rt.offsetMax = new Vector2(0, rt.offsetMax.y);
-
-        float spacingValue = DataManager.Instance.isMultiOn ? 12 : 20;
-
-        myDiceWarUI.GetComponentInChildren<HorizontalLayoutGroup>().spacing = spacingValue;
-        enemyDiceWarUI.GetComponentInChildren<HorizontalLayoutGroup>().spacing = spacingValue;
-
     }
 
     public void DiceClear()
@@ -78,7 +75,7 @@ public class DiceWarUIController : MonoBehaviour
 		myDiceWarUI.SetDiceResultText(myDiceWarData.diceSum);
         enemyDiceWarUI.SetDiceResultText(enemyDiceWarData.diceSum);
 
-        DiceWarUI winDiceWarUI = myDiceWarData.diceSum > enemyDiceWarData.diceSum ? myDiceWarUI : enemyDiceWarUI;
+        DiceWarRowView winDiceWarUI = myDiceWarData.diceSum > enemyDiceWarData.diceSum ? myDiceWarUI : enemyDiceWarUI;
 
         winDiceWarUI.WinTextEffectOn();
 

@@ -1,0 +1,22 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" editor-extension-mode="False">
+    <Style src="PopupView.uss" />
+    <ui:VisualElement name="land-trade-root" class="popup-root popup-open-anim">
+        <ui:VisualElement name="land-trade-mask" class="trade-popup__mask" />
+        <ui:Label name="land-trade-title" text="Land Trade" class="trade-popup__title" picking-mode="Ignore" />
+        <ui:Label name="land-trade-sub-title" text="Select Players and offer price" class="trade-popup__sub-title trade-popup__sub-title--narrow" picking-mode="Ignore" />
+        <ui:VisualElement name="land-trade-icon-panel" class="player-toggle-panel" />
+        <ui:Button name="land-trade-back-btn" text="" class="trade-popup__back-btn" />
+        <ui:Button name="land-trade-propose-btn" text="" class="trade-popup__btn trade-popup__propose-btn">
+            <ui:Label name="land-trade-propose-label" text="Propose" class="trade-popup__btn-label" picking-mode="Ignore" />
+        </ui:Button>
+        <ui:Button name="land-trade-cancel-btn" text="" class="trade-popup__btn trade-popup__cancel-btn">
+            <ui:Label name="land-trade-cancel-label" text="Cancel" class="trade-popup__btn-label" picking-mode="Ignore" />
+        </ui:Button>
+        <ui:VisualElement name="my-coin-panel" class="my-coin-panel trade-popup__my-coin">
+            <ui:Label name="my-coin-text" text="0" class="my-coin-panel__text trade-popup__my-coin-text" picking-mode="Ignore" />
+            <ui:Button name="my-coin-plus-btn" text="" class="my-coin-panel__plus-btn trade-popup__my-coin-plus">
+                <ui:VisualElement class="my-coin-panel__plus-icon trade-popup__my-coin-plus-icon" picking-mode="Ignore" />
+            </ui:Button>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

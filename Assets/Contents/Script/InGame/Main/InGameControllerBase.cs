@@ -4,6 +4,7 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using UnityEngine.UIElements;
 using UniRx;
 using System;
 using System.Threading.Tasks;
@@ -13,10 +14,16 @@ using static Unity.VisualScripting.Member;
 using UnityEngine.Assertions.Must;
 using static GameResultPopup;
 
+[RequireComponent(typeof(PanelRenderer))]
 public class InGameControllerBase : MonoBehaviour
 {
 	public MapController mapController;
-	public Button endTurnBtn;
+	protected UnityEngine.UIElements.Button endTurnBtn;
+
+	protected PanelUI panelUI;
+
+	/// <summary> UI Toolkit 루트 (인게임 화면 본체). PanelRenderer 가 준비되기 전에는 null </summary>
+	protected VisualElement UIRoot => panelUI.Root;
 
 	public InGameAreaEditor areaEditor;
 
@@ -26,12 +33,54 @@ public class InGameControllerBase : MonoBehaviour
 
 	protected virtual void Awake()
 	{
-		SetEvent();
+		//PanelRenderer 는 UI 를 비동기로 만든다. 화면 구성은 준비된 뒤 StartReady 에서 (2026-09-29)
+		panelUI = new PanelUI(this, null);
 
-		if (areaEditor != null)
+		SetEvent();
+	}
+
+	protected virtual void OnDestroy()
+	{
+		panelUI?.Dispose();
+	}
+
+	/// <summary> UI Toolkit HUD 버튼 이벤트 연결 (기존 상단 BtnPanel 의 uGUI 버튼 대체) </summary>
+	protected virtual void SetHudEvent()
+	{
+		UnityEngine.UIElements.Button tutorialBtn = UIRoot.Q<UnityEngine.UIElements.Button>("tutorial-btn");
+		UnityEngine.UIElements.Button optionBtn = UIRoot.Q<UnityEngine.UIElements.Button>("option-btn");
+
+		endTurnBtn = UIRoot.Q<UnityEngine.UIElements.Button>("end-turn-btn");
+
+		if (endTurnBtn != null)
 		{
-			areaEditor.SetData(this);
+			endTurnBtn.clicked += () => { PlayClickSe(); EndTurnBtnClickOn(); };
 		}
+
+		if (tutorialBtn != null)
+		{
+			tutorialBtn.clicked += () => { PlayClickSe(); TutorialPopupOn(); };
+		}
+
+		if (optionBtn != null)
+		{
+			optionBtn.clicked += () => { PlayClickSe(); OptionPopupOn(); };
+		}
+
+		//맵 선택 바 (원본 yesBtn / ChangeBtn)
+		MapSelectPanel mapSelectPanel = mapController.inGameBottomController.mapSelectPanel;
+
+		if (mapSelectPanel != null)
+		{
+			mapSelectPanel.startClickOn = GameStartOn;
+			mapSelectPanel.changeClickOn = NewGameCheckOn;
+		}
+	}
+
+	/// <summary> 기존 ButtonSound 컴포넌트 역할 </summary>
+	protected void PlayClickSe()
+	{
+		SoundManager.Instance.PlaySe(SeEnum.Yes);
 	}
 
 	protected virtual void SetEvent()
@@ -45,13 +94,36 @@ public class InGameControllerBase : MonoBehaviour
 
 	protected virtual void Start()
 	{
+		panelUI.Run(StartReady);
+	}
+
+	/// <summary> 예전 Start 본문. 인게임 UI 가 준비된 뒤 한 번 실행된다 (PanelRenderer, 2026-09-29) </summary>
+	protected virtual void StartReady()
+	{
 		SoundManager.Instance.PlayBGM(BGMEnum.Game);
 
-		PopupManager.Instance.SetCanvasParant(transform);
+		PopupManager.Instance.SetPopupParant();
+
+		mapController.SetMapLayer(UIRoot.Q<VisualElement>("map-layer"));
+
+		mapController.InitView(UIRoot);
+
+		mapController.playerIconController.SetIconPanel(UIRoot.Q<VisualElement>("player-icon-panel"));
+
+		mapController.inGameBottomController.InitView(UIRoot);
+
+		SetHudEvent();
+
+		//개발용 치트 패널 (Game_Multi 에만 있다). UI Toolkit 요소를 먼저 물려준 뒤 데이터를 넣는다
+		if (areaEditor != null)
+		{
+			areaEditor.InitView(UIRoot);
+			areaEditor.SetData(this);
+		}
 
 		mapController.CreateMapInit();
 
-		endTurnBtn.interactable = false;
+		endTurnBtn.SetEnabled(false);
 
 		if (DataManager.Instance.mapSelectionOn == false)
 		{
@@ -99,6 +171,9 @@ public class InGameControllerBase : MonoBehaviour
 
 		mapController.inGameBottomController.SetStatus(1);
 
+		//멀티는 첫 TurnRequest 를 받은 뒤 판정한다 (InGameControllerMulti.GameStartOn)
+		firstTurnCheckOn = DataManager.Instance.isMultiOn == false;
+
 		TurnCheck();
 
 		DataManager.Instance.leaveEarlyPopupReadyOn = true;
@@ -106,6 +181,9 @@ public class InGameControllerBase : MonoBehaviour
 
 	public void GoMainOn()
 	{
+		//판을 떠나므로 연패 보너스도 초기화
+		DataManager.Instance.loseCount = 0;
+
 		DataManager.Instance.GameDataClearOn();
 
 		if (DataManager.Instance.isMultiOn)
@@ -161,6 +239,9 @@ public class InGameControllerBase : MonoBehaviour
 	}
 
 
+	/// <summary> 게임이 시작되고 아직 첫 차례를 처리하지 않았다 (Your Color 토스트용) </summary>
+	protected bool firstTurnCheckOn = false;
+
 	protected virtual async void TurnCheck()
 	{
 		DataManager.Instance.playOn = true;
@@ -172,6 +253,17 @@ public class InGameControllerBase : MonoBehaviour
 		if (areaEditor != null)
 		{
 			areaEditor.ActiveOn(myTurn);
+		}
+
+		//첫 차례가 내가 아니면 내 색을 먼저 알려준다 (기획 시트 : 자기 색 구별, 2026-09-26)
+		if (firstTurnCheckOn)
+		{
+			firstTurnCheckOn = false;
+
+			if (myTurn == false)
+			{
+				PopupManager.Instance.YourColorPopupOn();
+			}
 		}
 
 		if (myTurn)
@@ -198,7 +290,7 @@ public class InGameControllerBase : MonoBehaviour
 		mapController.playerIconController.SetIconTurnEffect();
 
 		PlayerEnum currentPlayer = DataManager.Instance.currentPlayer;
-		PlayerIcon playerIcon = mapController.playerIconController.GetPlayerIcon(currentPlayer);
+		PlayerIconElement playerIcon = mapController.playerIconController.GetPlayerIcon(currentPlayer);
 
 		if (playerIcon != null)
 		{
@@ -235,7 +327,7 @@ public class InGameControllerBase : MonoBehaviour
 				nextPlayer = PlayerEnum.Player_0;
 			}
 
-			PlayerIcon playerIcon = mapController.playerIconController.GetPlayerIcon(nextPlayer);
+			PlayerIconElement playerIcon = mapController.playerIconController.GetPlayerIcon(nextPlayer);
 
 			if (playerIcon != null)
 			{
@@ -254,7 +346,7 @@ public class InGameControllerBase : MonoBehaviour
 	{
 		bool gameStart = DataManager.Instance.gameStart.Value;
 
-		endTurnBtn.interactable = gameStart && DataManager.Instance.IsMyTurn();
+		endTurnBtn.SetEnabled(gameStart && DataManager.Instance.IsMyTurn());
 
 		//Debug.LogWarning(DataManager.Instance.IsMyTurn());
 
@@ -267,7 +359,7 @@ public class InGameControllerBase : MonoBehaviour
 
 	protected virtual void EndTurnEventOn()
 	{
-		endTurnBtn.interactable = false;
+		endTurnBtn.SetEnabled(false);
 
 		mapController.SelectClearOn();
 		TokenSourceInit();
@@ -299,6 +391,9 @@ public class InGameControllerBase : MonoBehaviour
 		DataManager.Instance.gameStart.SetValueAndForceNotify(false);
 		DataManager.Instance.playOn = false;
 		DataManager.Instance.AddCoin(-DataManager.Instance.GetNeedCoin());
+
+		//다른 판으로 넘어가므로 연패 보너스는 초기화 (같은 판 '다시하기' 는 유지)
+		DataManager.Instance.loseCount = 0;
 
 		DataManager.Instance.GameDataClearOn();
 
@@ -359,6 +454,12 @@ public class InGameControllerBase : MonoBehaviour
 	public void LeaveEarlyPopupOn()
 	{
 		PopupManager.Instance.LeaveEarlyPopupOn(this , GetCoin(GameResultEnum.LeaveEarly));
+	}
+
+	/// <summary> 조기 종료 시 받는 코인. GiveUpPopup 의 '예상 보상' 표시용이다. (2026-09-19) </summary>
+	public int GetLeaveEarlyCoin()
+	{
+		return GetCoin(GameResultEnum.LeaveEarly);
 	}
 
 	public void LeaveEarlyFinishOn(bool finishOn)

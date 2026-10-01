@@ -41,15 +41,29 @@ public class PlayerIcon : MonoBehaviour
         int colorIndex = DataManager.Instance.GetPlayerColorIndex(playerEnum);
         Color color = DataManager.Instance.GetPlayerColor(colorIndex);
 
-        iconImage.sprite = spriteiconList[colorIndex];
-        aroundBGImage.color = color;
-        selectIconImage.color = color;
+        if (iconImage != null)
+		{
+			iconImage.sprite = spriteiconList[colorIndex];
+		}
+
+		if (aroundBGImage != null)
+		{
+			aroundBGImage.color = color;
+		}
+
+		if (selectIconImage != null)
+		{
+			selectIconImage.color = color;
+		}
 
         SetCenterBGImage(PlayerEnum.Player_None);
     }
 
     void SetCenterBGImage(PlayerEnum playerEnum = PlayerEnum.Player_None)
     {
+        if (centerBGImage == null)
+            return;
+        
         int colorIndex = DataManager.Instance.GetPlayerColorIndex(playerEnum);
 
         Color color = playerEnum == PlayerEnum.Player_None ? new Color32(44, 48, 54, 255) : DataManager.Instance.GetPlayerColor(colorIndex);

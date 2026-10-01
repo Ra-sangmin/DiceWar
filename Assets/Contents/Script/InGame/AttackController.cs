@@ -196,45 +196,6 @@ public class AttackController
 		return attackDataList;
 	}
 
-	/// <summary>
-	/// ���� ū ����� �̾����� ���� ã��
-	/// </summary>
-	/// <param name="playerEnum"></param>
-	/// <returns></returns>
-	private async UniTask<List<AttackData>> GetAdjTarget()
-	{
-		//가장 큰 영역 
-		List<AreaData> bigAreaDataList = DataManager.Instance.SetBundleKey(currentPlayerEnum);
-
-		//큰 영역 제외 자른 영토
-		List<AreaData> otherAreaList = DataManager.Instance.areaDataList.Where(data => data.player == currentPlayerEnum && bigAreaDataList.Any(bigData => bigData.id == data.id) == false).ToList();
-
-		List<AreaData> enemyList = new List<AreaData>();
-
-		List<AttackData> attackDataList = new List<AttackData>();
-
-		foreach (var areaData in bigAreaDataList)
-		{
-			enemyList.AddRange(areaData.CheckAdjAttakList2(otherAreaList));
-		}
-
-		foreach (var enemy in enemyList)
-		{
-			List<AreaData> adjList = enemy.GetAdjList();
-
-			foreach (var adjData in adjList) 
-			{
-				if (adjData.player == currentPlayerEnum &&
-					enemy.dice <= adjData.dice)
-				{
-					attackDataList.Add(new AttackData(adjData, enemy));
-				}
-			}
-		}
-
-		return attackDataList;
-	}
-
 	private int GetMoreDice(PlayerEnum playerEnum)
 	{
 		//���� ū ���� ����
@@ -262,136 +223,218 @@ public class AttackController
 		//모든 영토 수
 		int allAreaCount = DataManager.Instance.areaDataList.Where(data => data.player == currentPlayerEnum).Count();
 
-		//연결된 영토 수
+		//연결된 영토 수 (본인의 connectedCount = 가장 큰 덩어리의 땅 개수)
 		int bigAreaCount = DataManager.Instance.SetBundleKey(currentPlayerEnum).Count;
 
-		//모든 영토의 주사위가 Max 치 인지 
-		bool allDiceMaxOn = DataManager.Instance.areaDataList.Where(data => data.player == currentPlayerEnum).All(data => data.IsDiceMax());
+		AreaData startAreaData = null;
 
-		//모든 영토수가 연결된 영토수와 같거나, 모든 주사위 수가 Max 치일때
-		if (allAreaCount == bigAreaCount || allDiceMaxOn)
+		//본인의 connectedCount가 1인가? (= 가장 큰 덩어리가 땅 1개짜리인가?)
+		if (bigAreaCount == 1)
 		{
-			int moreDice = Mathf.Max(GetMoreDice(currentPlayerEnum), 0);
+			//두 땅을 연결할 수 있는 땅이 있는가? (자신의 두 땅이 땅 하나를 사이에 두고 있는가?)
+			//And 인접한 자신의 땅 중 주사위 2개 이상인 것이 있어서 공격 가능한가?
+			AttackData bridgeAttackData = GetBridgeAttackData();
 
-			int attackCount = (int)(moreDice / 6f);
+			if (bridgeAttackData != null)
+			{
+				//그 땅을 공격
+				await AttackOn(bridgeAttackData.fromAreaData, bridgeAttackData.toAreaData, source);
 
-			await Scenario_2(attackCount , source);
+				return;
+			}
+
+			//땅 1개짜리 덩어리 중 가장 주사위가 많은 땅에서 시작
+			startAreaData = DataManager.Instance.areaDataList
+				.Where(data => data.player == currentPlayerEnum)
+				.OrderByDescending(data => data.dice)
+				.FirstOrDefault();
 		}
-		else
-		{
-			int attackCount = allAreaCount - bigAreaCount;
 
-			await Scenario_1(attackCount , source);
-		}
+		//공격 횟수 : 두 숫자 중 더 큰 숫자 (AI 알고리즘 수정.pptx, 2026-09-26)
+		// 첫째. '모든 땅이 주사위 6개가 되는 공격 횟수' + 1 → 턴이 끝나고 채워져도 6개가 아닌 땅이 생기도록
+		// 둘째. 전체 땅 개수 - 가장 큰 덩어리의 땅 개수
+		int moreDice = Mathf.Max(GetMoreDice(currentPlayerEnum), 0);
+		int fillAttackCount = (int)(moreDice / 6f) + 1;
+		int areaAttackCount = allAreaCount - bigAreaCount;
+		int attackCount = Mathf.Max(fillAttackCount, areaAttackCount);
+
+		//공격 우선순위대로 한 번씩 골라 공격한다. 해당하는 땅이 없으면 횟수가 남아도 턴 종료 (2026-09-26)
+		await HardScenario(attackCount, source, startAreaData);
 	}
 
-	async UniTask Scenario_1(int attackCount , CancellationTokenSource source)
+
+	/// <summary>
+	/// 서로 떨어져 있는 자신의 두 땅을 연결할 수 있는 땅(다리 역할)이 있는지 확인하고,
+	/// 그 땅을 공격할 수 있는(주사위 2개 이상) 인접한 자신의 땅을 찾는다.
+	/// </summary>
+	AttackData GetBridgeAttackData()
+	{
+		foreach (var target in DataManager.Instance.areaDataList)
+		{
+			if (target.player == currentPlayerEnum)
+				continue;
+
+			if (DataManager.Instance.IsAllAlliance(new List<PlayerEnum>() { currentPlayerEnum, target.player }))
+				continue;
+
+			List<AreaData> myAdjList = target.GetAdjList().Where(data => data.player == currentPlayerEnum).ToList();
+
+			//두 땅을 연결할 수 있는 땅인가 (자신의 두 땅이 이 땅을 사이에 두고 있는가)
+			if (myAdjList.Count < 2)
+				continue;
+
+			//인접한 자신의 땅 중 주사위 2개 이상인 것이 있어서 공격 가능한가
+			AreaData attacker = myAdjList.Where(data => data.dice >= 2).OrderByDescending(data => data.dice).FirstOrDefault();
+
+			if (attacker != null)
+			{
+				return new AttackData(attacker, target);
+			}
+		}
+
+		return null;
+	}
+
+	List<AreaData> GetBigAreaDataList(AreaData anchorArea)
+	{
+		if (anchorArea != null)
+		{
+			return new List<AreaData>() { anchorArea };
+		}
+
+		return DataManager.Instance.SetBundleKey(currentPlayerEnum);
+	}
+
+
+	/// <summary>
+	/// Hard AI 공격 루프 (AI 알고리즘 수정.pptx 슬라이드 2, 2026-09-26)
+	/// 공격할 때마다 땅 주인 / 주사위가 바뀌므로 매번 다시 고른다.
+	/// </summary>
+	async UniTask HardScenario(int attackCount, CancellationTokenSource source, AreaData anchorArea = null)
 	{
 		while (attackCount > 0)
 		{
-			//���� ū ����� �̾����� ���� ã��
-			List<AttackData> attackDataList = await GetAdjTarget();
+			AttackData attackData = GetHardAttackData(anchorArea);
 
-			if (attackDataList.Count == 0)
+			//우선순위에 해당하는 땅이 없으면 공격 횟수가 남더라도 턴을 종료한다
+			if (attackData == null)
+				break;
+
+			await AttackOn(attackData.fromAreaData, attackData.toAreaData, source);
+
+			attackCount--;
+
+			//'땅 1개짜리 덩어리에서 시작' 은 첫 공격에만 쓰고, 이후에는 가장 큰 덩어리 기준
+			anchorArea = null;
+		}
+	}
+
+	/// <summary>
+	/// 공격 우선순위 (가장 큰 덩어리와 인접한 땅을 공격)
+	///  첫째. 다른 덩어리와 연결할 수 있으면서, 공격받는 땅의 주사위 ≤ 공격하는 땅의 주사위
+	///  둘째. 공격받는 땅의 주사위 &lt; 공격하는 땅의 주사위
+	///  셋째. 공격받는 땅의 주사위 ≤ 공격하는 땅의 주사위
+	///  → 같은 우선순위 중에서는 세력(연결된 땅 수)이 더 큰 플레이어의 땅을 공격
+	/// </summary>
+	AttackData GetHardAttackData(AreaData anchorArea)
+	{
+		List<AreaData> myAreaList = DataManager.Instance.areaDataList.Where(data => data.player == currentPlayerEnum).ToList();
+
+		List<AreaData> bigAreaList = GetBigAreaDataList(anchorArea);
+		HashSet<int> bigIdSet = new HashSet<int>(bigAreaList.Select(data => data.id));
+
+		//가장 큰 덩어리가 아닌 내 땅 (첫째 순위의 '다른 덩어리')
+		HashSet<int> otherIdSet = new HashSet<int>(myAreaList.Where(data => bigIdSet.Contains(data.id) == false).Select(data => data.id));
+
+		//가장 큰 덩어리와 인접한 공격 가능한 적 땅
+		Dictionary<int, AreaData> targetDic = new Dictionary<int, AreaData>();
+
+		foreach (var bigArea in bigAreaList)
+		{
+			foreach (var adj in bigArea.GetAdjList())
 			{
-				//���� ū ���
-				List<AreaData> bigAreaDataList = DataManager.Instance.SetBundleKey(currentPlayerEnum).Where(data => data.dice > 1).ToList();
+				if (IsEnemyArea(adj) && targetDic.ContainsKey(adj.id) == false)
+				{
+					targetDic.Add(adj.id, adj);
+				}
+			}
+		}
 
-				attackDataList = GetAttackData(bigAreaDataList, 0);
+		List<AttackData> firstList = new List<AttackData>();
+		List<AttackData> secondList = new List<AttackData>();
+		List<AttackData> thirdList = new List<AttackData>();
+
+		foreach (var target in targetDic.Values)
+		{
+			List<AreaData> targetAdjList = target.GetAdjList();
+
+			//첫째 : 이 땅을 먹으면 가장 큰 덩어리와 다른 덩어리가 이어진다.
+			//       공격은 양쪽 덩어리 어느 쪽에서든 가능하다 (주사위가 가장 많은 땅으로)
+			bool bridgeOn = targetAdjList.Any(data => otherIdSet.Contains(data.id));
+
+			if (bridgeOn)
+			{
+				AreaData bridgeAttacker = targetAdjList
+					.Where(data => data.player == currentPlayerEnum && data.dice > 1 && data.dice >= target.dice)
+					.Where(data => anchorArea == null || data.id == anchorArea.id)
+					.OrderByDescending(data => data.dice)
+					.FirstOrDefault();
+
+				if (bridgeAttacker != null)
+				{
+					firstList.Add(new AttackData(bridgeAttacker, target));
+					continue;
+				}
 			}
 
-			if (attackDataList.Count == 0)
+			//둘째 / 셋째 : 가장 큰 덩어리의 땅 중 주사위가 가장 많은 땅으로
+			AreaData attacker = targetAdjList
+				.Where(data => bigIdSet.Contains(data.id) && data.dice > 1 && data.dice >= target.dice)
+				.OrderByDescending(data => data.dice)
+				.FirstOrDefault();
+
+			if (attacker == null)
+				continue;
+
+			if (target.dice < attacker.dice)
 			{
-				attackCount = 0;
+				secondList.Add(new AttackData(attacker, target));
 			}
 			else
 			{
-				int beforeAttackCount = attackCount;
-
-				foreach (var attackData in attackDataList)
-				{
-					if (CheckData(attackData , true))
-						continue;
-
-					await AttackOn(attackData.fromAreaData, attackData.toAreaData, source);
-
-					attackCount--;
-
-					if (attackCount <= 0)
-					{
-						break;
-					}
-				}
-
-				if (beforeAttackCount == attackCount)
-				{
-					break;
-				}
+				thirdList.Add(new AttackData(attacker, target));
 			}
 		}
+
+		foreach (var list in new List<List<AttackData>>() { firstList, secondList, thirdList })
+		{
+			if (list.Count == 0)
+				continue;
+
+			//같은 우선순위 : 세력이 큰 플레이어의 땅 → 주사위 차이가 큰 공격 순
+			return list
+				.OrderByDescending(data => GetPlayerPower(data.toAreaData.player))
+				.ThenByDescending(data => data.fromAreaData.dice - data.toAreaData.dice)
+				.First();
+		}
+
+		return null;
 	}
 
-	async UniTask Scenario_2(int attackCount , CancellationTokenSource source)
+	bool IsEnemyArea(AreaData areaData)
 	{
-		while (attackCount > 0)
-		{
-			//공격 타겟 취득
-			List<AttackData> attackDataList = await GetAdjTarget();
+		if (areaData.player == currentPlayerEnum || areaData.player == PlayerEnum.Player_None)
+			return false;
 
-			if (attackDataList.Count == 0)
-			{
-				//���� ū ���
-				List<AreaData> bigAreaDataList = DataManager.Instance.SetBundleKey(currentPlayerEnum).Where(data => data.dice > 1).ToList();
+		//동맹의 땅은 공격하지 않는다
+		return DataManager.Instance.IsAllAlliance(new List<PlayerEnum>() { currentPlayerEnum, areaData.player }) == false;
+	}
 
-				attackDataList = GetAttackData(bigAreaDataList, 0);
-			}
+	int GetPlayerPower(PlayerEnum playerEnum)
+	{
+		PlayerIconElement playerIcon = playerIconController != null ? playerIconController.GetPlayerIcon(playerEnum) : null;
 
-			if (attackDataList.Count == 0)
-			{
-				//���� ū ���
-				List<AreaData> bigAreaDataList = DataManager.Instance.SetBundleKey(currentPlayerEnum).Where(data => data.dice > 1).ToList();
-
-				PlayerEnum playerEnum = playerIconController.BestBigPlayer();
-
-				//'���� ū ���信' ������ ���� �� �ֻ��� ������ �����鼭, ���� ������ ���ڰ� ū �÷��̾ ���� ����
-				attackDataList = GetAttackDataToPlayer(bigAreaDataList, 1, playerEnum);
-
-				if (attackDataList.Count == 0)
-				{
-					//'���� ū ���信' ������ ���� �� �ֻ��� ������ ���� ������ ����
-					attackDataList.AddRange(GetAttackData(bigAreaDataList, 1));
-
-					if (attackDataList.Count == 0)
-					{
-						var allAreaData = DataManager.Instance.areaDataList.Where(data => data.player == currentPlayerEnum).ToList();
-						//무작위 영토에서 공격 가능 영토 체크
-						attackDataList.AddRange(GetAttackData(allAreaData, 1));
-					}
-				}
-			}
-
-			int beforeAttackCount = attackCount;
-
-			foreach (var attackData in attackDataList)
-			{
-				if (CheckData(attackData, true))
-					continue;
-
-				await AttackOn(attackData.fromAreaData, attackData.toAreaData, source);
-
-				attackCount--;
-
-				if (attackCount <= 0)
-				{
-					break;
-				}
-			}
-
-			if (beforeAttackCount == attackCount)
-			{
-				break;
-			}
-		}
+		return playerIcon != null ? playerIcon.connectedCount : 0;
 	}
 
 	public async UniTask<bool> AttackOn(AreaData myData, AreaData enemyData , CancellationTokenSource source)
@@ -399,65 +442,72 @@ public class AttackController
 		attackEventOn = true;
 		ServerManager.Instance.receiveOn = false;
 
-		int myDice = myData.dice;
-		int enemyDice = enemyData.dice;
+		bool win = false;
 
-		List<int> myDiceResult = GetReseultDiceCount(myDice);
-		List<int> enemyDiceResult = GetReseultDiceCount(enemyDice);
-
-		DiceWarData myDiceWarData = new DiceWarData(myData.player, myDiceResult);
-		DiceWarData enemyDiceWarData = new DiceWarData(enemyData.player, enemyDiceResult);
-
-		myData.ChoisEventOn(true);
-		SoundManager.Instance.PlaySe(SeEnum.Yes);
-
-		int delay = 50;
-		await UniTask.Delay(delay , cancellationToken: source.Token);
-
-		enemyData.ChoisEventOn(true);
-
-		await UniTask.Delay(delay, cancellationToken: source.Token);
-
-		await inGameBottomController.nonePlayPanel.AttackOn(myDiceWarData, enemyDiceWarData , source);
-
-		//���ɿ� �����Ͽ��ٸ�
-		bool win = myDiceWarData.diceSum > enemyDiceWarData.diceSum;
-
-		if (win)
+		try
 		{
-			int resultDice = myData.dice - 1;
-			enemyData.SetDice(resultDice);
-			enemyData.PlayerChangeOn(myData.player);
+			int myDice = myData.dice;
+			int enemyDice = enemyData.dice;
 
-			playerIconController.SetBundleKeyuAll();
+			List<int> myDiceResult = GetReseultDiceCount(myDice);
+			List<int> enemyDiceResult = GetReseultDiceCount(enemyDice);
 
-			SoundManager.Instance.PlaySe(SeEnum.AttackWin);
+			DiceWarData myDiceWarData = new DiceWarData(myData.player, myDiceResult);
+			DiceWarData enemyDiceWarData = new DiceWarData(enemyData.player, enemyDiceResult);
+
+			myData.ChoisEventOn(true);
+			SoundManager.Instance.PlaySe(SeEnum.Yes);
+
+			int delay = 50;
+			await UniTask.Delay(delay , cancellationToken: source.Token);
+
+			enemyData.ChoisEventOn(true);
+
+			await UniTask.Delay(delay, cancellationToken: source.Token);
+
+			await inGameBottomController.nonePlayPanel.AttackOn(myDiceWarData, enemyDiceWarData , source);
+
+			//공격에 성공했다면
+			win = myDiceWarData.diceSum > enemyDiceWarData.diceSum;
+
+			if (win)
+			{
+				int resultDice = myData.dice - 1;
+				enemyData.SetDice(resultDice);
+				enemyData.PlayerChangeOn(myData.player);
+
+				playerIconController.SetBundleKeyuAll();
+
+				SoundManager.Instance.PlaySe(SeEnum.AttackWin);
+			}
+			else
+			{
+				SoundManager.Instance.PlaySe(SeEnum.AttackLose);
+			}
+
+			myData.SetDice(1);
+
+			myData.ChoisEventOn(false);
+			enemyData.ChoisEventOn(false);
+
+			if (choisIndex == myData.id)
+			{
+				SetChoisIndex();
+			}
+
+			if (DataManager.Instance.isMultiOn)
+			{
+				AttackRequestOn(myData, enemyData, myDiceWarData, enemyDiceWarData);
+			}
+
+			delay = 300;
+			await UniTask.Delay(delay, cancellationToken: source.Token);
 		}
-		else 
+		finally
 		{
-			SoundManager.Instance.PlaySe(SeEnum.AttackLose);
+			attackEventOn = false;
+			ServerManager.Instance.receiveOn = true;
 		}
-
-		myData.SetDice(1);
-
-		myData.ChoisEventOn(false);
-		enemyData.ChoisEventOn(false);
-
-		if (choisIndex == myData.id)
-		{
-			SetChoisIndex();
-		}
-
-		if (DataManager.Instance.isMultiOn)
-		{
-			AttackRequestOn(myData, enemyData, myDiceWarData, enemyDiceWarData);
-		}
-
-		delay = 300;
-		await UniTask.Delay(delay, cancellationToken: source.Token);
-
-		attackEventOn = false;
-		ServerManager.Instance.receiveOn = true;
 
 		return win;
 	}
@@ -517,25 +567,30 @@ public class AttackController
 	{
 		ServerManager.Instance.receiveOn = false;
 
-		AreaData fromAreaData = DataManager.Instance.GetAreaData(attackRequest.fromAreaData.id);
-		AreaData toAreaData = DataManager.Instance.GetAreaData(attackRequest.toAreaData.id);
+		try
+		{
+			AreaData fromAreaData = DataManager.Instance.GetAreaData(attackRequest.fromAreaData.id);
+			AreaData toAreaData = DataManager.Instance.GetAreaData(attackRequest.toAreaData.id);
 
-		fromAreaData.ChoisEventOn(true);
-		await UniTask.Delay(100);
-		toAreaData.ChoisEventOn(true);
-		await UniTask.Delay(100);
+			fromAreaData.ChoisEventOn(true);
+			await UniTask.Delay(100);
+			toAreaData.ChoisEventOn(true);
+			await UniTask.Delay(100);
 
-		await inGameBottomController.nonePlayPanel.AttackOn(attackRequest.fromDiceWarData, attackRequest.toDiceWarData, new CancellationTokenSource());
+			await inGameBottomController.nonePlayPanel.AttackOn(attackRequest.fromDiceWarData, attackRequest.toDiceWarData, new CancellationTokenSource());
 
-		fromAreaData.ChoisEventOn(false);
-		toAreaData.ChoisEventOn(false);
+			fromAreaData.ChoisEventOn(false);
+			toAreaData.ChoisEventOn(false);
 
-		DataManager.Instance.SetAreaData(attackRequest.fromAreaData);
-		DataManager.Instance.SetAreaData(attackRequest.toAreaData);
+			DataManager.Instance.SetAreaData(attackRequest.fromAreaData);
+			DataManager.Instance.SetAreaData(attackRequest.toAreaData);
 
-		playerIconController.SetBundleKeyuAll();
-
-		ServerManager.Instance.receiveOn = true;
+			playerIconController.SetBundleKeyuAll();
+		}
+		finally
+		{
+			ServerManager.Instance.receiveOn = true;
+		}
 	}
 }
 

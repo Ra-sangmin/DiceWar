@@ -1,0 +1,10 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" editor-extension-mode="False">
+    <Style src="PopupView.uss" />
+    <ui:VisualElement name="need-coin-root" class="popup-root" picking-mode="Ignore">
+        <ui:VisualElement name="toast-popup" class="need-coin-popup" picking-mode="Ignore">
+            <ui:VisualElement name="need-coin-icon" class="need-coin__coin-icon" picking-mode="Ignore" />
+            <ui:Label name="need-coin-text" text="" class="need-coin__coin-text" picking-mode="Ignore" />
+            <ui:Label name="toast-text" text="More Coin needed" class="need-coin__desc" picking-mode="Ignore" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

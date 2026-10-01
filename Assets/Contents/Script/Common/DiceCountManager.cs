@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using UnityEditor;
 using UnityEngine;
 
 public class DiceCountManager : MonoSingleton<DiceCountManager>
@@ -16,16 +15,18 @@ public class DiceCountManager : MonoSingleton<DiceCountManager>
 
 		string jsonValue = PlayerPrefs.GetString(diceCountListDataKey, string.Empty);
 
-		//임시로 초기화 로직 적용
-		jsonValue = string.Empty;
-
-		if (string.IsNullOrEmpty(jsonValue))
-		{
-			DiceCountListDataInit();
-		}
-		else
+		//Dice Setting 팝업에서 저장한 값을 그대로 쓴다 (예전의 '임시 초기화' 줄 제거, 2026-09-26)
+		if (string.IsNullOrEmpty(jsonValue) == false)
 		{
 			diceCountListData = JsonUtility.FromJson<DiceCountListData>(jsonValue);
+		}
+
+		//저장값이 없거나 깨졌으면(6개 설정이 다 없으면) 기본값으로
+		if (diceCountListData == null ||
+			diceCountListData.diceCountDataList == null ||
+			diceCountListData.diceCountDataList.Count < 6)
+		{
+			DiceCountListDataInit();
 		}
 	}
 
@@ -35,12 +36,13 @@ public class DiceCountManager : MonoSingleton<DiceCountManager>
 
 		diceCountListData.diceCountDataList = new List<DiceCountData>()
 		{
-			new DiceCountData(false, AILevel.Easy,	3,4),
-			new DiceCountData(false, AILevel.Normal,1,4),
-			new DiceCountData(false, AILevel.Hard,	1,4),
-			new DiceCountData(true,  AILevel.Easy,	1,4),
+			//2026-09-26 사용자 지정값
+			new DiceCountData(false, AILevel.Easy,	1,3),
+			new DiceCountData(false, AILevel.Normal,1,3),
+			new DiceCountData(false, AILevel.Hard,	1,3),
+			new DiceCountData(true,  AILevel.Easy,	1,3),
 			new DiceCountData(true,  AILevel.Normal,1,4),
-			new DiceCountData(true,  AILevel.Hard,	1,4),
+			new DiceCountData(true,  AILevel.Hard,	1,3),
 		};
 	}
 

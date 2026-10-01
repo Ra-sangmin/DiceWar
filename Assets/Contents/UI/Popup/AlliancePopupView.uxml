@@ -1,0 +1,29 @@
+﻿<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" editor-extension-mode="False">
+    <Style src="PopupView.uss" />
+    <ui:VisualElement name="alliance-root" class="popup-root popup-open-anim">
+        <ui:VisualElement name="alliance-mask" class="trade-popup__mask" />
+        <ui:Label name="alliance-title" text="" class="trade-popup__title" picking-mode="Ignore" />
+        <ui:Label name="alliance-sub-title" text="" class="trade-popup__sub-title trade-popup__sub-title--wide" picking-mode="Ignore" />
+        <ui:VisualElement name="alliance-icon-panel" class="player-toggle-panel" />
+        <ui:Button name="alliance-back-btn" text="" class="trade-popup__back-btn" />
+        <ui:VisualElement name="alliance-left-coin" class="alliance__left-coin" picking-mode="Ignore">
+            <ui:Label name="alliance-left-coin-label" text="" class="alliance__left-coin-label" />
+            <ui:Label name="alliance-left-coin-text" text="0" class="alliance__left-coin-text" />
+        </ui:VisualElement>
+        <ui:Button name="alliance-propose-btn" text="" class="trade-popup__btn trade-popup__propose-btn trade-popup__propose-btn--alliance">
+            <ui:Label name="alliance-propose-label" text="Propose" class="trade-popup__btn-label" picking-mode="Ignore" />
+        </ui:Button>
+        <ui:Button name="alliance-cancel-btn" text="" class="trade-popup__btn trade-popup__cancel-btn">
+            <ui:Label name="alliance-cancel-label" text="Cancel" class="trade-popup__btn-label" picking-mode="Ignore" />
+        </ui:Button>
+        <ui:VisualElement name="alliance-bottom-row" class="alliance__bottom-row" picking-mode="Ignore">
+            <ui:VisualElement name="alliance-need-coin" class="alliance__need-coin" picking-mode="Ignore">
+                <ui:Label name="alliance-need-coin-label" text="" class="alliance__need-coin-label" picking-mode="Ignore" />
+                <ui:VisualElement name="alliance-select-group" class="alliance__group" picking-mode="Ignore" />
+                <ui:Label name="alliance-need-coin-text" text="0" class="alliance__need-coin-text" picking-mode="Ignore" />
+                <ui:VisualElement class="alliance__need-coin-icon" picking-mode="Ignore" />
+            </ui:VisualElement>
+            <ui:VisualElement name="alliance-exist-group-panel" class="alliance__exist-groups" picking-mode="Ignore" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

@@ -1,77 +1,109 @@
 ﻿using Unity.VisualScripting;
 using UnityEngine;
-using UnityEngine.UI;
+using UnityEngine.UIElements;
 using static GameResultPopup;
 
 public class PopupManager : MonoSingleton<PopupManager>
 {
-	public RectTransform parantTranform = null;
-	//public RectTransform parantRectTranform = null;
+	/// <summary>
+	/// 팝업들이 붙는 부모. 예전에는 Canvas 밑의 또 다른 Canvas 였지만
+	/// 팝업이 전부 UI Toolkit(PanelRenderer) 이라 이제는 그냥 빈 GameObject 다.
+	/// </summary>
+	public Transform parantTranform = null;
 
     public bool otherPopupOn = false;
-    
-    //private OptionPopup optionPopup;
-    //private TutorialPopup tutorialPopup;
+
+    /// <summary> UI Toolkit 팝업의 겹침 순서 (나중에 뜬 팝업이 위) </summary>
+    private int popupSortingOrder = 0;
 
     public override void Init() 
 	{
-		//ParantSet(transform);
 	}
 
-	public void SetCanvasParant(Transform target)
+	/// <summary>
+	/// 씬마다 한 번 호출해서 팝업 부모를 새로 만든다.
+	/// Canvas / GraphicRaycaster 는 필요 없다 — UI Toolkit 패널은 자기 입력 경로를 따로 갖는다.
+	/// </summary>
+	public void SetPopupParant()
 	{
-		Canvas canvas = target.GetComponentInParent<Canvas>();
-		ParantSet(canvas);
-	}
+		if (parantTranform != null)
+		{
+			Destroy(parantTranform.gameObject);
+		}
 
-	public void ParantSet(Canvas canvas)
-	{
 		GameObject newParantObj = new GameObject("PopupParant");
-		newParantObj.transform.SetParent(canvas.transform);
-        RectTransform rectTransform = newParantObj.AddComponent<RectTransform>();
 
-        parantTranform = rectTransform;
-        rectTransform.anchoredPosition3D = new Vector3(0, 0, 0);
-		rectTransform.sizeDelta = (canvas.transform as RectTransform).sizeDelta;
+		parantTranform = newParantObj.transform;
 
-        Canvas newCanvas = parantTranform.AddComponent<Canvas>();
-        newCanvas.overrideSorting = true;
-        newCanvas.sortingOrder = 10;
+		//씬이 바뀌면 겹침 순서도 0 부터 다시 센다
+		popupSortingOrder = 0;
+	}
 
-        parantTranform.AddComponent<GraphicRaycaster>();
+	/// <summary>
+	/// 팝업끼리의 겹침 순서.
+	/// 같은 PanelSettings 를 공유하는 PanelRenderer 는 sortingOrder 로 순서가 정해진다.
+	/// </summary>
+	private T PopupOrderOn<T>(T popup) where T : Component
+	{
+		if (popup == null)
+			return popup;
 
-        rectTransform.transform.localScale = Vector3.one;
+		//PanelRenderer 는 Renderer 라 sortingOrder 가 int 다 (2026-09-29)
+		PanelRenderer panelRenderer = popup.GetComponent<PanelRenderer>();
+
+		if (panelRenderer != null)
+		{
+			popupSortingOrder++;
+			panelRenderer.sortingOrder = popupSortingOrder;
+		}
+
+		return popup;
 	}
 
     public void MainSettingPopupOn()
     {
-		MainSettingPopup mainSettingPopup = Instantiate(Resources.Load<MainSettingPopup>("Popup/Main/MainSettingPopup"), parantTranform);
+		MainSettingPopup mainSettingPopup = PopupOrderOn(Instantiate(Resources.Load<MainSettingPopup>("Popup/Main/MainSettingPopup"), parantTranform));
 	}
 
 	public void MainInfoPopupOn()
 	{
-		MainInfoPopup mainInfoPopup = Instantiate(Resources.Load<MainInfoPopup>("Popup/Main/MainInfoPopup"), parantTranform);
+		MainInfoPopup mainInfoPopup = PopupOrderOn(Instantiate(Resources.Load<MainInfoPopup>("Popup/Main/MainInfoPopup"), parantTranform));
 	}
 
 	public void TermsOfConditionsPopupOn()
 	{
-		TeamOfConditionsPopup teamOfConditionsPopup = Instantiate(Resources.Load<TeamOfConditionsPopup>("Popup/Main/TeamOfConditionsPopup"), parantTranform);
+		TeamOfConditionsPopup teamOfConditionsPopup = PopupOrderOn(Instantiate(Resources.Load<TeamOfConditionsPopup>("Popup/Main/TeamOfConditionsPopup"), parantTranform));
 	}
 
 	public void PrivatePolicyPopupOn()
 	{
-		PrivatePolicyPopup privatePolicyPopup = Instantiate(Resources.Load<PrivatePolicyPopup>("Popup/Main/PrivatePolicyPopup"), parantTranform);
+		PrivatePolicyPopup privatePolicyPopup = PopupOrderOn(Instantiate(Resources.Load<PrivatePolicyPopup>("Popup/Main/PrivatePolicyPopup"), parantTranform));
+	}
+
+	/// <summary>
+	/// 개발용 주사위 개수 설정 팝업. (Main 씬 좌하단 숨김 핫스팟)
+	/// 예전에는 Main 씬에 비활성으로 놓여 있었지만 2026-09-20 부터 다른 팝업과 같이 생성한다.
+	/// </summary>
+	public void DiceSetPopupOn()
+	{
+		DiceSetPopup diceSetPopup = PopupOrderOn(Instantiate(Resources.Load<DiceSetPopup>("Popup/Main/DiceSetPopup"), parantTranform));
 	}
 
 	public void PlaySetPopupOn(bool multiOn)
 	{
-		PlaySetPopup playSetPopup = Instantiate(Resources.Load<PlaySetPopup>("Popup/Main/PlaySetPopup"), parantTranform);
+		PlaySetPopup playSetPopup = PopupOrderOn(Instantiate(Resources.Load<PlaySetPopup>("Popup/Main/PlaySetPopup"), parantTranform));
         playSetPopup.InitOn(multiOn);
+	}
+
+	public OkPopup LogOutPopupOn()
+	{
+		OkPopup okPopup = PopupOrderOn(Instantiate(Resources.Load<OkPopup>("Popup/Common/OkPopup"), parantTranform));
+        return okPopup;
 	}
 
 	public void YourTurnPopupOn()
 	{
-		ToastPopup yourTurnPopup = Instantiate(Resources.Load<ToastPopup>("Popup/InGame/YourTurnPopup"), parantTranform);
+		ToastPopup yourTurnPopup = PopupOrderOn(Instantiate(Resources.Load<ToastPopup>("Popup/InGame/YourTurnPopup"), parantTranform));
 
 		if (yourTurnPopup != null)
 		{
@@ -79,9 +111,34 @@ public class PopupManager : MonoSingleton<PopupManager>
         }
 	}
 
+	/// <summary> 게임 시작 때 첫 차례가 아닌 사람에게 내 색을 알려준다 (Your Turn 과 같은 모양, 2026-09-26) </summary>
+	public void YourColorPopupOn()
+	{
+		YourTurnPopup popup = PopupOrderOn(Instantiate(Resources.Load<YourTurnPopup>("Popup/InGame/YourTurnPopup"), parantTranform));
+
+		if (popup != null)
+		{
+			popup.SetText(LocalizeManager.Instance.GetStrData(LocalizeStatus.Game, 65));
+			popup.ActiveOn();
+		}
+	}
+
+	/// <summary> 내 동맹원이 배신했을 때 : (배신한 사람 색 육각형) 배신! </summary>
+	public void BetrayedPopupOn(PlayerEnum betrayPlayer)
+	{
+		YourTurnPopup popup = PopupOrderOn(Instantiate(Resources.Load<YourTurnPopup>("Popup/InGame/YourTurnPopup"), parantTranform));
+
+		if (popup != null)
+		{
+			popup.SetPlayerIcon(betrayPlayer);
+			popup.SetText(LocalizeManager.Instance.GetStrData(LocalizeStatus.Game, 66));
+			popup.ActiveOn();
+		}
+	}
+
     public void TimeOverPopupOn()
     {
-		ToastPopup timeOverPopup = Instantiate(Resources.Load<ToastPopup>("Popup/InGame/TimeOverPopup"), parantTranform);
+		ToastPopup timeOverPopup = PopupOrderOn(Instantiate(Resources.Load<ToastPopup>("Popup/InGame/TimeOverPopup"), parantTranform));
 
 		if (timeOverPopup != null)
         {
@@ -91,7 +148,7 @@ public class PopupManager : MonoSingleton<PopupManager>
 
     public void InGameWarningPopupOn(string text)
 	{
-		ToastPopup popup = Instantiate(Resources.Load<ToastPopup>("Popup/InGame/InGameWarningPopup"), parantTranform);
+		ToastPopup popup = PopupOrderOn(Instantiate(Resources.Load<ToastPopup>("Popup/InGame/InGameWarningPopup"), parantTranform));
 
 		if (popup != null)
 		{
@@ -102,7 +159,7 @@ public class PopupManager : MonoSingleton<PopupManager>
 
 	public void NeedCoinPopupOn(int needCoin)
 	{
-		NeedCoinPopup needCoinPopup = Instantiate(Resources.Load<NeedCoinPopup>("Popup/InGame/NeedCoinPopup"), parantTranform);
+		NeedCoinPopup needCoinPopup = PopupOrderOn(Instantiate(Resources.Load<NeedCoinPopup>("Popup/InGame/NeedCoinPopup"), parantTranform));
 
 		if (needCoinPopup != null)
 		{
@@ -112,7 +169,7 @@ public class PopupManager : MonoSingleton<PopupManager>
 
 	public void OptionPopupOn(InGameControllerBase inGameController)
     {
-		OptionPopup optionPopup = Instantiate(Resources.Load<OptionPopup>("Popup/InGame/OptionPopup"), parantTranform);
+		OptionPopup optionPopup = PopupOrderOn(Instantiate(Resources.Load<OptionPopup>("Popup/InGame/OptionPopup"), parantTranform));
 
         if (optionPopup != null)
         {
@@ -122,7 +179,7 @@ public class PopupManager : MonoSingleton<PopupManager>
 
 	public void LeaveEarlyPopupOn(InGameControllerBase inGameController, int getCoin)
 	{
-		LeaveEarlyPopup leaveEarlyPopup = Instantiate(Resources.Load<LeaveEarlyPopup>("Popup/InGame/LeaveEarlyPopup"), parantTranform);
+		LeaveEarlyPopup leaveEarlyPopup = PopupOrderOn(Instantiate(Resources.Load<LeaveEarlyPopup>("Popup/InGame/LeaveEarlyPopup"), parantTranform));
 
 		if (leaveEarlyPopup != null)
 		{
@@ -132,7 +189,7 @@ public class PopupManager : MonoSingleton<PopupManager>
 
 	public void TutorialPopupOn()
     {
-		TutorialPopup tutorialPopup = Instantiate(Resources.Load<TutorialPopup>("Popup/InGame/TutorialPopup"), parantTranform);
+		TutorialPopup tutorialPopup = PopupOrderOn(Instantiate(Resources.Load<TutorialPopup>("Popup/InGame/TutorialPopup"), parantTranform));
 
 		if (tutorialPopup != null)
         {
@@ -142,61 +199,41 @@ public class PopupManager : MonoSingleton<PopupManager>
 
     public void GameResultPopupOn(InGameControllerBase inGameController , GameResultEnum gameResultEnum, int coinCount)
     {
-        GameResultPopup gameResultPopup = Instantiate(Resources.Load<GameResultPopup>("Popup/InGame/GameResultPopup"), parantTranform);
+        GameResultPopup gameResultPopup = PopupOrderOn(Instantiate(Resources.Load<GameResultPopup>("Popup/InGame/GameResultPopup"), parantTranform));
         gameResultPopup.DataInit(inGameController, gameResultEnum, coinCount);
     }
-	public void GiveUpPopupOn(InGameControllerBase inGameController, bool newGameOn = false, int coinCount = 0)
+	/// <param name="penaltyFreeOn"> true : 땅이 0 이 되어 뜬 경우 - 지금 끝내면 배신 패널티 면제 (2026-09-26) </param>
+	public void GiveUpPopupOn(InGameControllerBase inGameController, bool newGameOn = false, int coinCount = 0, bool penaltyFreeOn = false)
 	{
-		GiveUpPopup giveUpPopup = Instantiate(Resources.Load<GiveUpPopup>("Popup/InGame/GiveUpPopup"), parantTranform);
-		giveUpPopup.DataInit(inGameController, newGameOn , coinCount);
+		GiveUpPopup giveUpPopup = PopupOrderOn(Instantiate(Resources.Load<GiveUpPopup>("Popup/InGame/GiveUpPopup"), parantTranform));
+		giveUpPopup.DataInit(inGameController, newGameOn , coinCount, penaltyFreeOn);
 	}
 
 	public LandTradePopup LandTradePopupOn()
     {
-        LandTradePopup landTradePopup = Instantiate(Resources.Load<LandTradePopup>("Popup/InGame/LandTradePopup"), parantTranform);
+        LandTradePopup landTradePopup = PopupOrderOn(Instantiate(Resources.Load<LandTradePopup>("Popup/InGame/LandTradePopup"), parantTranform));
 
         return landTradePopup;
     }
 
     public AlliancePopup AlliancePopupOn()
     {
-        AlliancePopup alliancePopup = Instantiate(Resources.Load<AlliancePopup>("Popup/InGame/AlliancePopup"), parantTranform);
+        AlliancePopup alliancePopup = PopupOrderOn(Instantiate(Resources.Load<AlliancePopup>("Popup/InGame/AlliancePopup"), parantTranform));
 
         return alliancePopup;
     }
 
 
-    public AllianceApprovePopup AllianceApprovePopupOn(AllianceRequest AllianceRequest)
-    {
-        AllianceApprovePopup allianceApprovePopup = Instantiate(Resources.Load<AllianceApprovePopup>("Popup/InGame/AllianceApprovePopup"), parantTranform);
-        allianceApprovePopup.SetData(AllianceRequest);
-        return allianceApprovePopup;
-    }
-
     public BetrayPopup BetrayPopupOn()
     {
-        BetrayPopup betrayPopup = Instantiate(Resources.Load<BetrayPopup>("Popup/InGame/BetrayPopup"), parantTranform);
+        BetrayPopup betrayPopup = PopupOrderOn(Instantiate(Resources.Load<BetrayPopup>("Popup/InGame/BetrayPopup"), parantTranform));
 
         return betrayPopup;
     }
 
-    public LandTradeApprovePopup LandTradeApprovePopupOn(LandTradeRequest landTradeRequest)
-    {
-        LandTradeApprovePopup landTradeApprovePopup = Instantiate(Resources.Load<LandTradeApprovePopup>("Popup/InGame/LandTradeApprovePopup"), parantTranform);
-        landTradeApprovePopup.SetData(landTradeRequest);
-        return landTradeApprovePopup;
-    }
-
-	public ApprovePopup ApprovePopup(ApproveData approveData)
-	{
-		ApprovePopup approvePopup = Instantiate(Resources.Load<ApprovePopup>("Popup/InGame/ApprovePopup"), parantTranform);
-		approvePopup.SetData(approveData);
-		return approvePopup;
-	}
-
 	public BuyCoinPopup BuyCoinPopupOn()
     {
-        BuyCoinPopup buyCoinPopup = Instantiate(Resources.Load<BuyCoinPopup>("Popup/Common/BuyCoinPopup"), parantTranform);
+        BuyCoinPopup buyCoinPopup = PopupOrderOn(Instantiate(Resources.Load<BuyCoinPopup>("Popup/Common/BuyCoinPopup"), parantTranform));
 
         return buyCoinPopup;
     }
@@ -209,7 +246,7 @@ public class PopupManager : MonoSingleton<PopupManager>
 
     //		parantTranform.SetAsLastSibling();
 
-    //		OkPopup okPopup = Instantiate(Resources.Load<OkPopup>("Popup/OkPopup"), parantTranform);
+    //		OkPopup okPopup = PopupOrderOn(Instantiate(Resources.Load<OkPopup>("Popup/OkPopup"), parantTranform));
     //#if UNITY_WEBGL || UNITY_STANDALONE
     //#else
     //		okPopup.transform.localScale = Vector3.one * 1.5f;
@@ -225,7 +262,7 @@ public class PopupManager : MonoSingleton<PopupManager>
     //			return null;
 
     //		parantTranform.SetAsLastSibling();
-    //		WarningPopup warningPopup = Instantiate(Resources.Load<WarningPopup>("Popup/WarningPopup"), parantTranform);
+    //		WarningPopup warningPopup = PopupOrderOn(Instantiate(Resources.Load<WarningPopup>("Popup/WarningPopup"), parantTranform));
     //		warningPopup.DataSet(contensStr);
 
     //		Vector3 scale = Vector3.one;

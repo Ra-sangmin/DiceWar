@@ -1,0 +1,91 @@
+﻿/* ===== 기본 폰트 (경기천년제목 Medium / normal, 2026-09-26 변경) =====
+   개별 규칙이 없는 요소가 Unity 기본 테마 폰트(NotInter)로 떨어지지 않도록
+   루트에 한 번 지정해 상속시킨다. (2026-09-19) */
+:root {
+    -unity-font-definition: url("/Assets/Contents/Font/GyeonggiTitle-Medium.ttf");
+    -unity-font-style: normal;
+}
+
+.intro-root {
+    flex-grow: 1;
+    background-image: url("/Assets/Contents/Image/BG/Main/BG2.png");
+    -unity-background-scale-mode: scale-and-crop;
+}
+
+.corner-btn {
+    position: absolute;
+    width: 138px;
+    height: 139px;
+    margin: 0;
+    padding: 0;
+    background-color: rgba(0, 0, 0, 0);
+    border-width: 0;
+    border-radius: 0;
+    -unity-background-scale-mode: scale-to-fit;
+    transition-property: scale;
+    transition-duration: 0.08s;
+}
+
+.corner-btn:hover {
+    scale: 1.05 1.05;
+}
+
+.corner-btn:active {
+    scale: 0.95 0.95;
+}
+
+.corner-btn--info {
+    left: 20px;
+    top: 20px;
+    background-image: url("/Assets/Contents/Image/Button/info_btn.png");
+}
+
+.corner-btn--setting {
+    right: 20px;
+    top: 20px;
+    background-image: url("/Assets/Contents/Image/Button/setting_btn.png");
+}
+
+.btn-panel {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 120px;
+    height: 360px;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    /* 6.7 gap: 형제 간격 (2026-09-29) */
+    gap: 30px;
+}
+
+.signin-btn {
+    width: 540px;
+    height: 105px;
+    margin: 0;
+    padding: 0;
+    background-color: rgba(0, 0, 0, 0);
+    border-width: 0;
+    border-radius: 0;
+    -unity-background-scale-mode: scale-to-fit;
+    transition-property: scale;
+    transition-duration: 0.08s;
+}
+
+.signin-btn:hover {
+    scale: 1.03 1.03;
+}
+
+.signin-btn:active {
+    scale: 0.97 0.97;
+}
+
+/* 원본 VerticalLayoutGroup(spacing 30, MiddleCenter) → 세로 배치, 위아래 15px 씩 */
+
+.signin-btn--google {
+    background-image: url("/Assets/Contents/Image/Button/login_btn_google.png");
+}
+
+.signin-btn--apple {
+    background-image: url("/Assets/Contents/Image/Button/login_btn_apple.png");
+}

@@ -4,19 +4,32 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.UIElements;
 
 public class PlayerIconController : MonoBehaviour
 {
-    [SerializeField] PlayerIcon playerIconPrefab;
-    private List<PlayerIcon> playerIconList = new List<PlayerIcon>();
+    private VisualElement iconPanel;
+    private List<PlayerIconElement> playerIconList = new List<PlayerIconElement>();
 
     public UnityAction gameWinOn = () => { };
     public UnityAction gameLoseOn = () => { };
 
-    public UnityAction<PlayerIcon> playerClickOn = data => { };
+    /// <summary> 멀티에서 동맹이 있는 채로 내 땅이 0 이 됐다 (퇴장 / 관전 선택 팝업, 2026-09-26) </summary>
+    public UnityAction myLandZeroWithAllianceOn = () => { };
+    private bool myLandZeroCheckedOn = false;
+
+    public UnityAction<PlayerIconElement> playerClickOn = data => { };
 
     private void Awake()
     {
+    }
+
+    /// <summary> UIDocument 의 player-icon-panel 을 받아 아이콘을 담을 컨테이너로 쓴다 </summary>
+    public void SetIconPanel(VisualElement iconPanel)
+    {
+        this.iconPanel = iconPanel;
+        this.iconPanel.Clear(VisualElementClearOptions.RecursiveReleaseResources); //6.5+ : 다시 만들 요소라 자원까지 바로 반환 (2026-09-29)
+        playerIconList.Clear();
     }
 
     // Start is called before the first frame update
@@ -32,9 +45,9 @@ public class PlayerIconController : MonoBehaviour
 
     public void SetPlayerIcon()
     {
-        foreach (PlayerIcon playerIcon in playerIconList) 
+        foreach (PlayerIconElement playerIcon in playerIconList) 
         {
-            playerIcon.gameObject.SetActive(false);
+            playerIcon.SetActive(false);
         }
 
         int numPlayer = DataManager.Instance.num_player;
@@ -44,15 +57,16 @@ public class PlayerIconController : MonoBehaviour
         {
             for (int i = playerIconList.Count; i < numPlayer; i++)
             {
-                PlayerIcon playerIcon = Instantiate(playerIconPrefab, transform);
+                PlayerIconElement playerIcon = new PlayerIconElement();
                 playerIcon.playerClickOn = playerClickOn;
+                iconPanel.Add(playerIcon.Root);
                 playerIconList.Add(playerIcon);
             }
         }
 
         for (int i = 0; i < playerIconList.Count; i++)
         {
-            playerIconList[i].gameObject.SetActive(true);
+            playerIconList[i].SetActive(true);
             playerIconList[i].SetPlayer((PlayerEnum)i);
             SetBundleKey(playerIconList[i]);
         }
@@ -67,7 +81,7 @@ public class PlayerIconController : MonoBehaviour
 
 		PlayerEnum myPlayerEnum = DataManager.Instance.playerData.pe;
 
-        PlayerIcon myPlayerIcon = playerIconList.FirstOrDefault(data => data.playerEnum == myPlayerEnum);
+        PlayerIconElement myPlayerIcon = playerIconList.FirstOrDefault(data => data.playerEnum == myPlayerEnum);
 
         if (myPlayerIcon != null)
         {
@@ -101,7 +115,34 @@ public class PlayerIconController : MonoBehaviour
         if (resultList.Any(data => data.playerEnum == myPlayerEnum) == false)
         {
             //Debug.LogWarning("내땅 없음");
-            gameLoseOn();
+            //기획 시트 : 멀티에서 동맹이 있으면 바로 지는 대신, 패널티 없이 퇴장할지 동맹을 유지한 채 관전할지 고른다 (2026-09-26)
+            AllianceData myAllianceData = DataManager.Instance.isMultiOn ? DataManager.Instance.GetMyAllianceData() : null;
+
+            if (myAllianceData == null)
+            {
+                gameLoseOn();
+                return;
+            }
+
+            if (myLandZeroCheckedOn == false)
+            {
+                myLandZeroCheckedOn = true;
+                myLandZeroWithAllianceOn();
+            }
+
+            //관전 중 : 동맹원이 모두 사라지면 패배, 남은 사람이 전부 내 동맹이면 승리 (승리 시 내 몫 유지)
+            List<PlayerEnum> allianceMemberList = DataManager.Instance.GetAllAlliance(myPlayerEnum).allianceDataList
+                .Select(data => data.playerEnum).ToList();
+
+            if (resultList.Any(data => allianceMemberList.Contains(data.playerEnum)) == false)
+            {
+                gameLoseOn();
+            }
+            else if (resultList.All(data => allianceMemberList.Contains(data.playerEnum)))
+            {
+                gameWinOn();
+            }
+
             return;
         }
 
@@ -141,9 +182,9 @@ public class PlayerIconController : MonoBehaviour
         }
     }
 
-    public List<PlayerIcon> GetActiveList()
+    public List<PlayerIconElement> GetActiveList()
     {
-        return playerIconList.Where(data => data.gameObject.activeSelf).ToList();
+        return playerIconList.Where(data => data.IsActive()).ToList();
     }
 
     public List<PlayerEnum> GetActiveDiceLowerList()
@@ -164,9 +205,9 @@ public class PlayerIconController : MonoBehaviour
 		return resultList;
 	}
 
-	public List<PlayerIcon> GetActiveDiceHigherList(List<PlayerToggleIcon>  playerList)
+	public List<PlayerIconElement> GetActiveDiceHigherList(List<PlayerToggleIcon>  playerList)
 	{
-        List<PlayerIcon> newCheckList = new List<PlayerIcon>();
+        List<PlayerIconElement> newCheckList = new List<PlayerIconElement>();
 
         foreach (var item in GetActiveList())
         {
@@ -177,14 +218,14 @@ public class PlayerIconController : MonoBehaviour
 		}
 
 		//연결된 영토가 큰 순으로 취득
-		List<PlayerIcon> resultList = newCheckList.OrderByDescending(data => data.connectedCount).ToList();
+		List<PlayerIconElement> resultList = newCheckList.OrderByDescending(data => data.connectedCount).ToList();
 
 		return resultList;
 	}
 
-	public List<PlayerIcon> GetActiveDiceHigherList(List<AllianceData> playerList)
+	public List<PlayerIconElement> GetActiveDiceHigherList(List<AllianceData> playerList)
 	{
-		List<PlayerIcon> newCheckList = new List<PlayerIcon>();
+		List<PlayerIconElement> newCheckList = new List<PlayerIconElement>();
 
 		foreach (var item in GetActiveList())
 		{
@@ -195,7 +236,7 @@ public class PlayerIconController : MonoBehaviour
 		}
 
 		//연결된 영토가 큰 순으로 취득
-		List<PlayerIcon> resultList = newCheckList.OrderByDescending(data => data.connectedCount).ToList();
+		List<PlayerIconElement> resultList = newCheckList.OrderByDescending(data => data.connectedCount).ToList();
 
 		return resultList;
 	}
@@ -203,7 +244,7 @@ public class PlayerIconController : MonoBehaviour
 	
 
 	//각 플레이어 별로 연결된 영토 확인
-	public void SetBundleKey(PlayerIcon checkPlayerIcon)
+	public void SetBundleKey(PlayerIconElement checkPlayerIcon)
     {
         PlayerEnum checkEnum = checkPlayerIcon.playerEnum;
 
@@ -212,10 +253,23 @@ public class PlayerIconController : MonoBehaviour
 
         if (maxCount <= 0)
         {
+			bool isAI = DataManager.Instance.GetPlayerData(checkPlayerIcon.playerEnum).isAI;
+
+			// AI는 동맹 여부와 상관없이 땅이 없어지면 바로 퇴장
+			if (DataManager.Instance.isMultiOn && isAI && DataManager.Instance.IsAlliance(checkPlayerIcon.playerEnum))
+			{
+				AllianceAllData allianceAllData = DataManager.Instance.BetrayOn(checkPlayerIcon.playerEnum);
+
+				SetBetrayPlayerIcon(checkPlayerIcon.playerEnum);
+				ResetAlliancePlayerIcon(allianceAllData);
+				DataManager.Instance.AllianceClearCheckOn(this);
+
+				checkPlayerIcon.SetActive(false);
+			}
 			// 넘겨 받은 플레이어가 동맹 상태가 아니라면
-			if (DataManager.Instance.IsAlliance(checkPlayerIcon.playerEnum) == false)
+			else if (DataManager.Instance.IsAlliance(checkPlayerIcon.playerEnum) == false)
             {
-				checkPlayerIcon.gameObject.SetActive(false);
+				checkPlayerIcon.SetActive(false);
             }
             else
             {
@@ -234,7 +288,7 @@ public class PlayerIconController : MonoBehaviour
 
                         if (playerIcon != null)
 						{
-							playerIcon.gameObject.SetActive(false);
+							playerIcon.SetActive(false);
 						}
 					}
 				}
@@ -244,33 +298,27 @@ public class PlayerIconController : MonoBehaviour
 		checkPlayerIcon.SetConnectedCount(maxCount);
 	}
 
-    public List<PlayerIcon> GetPlayerIconList()
+    public List<PlayerIconElement> GetPlayerIconList()
     {
         return playerIconList;
     }
 
-    public PlayerIcon GetPlayerIcon(PlayerEnum playerEnum)
+    public PlayerIconElement GetPlayerIcon(PlayerEnum playerEnum)
     {
         return GetActiveList().FirstOrDefault(data => data.playerEnum == playerEnum);
     }
 
-    public List<PlayerIcon> CheckAIAllianceOn(PlayerEnum fromAIEnum)
+    public List<PlayerIconElement> CheckAIAllianceOn(PlayerEnum fromAIEnum)
     {
 		int maxAreaCount = DataManager.Instance.areaDataList.Count;
 
 		maxAreaCount = Mathf.RoundToInt(maxAreaCount / 3.0f);
 
-		List<PlayerIcon> resultList = new List<PlayerIcon>();
+		List<PlayerIconElement> resultList = new List<PlayerIconElement>();
 
-		//단일 세력으로 영토 / 3 보다 큰 세력이 없는지 체크
-		List<PlayerIcon> overPlayerList = GetActiveList().Where(data => data.connectedCount > maxAreaCount).ToList();
-
-		List<PlayerIcon> alliancePlayerList = GetActiveList().Where(data => DataManager.Instance.IsAlliance(data.playerEnum)).ToList();
-
-        int allianceSumCount = alliancePlayerList.Sum(data => data.connectedCount);
-
-		//단일 세력으로 체크 최대 영토 이상인 유저가 없거나, 동맹세력 합이 체크 최대 영토 가 아니라면
-		if (overPlayerList.Count == 0 && allianceSumCount < maxAreaCount)
+		//세력이 전체 땅의 1/3 이상인 플레이어 or 동맹이 있는가? (AI 알고리즘 수정-260927.pptx, 2026-09-28)
+		//예전엔 플레이어는 1/3 '초과', 동맹은 모든 동맹의 합으로 봤다 → 플레이어/동맹 각각 1/3 '이상'
+		if (IsOverThirdPowerOn() == false)
         {
             return resultList;
 		}
@@ -287,7 +335,7 @@ public class PlayerIconController : MonoBehaviour
         //내 세력이 최대 영토 보다 적다면
         if (connectedCount < maxAreaCount)
         {
-            List<PlayerIcon> checkList = GetActiveList()
+            List<PlayerIconElement> checkList = GetActiveList()
                                             .Where(data => data.playerEnum != fromAIEnum && //체크 상대가 당사자가 아니고
                                                            !DataManager.Instance.IsAlliance(data.playerEnum) && // 동맹이 없다면
 														   GetPlayerIcon(data.playerEnum).connectedCount < maxAreaCount) // 세력수가 최대 영토수보다 작다면
@@ -308,24 +356,62 @@ public class PlayerIconController : MonoBehaviour
 	}
 
 
+	/// <summary> 세력(연결 땅 수)이 전체 땅의 1/3 이상인 플레이어 또는 동맹(동맹원 합)이 있는가 </summary>
+	bool IsOverThirdPowerOn()
+	{
+		int allAreaCount = DataManager.Instance.areaDataList.Count;
+
+		List<PlayerEnum> countedList = new List<PlayerEnum>();
+
+		foreach (var playerIcon in GetActiveList())
+		{
+			if (countedList.Contains(playerIcon.playerEnum))
+				continue;
+
+			int power = playerIcon.connectedCount;
+
+			countedList.Add(playerIcon.playerEnum);
+
+			if (DataManager.Instance.IsAlliance(playerIcon.playerEnum))
+			{
+				var memberList = DataManager.Instance.GetAllAlliance(playerIcon.playerEnum).allianceDataList.Select(data => data.playerEnum).ToList();
+
+				power = memberList.Sum(playerEnum => GetPlayerIcon(playerEnum)?.connectedCount ?? 0);
+
+				countedList.AddRange(memberList);
+			}
+
+			if (power * 3 >= allAreaCount)
+				return true;
+		}
+
+		return false;
+	}
+
 	public void SetAlliancePlayerIcon(AllianceResultRequest allianceResultRequest)
     {
-        PlayerEnum orderPlayer = allianceResultRequest.orderData.playerEnum;
+        AllianceAllData allianceAllData = new AllianceAllData() { orderData = allianceResultRequest.orderData , allianceDataList = allianceResultRequest.allianceDataList };
 
-        foreach (var allianceData in allianceResultRequest.allianceDataList)
-        {
-            PlayerIcon playerIcon = GetActiveList().FirstOrDefault(data => data.playerEnum == allianceData.playerEnum);
-
-            if (playerIcon != null)
-            {
-                playerIcon.SetAllianceColor(orderPlayer);
-            }
-        }
+        ResetAlliancePlayerIcon(allianceAllData);
     }
+	public void ResetAlliancePlayerIcon(AllianceAllData allianceAllData)
+	{
+		PlayerEnum orderPlayer = allianceAllData.orderData.playerEnum;
 
-    public void SetBetrayPlayerIcon(PlayerEnum targetPlayerEnum)
+		foreach (var allianceData in allianceAllData.allianceDataList)
+		{
+			PlayerIconElement playerIcon = GetActiveList().FirstOrDefault(data => data.playerEnum == allianceData.playerEnum);
+
+			if (playerIcon != null)
+			{
+				playerIcon.SetAllianceColor(orderPlayer);
+			}
+		}
+	}
+
+	public void SetBetrayPlayerIcon(PlayerEnum targetPlayerEnum)
     {
-        PlayerIcon playerIcon = GetActiveList().FirstOrDefault(data => data.playerEnum == targetPlayerEnum);
+        PlayerIconElement playerIcon = GetActiveList().FirstOrDefault(data => data.playerEnum == targetPlayerEnum);
 
         if (playerIcon != null)
         {

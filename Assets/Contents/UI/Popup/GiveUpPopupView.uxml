@@ -1,0 +1,49 @@
+﻿<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" editor-extension-mode="False">
+    <Style src="PopupView.uss" />
+    <ui:VisualElement name="give-up-root" class="popup-root popup-open-anim">
+        <ui:VisualElement name="give-up-dim-0" class="popup-dim popup-dim--blur" />
+        <ui:VisualElement name="give-up-dim-1" class="popup-dim popup-dim--soft" />
+        <ui:VisualElement name="give-up-bg" class="give-up__bg" picking-mode="Ignore" />
+        <ui:Label name="give-up-title" text="" class="give-up__title" picking-mode="Ignore" />
+        <ui:Label name="give-up-sub-title" text="" class="give-up__sub-title" picking-mode="Ignore" />
+        <ui:Button name="give-up-close-btn" text="" class="give-up__close-btn" />
+        <ui:VisualElement name="give-up-reward-panel" class="give-up__reward-panel" picking-mode="Ignore">
+            <ui:Label name="give-up-reward-title" text="" class="give-up__reward-title" picking-mode="Ignore" />
+            <ui:VisualElement name="give-up-reward-coins" class="give-up__reward-coins" picking-mode="Ignore">
+                <ui:VisualElement class="option__reward-coin give-up__reward-coin--left" />
+                <ui:VisualElement class="option__reward-coin give-up__reward-coin--right" />
+                <ui:VisualElement class="option__reward-coin give-up__reward-coin--center" />
+            </ui:VisualElement>
+            <ui:Label name="give-up-reward-text" text="" class="give-up__reward-text" picking-mode="Ignore" />
+            <ui:VisualElement name="give-up-row-1" class="give-up__reward-row give-up__reward-row--1" picking-mode="Ignore">
+                <ui:Label name="give-up-row1-label" text="" class="give-up__reward-label" picking-mode="Ignore" />
+                <ui:Label name="give-up-row1-value" text="" class="give-up__reward-value" picking-mode="Ignore" />
+            </ui:VisualElement>
+            <ui:VisualElement name="give-up-row-2" class="give-up__reward-row give-up__reward-row--2" picking-mode="Ignore">
+                <ui:Label name="give-up-row2-label" text="" class="give-up__reward-label" picking-mode="Ignore" />
+                <ui:Label name="give-up-row2-value" text="" class="give-up__reward-value give-up__reward-value--minus" picking-mode="Ignore" />
+            </ui:VisualElement>
+            <ui:VisualElement name="give-up-row-3" class="give-up__reward-row give-up__reward-row--3" picking-mode="Ignore">
+                <ui:Label name="give-up-row3-label" text="" class="give-up__reward-label" picking-mode="Ignore" />
+                <ui:Label name="give-up-row3-value" text="" class="give-up__reward-value give-up__reward-value--free" picking-mode="Ignore" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+        <ui:VisualElement name="give-up-btn-panel" class="give-up__btn-panel">
+            <ui:Button name="give-up-return-btn" text="" class="option__btn">
+                <ui:Label name="give-up-return-label" text="" class="option__btn-label" picking-mode="Ignore" />
+            </ui:Button>
+            <ui:VisualElement name="give-up-new-game-group" class="option__play-group give-up__btn-gap">
+                <ui:Button name="give-up-new-game-btn" text="" class="option__play-btn">
+                    <ui:Label name="give-up-new-game-label" text="" class="option__play-label" picking-mode="Ignore" />
+                    <ui:VisualElement name="give-up-need-coin-panel" class="option__need-coin-panel" picking-mode="Ignore">
+                        <ui:Label name="give-up-need-coin-text" text="" class="option__need-coin-text" />
+                        <ui:VisualElement class="option__need-coin-icon" />
+                    </ui:VisualElement>
+                </ui:Button>
+            </ui:VisualElement>
+            <ui:Button name="give-up-go-main-btn" text="" class="option__btn option__continue-btn give-up__btn-gap--wide">
+                <ui:Label name="give-up-go-main-label" text="" class="option__btn-label option__continue-label" picking-mode="Ignore" />
+            </ui:Button>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

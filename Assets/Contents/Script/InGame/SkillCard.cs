@@ -2,16 +2,22 @@
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using UnityEngine.UI;
+using UnityEngine.UIElements;
 
 public class SkillCard : MonoBehaviour
 {
-    [SerializeField] List<Image> skillCardList = new List<Image>();
+    private VisualElement iconElement;
+    private int currentIconIndex = -1;
+
+    /// <summary> UI Toolkit 요소 연결 (원본 Icon_0~3 이미지 교체 대체) </summary>
+    public void InitView(VisualElement iconElement)
+    {
+        this.iconElement = iconElement;
+    }
 
     // Start is called before the first frame update
     void Start()
     {
-        SetCountIcon(DataManager.Instance.playerData.pe);
     }
 
     // Update is called once per frame
@@ -22,19 +28,40 @@ public class SkillCard : MonoBehaviour
 
     public void SetCountIcon(PlayerEnum playerEnum)
     {
+        if (iconElement == null)
+            return;
+
         PlayerData playerData = DataManager.Instance.GetPlayerData(playerEnum);
 
+        //플레이어 데이터가 아직 없으면(맵 생성 전) 건너뛴다
+        if (playerData == null)
+            return;
+
+        //보유 스킬 카드 수(0~3)에 맞는 아이콘. 범위를 벗어나면 원본과 동일하게 0번을 쓴다
         int countIndex = playerData.sc;
 
-        for (int i = 0; i < skillCardList.Count; i++)
+        if (countIndex < 0 || countIndex > 3)
         {
-            bool activeOn = i == countIndex;
-            skillCardList[i].gameObject.SetActive(activeOn);
+            countIndex = 0;
         }
 
-        if (skillCardList.All(data => data.gameObject.activeSelf == false))
+        if (currentIconIndex == countIndex)
+            return;
+
+        if (currentIconIndex >= 0)
         {
-            skillCardList[0].gameObject.SetActive(true);
+            iconElement.RemoveFromClassList("skill-card__icon--" + currentIconIndex);
+        }
+
+        currentIconIndex = countIndex;
+        iconElement.AddToClassList("skill-card__icon--" + currentIconIndex);
+    }
+
+    public void SetActive(bool activeOn)
+    {
+        if (iconElement != null)
+        {
+            iconElement.style.display = activeOn ? DisplayStyle.Flex : DisplayStyle.None;
         }
     }
 }

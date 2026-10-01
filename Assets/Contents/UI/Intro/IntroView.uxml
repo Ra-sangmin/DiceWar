@@ -1,0 +1,11 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" editor-extension-mode="False">
+    <Style src="IntroView.uss" />
+    <ui:VisualElement name="intro-root" class="intro-root">
+        <ui:Button name="info-btn" text="" class="corner-btn corner-btn--info" />
+        <ui:Button name="setting-btn" text="" class="corner-btn corner-btn--setting" />
+        <ui:VisualElement name="btn-panel" class="btn-panel">
+            <ui:Button name="google-btn" text="" class="signin-btn signin-btn--google" />
+            <ui:Button name="apple-btn" text="" class="signin-btn signin-btn--apple" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

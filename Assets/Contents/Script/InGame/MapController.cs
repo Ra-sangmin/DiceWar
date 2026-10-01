@@ -7,21 +7,21 @@ using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
+using UnityEngine.UIElements;
 using static NonePlayPanel;
 
 public class MapController : MonoBehaviour
 {
-    [SerializeField] RectTransform hexagonPanel;
-    [SerializeField] Hexagon hexagonObjPrefab;
-    [SerializeField] HexagonLine hexagonLinePrefab;
-    [SerializeField] MapDice mapDicePrefab;
-    [SerializeField] Button endTurnBtn;
+    /// <summary> 원본 HexagonPanel 의 중심 오프셋 (씬에 박혀있던 값) </summary>
+    [SerializeField] Vector2 mapPanelOffset = new Vector2(-80f, 79.5f);
+
+    private MapLayerView mapLayerView;
 
     [SerializeField] PlayerDataPanel playerDataPanel;
 
-    private List<Hexagon> hexagonList = new List<Hexagon>(); //인접 셀을 포함한 배열(arrangement with adjacent cells)
-	private List<HexagonLine> hexagonLineList = new List<HexagonLine>(); //인접 셀을 포함한 배열(arrangement with adjacent cells)
-	private List<MapDice> mapDiceList = new List<MapDice>();
+    private List<HexagonElement> hexagonList = new List<HexagonElement>(); //인접 셀을 포함한 배열(arrangement with adjacent cells)
+	private List<HexagonLineElement> hexagonLineList = new List<HexagonLineElement>(); //인접 셀을 포함한 배열(arrangement with adjacent cells)
+	private List<MapDiceElement> mapDiceList = new List<MapDiceElement>();
 
     private bool diceAddEventOn = false;
     private bool attackEventOn = false;
@@ -46,6 +46,18 @@ public class MapController : MonoBehaviour
 		//SetEvent();
 	}
 
+    /// <summary> UIDocument 의 map-layer 를 받아 맵 레이어를 구성한다 (InGameControllerBase 에서 호출) </summary>
+    public void SetMapLayer(VisualElement mapLayer)
+    {
+        mapLayerView = new MapLayerView(mapLayer);
+    }
+
+    /// <summary> UI Toolkit 요소 연결 </summary>
+    public void InitView(VisualElement root)
+    {
+        playerDataPanel.InitView(root);
+    }
+
     public void SetTimer(Timer timer)
     {
         this.timer = timer;
@@ -59,14 +71,13 @@ public class MapController : MonoBehaviour
 
         inGameBottomController.nonePlayPanel.skillBtnClickEventOn = SkillBtnClickEventOn;
     }
-    private void PlayerClickOn(PlayerIcon PlayerIcon)
+    private void PlayerClickOn(PlayerIconElement PlayerIcon)
     {
         if (DataManager.Instance.isMultiOn == false)
         {
             return;
         }
 
-        playerDataPanel.gameObject.SetActive(true);
         playerDataPanel.SetData(PlayerIcon);
     }
 
@@ -111,19 +122,18 @@ public class MapController : MonoBehaviour
 
     void SetHexagonPanel()
     {
-        hexagonPanel.anchoredPosition3D = DataManager.Instance.GetHexagonPanelPos();
+        mapLayerView.SetOrigin(mapPanelOffset, DataManager.Instance.GetHexagonPanelPos());
     }
 
     void CreateHexagon()
     {
-        RectTransform rectTransform = hexagonObjPrefab.transform as RectTransform;
-        rectTransform.sizeDelta = DataManager.Instance.GetHexagonSizeDelta();
+        Vector2 hexagonSize = DataManager.Instance.GetHexagonSizeDelta();
 
         for (int i = 0; i < DataManager.Instance.GetCelMax(); i++)
         {
-            Hexagon hexagon = Instantiate(hexagonObjPrefab, hexagonObjPrefab.transform.parent);
+            HexagonElement hexagon = mapLayerView.CreateHexagon(hexagonSize);
 
-            hexagon.gameObject.SetActive(true);
+            hexagon.SetActive(true);
             hexagon.SetPos(i);
             hexagon.clickOn = HexagonClickOn;
 
@@ -133,14 +143,13 @@ public class MapController : MonoBehaviour
 
 	void CreateHexagonLine()
 	{
-		RectTransform rectTransform = hexagonLinePrefab.transform as RectTransform;
-		rectTransform.sizeDelta = DataManager.Instance.GetHexagonSizeDelta();
+		Vector2 hexagonSize = DataManager.Instance.GetHexagonSizeDelta();
 
 		for (int i = 0; i < DataManager.Instance.GetCelMax(); i++)
 		{
-			HexagonLine hexagon = Instantiate(hexagonLinePrefab, hexagonLinePrefab.transform.parent);
+			HexagonLineElement hexagon = mapLayerView.CreateHexagonLine(hexagonSize);
 
-			hexagon.gameObject.SetActive(true);
+			hexagon.SetActive(true);
 			hexagon.SetPos(i);
 
 			hexagonLineList.Add(hexagon);
@@ -169,7 +178,7 @@ public class MapController : MonoBehaviour
 
         for (int i = 0; i < DataManager.Instance.GetCelMax(); i++)
         {
-            Hexagon hexagon = hexagonList[i];
+            HexagonElement hexagon = hexagonList[i];
 
             //SetArea(i);
 
@@ -177,11 +186,11 @@ public class MapController : MonoBehaviour
 
             if (areaData == null)
             {
-                hexagon.gameObject.SetActive(false);
+                hexagon.SetActive(false);
                 continue;
             }
 
-            hexagon.gameObject.SetActive(true);
+            hexagon.SetActive(true);
 
             hexagon.SetArea(areaData.id);
             hexagon.SetPlayer(areaData.player);
@@ -226,7 +235,7 @@ public class MapController : MonoBehaviour
         {
             AreaData areaData = areaDataList[i];
 
-            mapDiceList[i].gameObject.SetActive(true);
+            mapDiceList[i].SetActive(true);
 
             if (areaData.id > 0)
             {
@@ -256,20 +265,20 @@ public class MapController : MonoBehaviour
 
         foreach (var mapDice in mapDiceList)
         {
-            mapDice.gameObject.SetActive(false);
+            mapDice.SetActive(false);
         }
 
         if (mapDiceList.Count < areaDataList.Count)
         {
             for (int i = mapDiceList.Count; i < areaDataList.Count; i++)
             {
-                MapDice mapDice = CreateMapDice();
+                MapDiceElement mapDice = CreateMapDice();
                 mapDiceList.Add(mapDice);
             }
         }
     }
 
-    MapDice CreateMapDice()
+    MapDiceElement CreateMapDice()
     {
         Vector2 scaleValue = Vector2.zero;
 
@@ -280,11 +289,11 @@ public class MapController : MonoBehaviour
             case MapSizeEnum.Large: scaleValue = Vector2.one * 0.6f; break;
         }
 
-        mapDicePrefab.transform.localScale = scaleValue;
+        MapDiceElement mapDice = mapLayerView.CreateMapDice();
 
-        MapDice mapDice = Instantiate(mapDicePrefab, mapDicePrefab.transform.parent);
+        mapDice.Root.style.scale = new Scale(scaleValue);
 
-        mapDice.gameObject.SetActive(true);
+        mapDice.SetActive(true);
         mapDice.SetDice(0);
 
         return mapDice;
@@ -292,7 +301,7 @@ public class MapController : MonoBehaviour
 
     void SetAroundLine(Vector2 posIndex, int i)
     {
-        HexagonLine hexagonLine = hexagonLineList[i];
+        HexagonLineElement hexagonLine = hexagonLineList[i];
 
 		if (posIndex.y == 0)
         {
@@ -414,9 +423,19 @@ public class MapController : MonoBehaviour
 
                 attackEventOn = true;
 
-				await attackController.AttackOn(beforeAreaData, areaData, new CancellationTokenSource());
+				try
+				{
+					await attackController.AttackOn(beforeAreaData, areaData, new CancellationTokenSource());
+				}
+				finally
+				{
+					attackEventOn = false;
+				}
 
-				attackEventOn = false;
+				if (DataManager.Instance.isMultiOn && timer != null)
+				{
+					timer.AddExtraTimeOn();
+				}
 			}
 		}
 	}
@@ -493,7 +512,7 @@ public class MapController : MonoBehaviour
     {
         diceAddEventOn = true;
 
-        PlayerIcon playerIcon = playerIconController.GetPlayerIcon(playerEnum);
+        PlayerIconElement playerIcon = playerIconController.GetPlayerIcon(playerEnum);
 
         if (playerIcon == null)
         {

@@ -1,0 +1,23 @@
+﻿<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" editor-extension-mode="False">
+    <Style src="MainView.uss" />
+    <ui:VisualElement name="main-root" class="main-root">
+        <ui:Button name="info-btn" text="" class="corner-btn corner-btn--info" />
+        <ui:Button name="setting-btn" text="" class="corner-btn corner-btn--setting" />
+        <ui:Button name="dice-setting-btn" text="" class="dice-setting-btn" />
+        <ui:Button name="single-play-btn" text="" class="play-btn play-btn--single">
+            <ui:Label name="single-play-label" text="Single Player" class="play-btn__label" />
+        </ui:Button>
+        <ui:Button name="multi-play-btn" text="" class="play-btn play-btn--multi">
+            <ui:Label name="multi-play-label" text="Multi Players" class="play-btn__label" />
+        </ui:Button>
+        <ui:Button name="tutorial-btn" text="" class="play-btn play-btn--tutorial">
+            <ui:Label name="tutorial-label" text="Tutorial" class="play-btn__label" />
+        </ui:Button>
+        <ui:VisualElement name="coin-panel" class="coin-panel">
+            <ui:VisualElement name="coin-bg" class="coin-bg">
+                <ui:VisualElement name="coin-icon" class="coin-icon" picking-mode="Ignore" />
+                <ui:Label name="coin-text" text="0" class="coin-text" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

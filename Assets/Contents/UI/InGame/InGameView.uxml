@@ -1,0 +1,182 @@
+﻿<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" editor-extension-mode="False">
+    <Style src="InGameView.uss" />
+    <ui:VisualElement name="ingame-root" class="ingame-root">
+        <ui:VisualElement name="ingame-bg" class="ingame-bg" picking-mode="Ignore" />
+        <ui:VisualElement name="map-layer" class="map-layer" />
+        <ui:VisualElement name="hud-layer" class="hud-layer" picking-mode="Ignore">
+            <ui:Button name="tutorial-btn" text="" class="ingame-corner-btn ingame-corner-btn--tutorial" />
+            <ui:Button name="option-btn" text="" class="ingame-corner-btn ingame-corner-btn--option" />
+            <ui:VisualElement name="player-icon-panel" class="player-icon-panel" picking-mode="Ignore" />
+            <ui:VisualElement name="none-play-panel" class="none-play-panel">
+                <ui:VisualElement name="none-play-bg" class="none-play__bg" />
+                <ui:VisualElement name="message-bar" class="none-play__message-bar">
+                    <ui:Label name="intro-text" text="" class="none-play__intro-text" />
+                </ui:VisualElement>
+                <ui:VisualElement name="dice-row-my" class="dice-war__row dice-war__row--my" />
+                <ui:Label name="dice-result-my" text="" class="dice-war__result dice-war__result--my" />
+                <ui:VisualElement name="dice-row-enemy" class="dice-war__row dice-war__row--enemy" />
+                <ui:Label name="dice-result-enemy" text="" class="dice-war__result dice-war__result--enemy" />
+                <ui:VisualElement name="skill-card-icon" class="skill-card__icon" />
+                <ui:Button name="skill-btn" text="" class="skill-card__btn" />
+                <ui:VisualElement name="skill-btn-panel" class="skill-btn-panel">
+                    <ui:Button name="skill-btn-betray" class="skill-menu-btn skill-menu-btn--normal">
+                        <ui:Label name="skill-btn-betray-label" text="Betray" class="skill-menu-btn__label" />
+                    </ui:Button>
+                    <ui:Button name="skill-btn-ally" class="skill-menu-btn skill-menu-btn--normal">
+                        <ui:Label name="skill-btn-ally-label" text="Ally" class="skill-menu-btn__label" />
+                    </ui:Button>
+                    <ui:Button name="skill-btn-sell" class="skill-menu-btn skill-menu-btn--normal">
+                        <ui:Label name="skill-btn-sell-label" text="Sell" class="skill-menu-btn__label" />
+                    </ui:Button>
+                    <ui:Button name="skill-btn-buy" class="skill-menu-btn skill-menu-btn--normal">
+                        <ui:Label name="skill-btn-buy-label" text="Buy" class="skill-menu-btn__label" />
+                    </ui:Button>
+                    <ui:Button name="skill-btn-cancel" class="skill-menu-btn skill-menu-btn--cancel">
+                        <ui:Label name="skill-btn-cancel-label" text="Cancel" class="skill-menu-btn__label" />
+                    </ui:Button>
+                </ui:VisualElement>
+                <ui:VisualElement name="timer" class="timer">
+                    <ui:VisualElement name="timer-inactive" class="timer__inactive" />
+                    <ui:VisualElement name="timer-active" class="timer__active">
+                        <ui:VisualElement name="timer-fill-area" class="timer__fill-area">
+                            <ui:VisualElement name="timer-fill" class="timer__fill" />
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+                </ui:VisualElement>
+                <ui:Button name="end-turn-btn" class="end-turn-btn">
+                    <ui:Label name="end-turn-label" text="" class="end-turn-btn__label" />
+                </ui:Button>
+                <ui:VisualElement name="stash-panel" class="stash-panel">
+                    <ui:VisualElement class="stash-panel__dice" />
+                    <ui:Label name="stash-text" text="" class="stash-panel__text" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+            <ui:VisualElement name="map-select-panel" class="map-select-panel">
+                <ui:VisualElement name="map-select-bg" class="map-select__bg" picking-mode="Ignore" />
+                <ui:VisualElement name="map-select-player-row" class="map-select__player-row" picking-mode="Ignore">
+                    <ui:Label name="map-select-player-label" text="" class="map-select__player-label" />
+                    <ui:VisualElement name="map-select-player-icon" class="map-select__player-icon" />
+                </ui:VisualElement>
+                <ui:VisualElement name="map-select-change-group" class="map-select__change-group">
+                    <ui:Button name="map-select-ad-btn" text="" class="map-select__ad-btn">
+                        <ui:VisualElement name="map-select-ad-icon" class="map-select__ad-icon" picking-mode="Ignore" />
+                        <ui:Label name="map-select-ad-label" text="" class="map-select__ad-label" picking-mode="Ignore" />
+                    </ui:Button>
+                    <ui:Button name="map-select-play-btn" text="" class="map-select__play-btn">
+                        <ui:Label name="map-select-play-label" text="" class="map-select__play-label" picking-mode="Ignore" />
+                        <ui:VisualElement name="map-select-need-coin-panel" class="map-select__need-coin-panel" picking-mode="Ignore">
+                            <ui:Label name="map-select-need-coin-text" text="" class="map-select__need-coin-text" />
+                            <ui:VisualElement name="map-select-coin-icon" class="map-select__coin-icon" />
+                        </ui:VisualElement>
+                    </ui:Button>
+                </ui:VisualElement>
+                <ui:Button name="map-select-yes-btn" text="" class="map-select__yes-btn">
+                    <ui:Label name="map-select-yes-label" text="" class="map-select__yes-label" picking-mode="Ignore" />
+                </ui:Button>
+            </ui:VisualElement>
+            <ui:VisualElement name="player-data-panel" class="player-data-panel">
+                <ui:VisualElement name="player-data-skill-panel" class="player-data__skill-panel">
+                    <ui:VisualElement name="player-data-line" class="player-data__line" />
+                    <ui:VisualElement name="player-data-skill-icon" class="player-data__skill-icon" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+            <ui:VisualElement name="alliance-approve-panel" class="alliance-approve-panel" picking-mode="Ignore">
+                <ui:VisualElement name="alliance-approve-bar" class="alliance-approve__bar" picking-mode="Ignore">
+                    <ui:Label name="alliance-approve-title" text="" class="alliance-approve__title" picking-mode="Ignore" />
+                    <ui:VisualElement name="alliance-approve-icon-panel" class="alliance-approve__icon-panel" picking-mode="Ignore">
+                        <ui:Label name="alliance-approve-result-title" text="" class="alliance-approve__result-title" picking-mode="Ignore" />
+                        <ui:Label name="alliance-approve-count" text="" class="alliance-approve__count" picking-mode="Ignore" />
+                    </ui:VisualElement>
+                    <ui:VisualElement name="alliance-approve-reward-panel" class="alliance-approve__reward-panel" picking-mode="Ignore">
+                        <ui:Label name="alliance-approve-reward" text="" class="alliance-approve__reward" picking-mode="Ignore" />
+                        <ui:VisualElement class="alliance-approve__coin" picking-mode="Ignore" />
+                    </ui:VisualElement>
+                    <ui:Button name="alliance-approve-cancel-btn" text="" class="alliance-approve__cancel-btn">
+                        <ui:Label name="alliance-approve-cancel-label" text="" class="alliance-approve__cancel-label" picking-mode="Ignore" />
+                    </ui:Button>
+                </ui:VisualElement>
+            </ui:VisualElement>
+            <ui:VisualElement name="approve-layer" class="approve-layer" picking-mode="Ignore">
+                <ui:VisualElement name="approve-popup" class="approve-popup">
+                    <ui:VisualElement name="approve-contens-0" class="approve__contens-0" picking-mode="Ignore" />
+                    <ui:VisualElement name="approve-contens-1" class="approve__contens-1" picking-mode="Ignore" />
+                    <ui:VisualElement name="approve-contents-panel" class="approve__contents-panel">
+                        <ui:VisualElement name="approve-trade-panel" class="approve__sub-panel">
+                            <ui:Label name="approve-trade-title" text="" class="approve__title" />
+                            <ui:VisualElement name="approve-trade-icon" class="approve__player-icon">
+                                <ui:VisualElement name="approve-trade-icon-bg" class="approve__player-icon-bg" />
+                                <ui:VisualElement name="approve-trade-icon-fg" class="approve__player-icon-fg" />
+                            </ui:VisualElement>
+                            <ui:Label name="approve-trade-subtitle" text="Offer Price" class="approve__subtitle" />
+                        </ui:VisualElement>
+                        <ui:VisualElement name="approve-coin-panel" class="approve__coin-panel" picking-mode="Ignore">
+                            <ui:Label name="approve-coin-text" text="0" class="approve__coin-text" />
+                            <ui:VisualElement name="approve-coin-icon" class="approve__coin-icon" />
+                        </ui:VisualElement>
+                        <ui:Button name="approve-refuse-btn" text="" class="approve__refuse-btn">
+                            <ui:Label name="approve-refuse-label" text="Refuse" class="approve__btn-label" picking-mode="Ignore" />
+                        </ui:Button>
+                        <ui:Button name="approve-accept-btn" text="" class="approve__accept-btn">
+                            <ui:Label name="approve-accept-label" text="Accept" class="approve__btn-label" picking-mode="Ignore" />
+                        </ui:Button>
+                    </ui:VisualElement>
+                </ui:VisualElement>
+                <ui:VisualElement name="approve-alliance-bar" class="approve-alliance__bar" picking-mode="Ignore">
+                    <ui:Label name="approve-alliance-bar-title" text="" class="approve-alliance__title" picking-mode="Ignore" />
+                    <ui:VisualElement name="approve-alliance-bar-icons" class="approve-alliance__icon-panel" picking-mode="Ignore" />
+                    <ui:VisualElement name="approve-alliance-bar-reward-panel" class="approve-alliance__reward-panel" picking-mode="Ignore">
+                        <ui:Label name="approve-alliance-bar-reward" text="" class="approve-alliance__reward" picking-mode="Ignore" />
+                        <ui:VisualElement class="approve-alliance__coin" picking-mode="Ignore" />
+                    </ui:VisualElement>
+                    <ui:Button name="approve-alliance-refuse-btn" text="" class="approve-alliance__refuse-btn">
+                        <ui:Label name="approve-alliance-refuse-label" text="" class="approve-alliance__btn-label" picking-mode="Ignore" />
+                    </ui:Button>
+                    <ui:Button name="approve-alliance-accept-btn" text="" class="approve-alliance__accept-btn">
+                        <ui:Label name="approve-alliance-accept-label" text="" class="approve-alliance__btn-label" picking-mode="Ignore" />
+                        <ui:VisualElement name="approve-alliance-betray-coin" class="approve-alliance__betray-coin" picking-mode="Ignore">
+                            <ui:Label name="approve-alliance-betray-coin-text" text="" class="approve-alliance__betray-coin-text" picking-mode="Ignore" />
+                            <ui:VisualElement class="approve-alliance__betray-coin-icon" picking-mode="Ignore" />
+                        </ui:VisualElement>
+                    </ui:Button>
+                </ui:VisualElement>
+                <!-- 영토 교환 제안 받기 바 (2026-09-26 시안 'Land trade 제안 받기'). 동맹 바와 같은 틀을 쓴다 -->
+                <ui:VisualElement name="approve-trade-bar" class="approve-alliance__bar" picking-mode="Ignore">
+                    <ui:VisualElement name="approve-trade-bar-icon" class="approve-trade__icon" picking-mode="Ignore" />
+                    <ui:Label name="approve-trade-bar-title" text="" class="approve-alliance__title approve-trade__title" picking-mode="Ignore" />
+                    <ui:Button name="approve-trade-refuse-btn" text="" class="approve-alliance__refuse-btn">
+                        <ui:Label name="approve-trade-refuse-label" text="" class="approve-alliance__btn-label" picking-mode="Ignore" />
+                    </ui:Button>
+                    <ui:Button name="approve-trade-accept-btn" text="" class="approve-alliance__accept-btn">
+                        <ui:Label name="approve-trade-accept-label" text="" class="approve-alliance__btn-label" picking-mode="Ignore" />
+                    </ui:Button>
+                </ui:VisualElement>
+                <ui:Button name="approve-before-btn" text="" class="approve__nav-btn approve__nav-btn--before" />
+                <ui:Button name="approve-after-btn" text="" class="approve__nav-btn approve__nav-btn--after">
+                    <ui:Label name="approve-count-badge" text="" class="approve__count-badge" picking-mode="Ignore" />
+                </ui:Button>
+            </ui:VisualElement>
+            <!-- 개발용 치트 패널 (InGameAreaEditor). 에디터/윈도우 빌드에서만 동작하고 기본은 숨김 -->
+            <ui:VisualElement name="area-editor-layer" class="area-editor" picking-mode="Ignore">
+                <ui:Button name="area-editor-on-btn" text="" class="area-editor__on-btn" />
+                <ui:VisualElement name="area-editor-panel" class="area-editor__panel">
+                    <ui:Button name="area-editor-add-time-btn" text="" class="area-editor__btn area-editor__btn--time">
+                        <ui:Label text="시간 증가 +10초" class="area-editor__btn-label area-editor__btn-label--dark" picking-mode="Ignore" />
+                    </ui:Button>
+                    <ui:Button name="area-editor-add-skill-btn" text="" class="area-editor__btn area-editor__btn--skill">
+                        <ui:Label text="스킬카드 증가" class="area-editor__btn-label area-editor__btn-label--dark" picking-mode="Ignore" />
+                    </ui:Button>
+                    <ui:Button name="area-editor-get-area-toggle" text="" class="area-editor__btn area-editor__btn--toggle area-editor__btn--get-area">
+                        <ui:Label text="영토취득" class="area-editor__btn-label" picking-mode="Ignore" />
+                    </ui:Button>
+                    <ui:Button name="area-editor-player-icon" text="" class="area-editor__player-icon">
+                        <ui:Label name="area-editor-player-my-text" text="본인" class="area-editor__player-my-text" picking-mode="Ignore" />
+                    </ui:Button>
+                    <ui:Button name="area-editor-get-dice-toggle" text="" class="area-editor__btn area-editor__btn--toggle area-editor__btn--get-dice">
+                        <ui:Label text="주사위수 변경" class="area-editor__btn-label" picking-mode="Ignore" />
+                    </ui:Button>
+                    <ui:Button name="area-editor-dice-icon" text="" class="area-editor__dice-icon" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

@@ -4,6 +4,17 @@ const express = require('express');
 const clients = new Map();
 const HEARTBEAT_TIMEOUT = 60000; // 60초
 const port = 8000;
+
+// 인게임 중 연결이 끊긴 유저를 바로 퇴장시키지 않고 재입장을 기다리는 시간
+// (앱이 잠깐 백그라운드에 갔다가 돌아오며 소켓이 새로 열리는 경우 대비)
+const REJOIN_GRACE_MS = 15000;
+// 재입장 대기 중 쌓아둘 최대 패킷 수
+const MAX_PENDING_PACKETS = 200;
+
+const PROTOCOL_GAME_READY = 1;
+const PROTOCOL_GAME_OUT = 2;
+const PROTOCOL_REJOIN = 15;
+const PROTOCOL_HEARTBEAT = 99;
 const monitorPort = 8004;
 
 let roomDatas = []; // 가급적 let 사용
@@ -39,6 +50,8 @@ class RoomData {
         this.sockets = sockets;
         this.gameOuts = gameOuts;
         this.gameReadyOn = gameReadyOn;
+        // 플레이어 번호별 재입장 대기 정보 { timer, pending: [] } (연결이 살아있으면 null)
+        this.waits = [];
     }
 }
 
@@ -62,7 +75,16 @@ function BroadcastOn(getRoomData, resultData) {
 
     if (!getRoomData) return;
     getRoomData.sockets.forEach((s, i) => {
-        if (s && !s.destroyed && !getRoomData.gameOuts[i]) {
+        if (getRoomData.gameOuts[i]) return;
+
+        // 재입장 대기 중인 유저 몫은 쌓아뒀다가 재입장하면 보내준다
+        const wait = getRoomData.waits[i];
+        if (wait) {
+            if (wait.pending.length < MAX_PENDING_PACKETS) wait.pending.push(resultData);
+            return;
+        }
+
+        if (s && !s.destroyed) {
             sendMessage(s, resultData);
         }
     });
@@ -129,7 +151,7 @@ const server = net.createServer((socket) => {
             if (reason !== 'Error') {
                 //console.log(`연결 종료 (${reason}): ${clientIp}`);
             }
-            GameOutCheckOn(socket);
+            DisconnectCheckOn(socket);
             clients.delete(socket);
             socket.destroy();
         }
@@ -168,20 +190,26 @@ function SetData(socket, data) {
 
     //console.log(`protocol ` +protocol );
 
-    if (protocol === 99) return; // 하트비트
+    if (protocol === PROTOCOL_HEARTBEAT) return; // 하트비트
 
-    if (protocol === 1) {
+    if (protocol === PROTOCOL_GAME_READY) {
         GameReadyOn(socket, jsonData);
+    } else if (protocol === PROTOCOL_REJOIN) {
+        RejoinOn(socket, jsonData);
     } else {
         let room = GetRoomDataFromIndex(jsonData.roomDataIndex);
         
-        if (protocol === 2) {
+        if (protocol === PROTOCOL_GAME_OUT) {
             // [핵심] 소켓 정보뿐만 아니라, 유니티가 보낸 내 플레이어 번호(outPlayerEnum)를 같이 넘깁니다.
             if (room) GameOutOn(socket, room, jsonData.outPlayerEnum);
             return;
         }
 
         if (!room) return;
+
+        // 이 방에 속한 소켓이 보낸 패킷만 중계한다
+        // (끊겼다가 재입장하지 않은 소켓이나, 없어진 방 번호를 재사용한 새 방으로 이전 판 패킷이 섞이는 것 방지)
+        if (!room.sockets.includes(socket)) return;
         
         if (protocol === 3 || protocol === 4) room.gameReadyOn = true;
         BroadcastOn(room, data);
@@ -226,6 +254,72 @@ function GameOutCheckOn(socket) {
     if (room) GameOutOn(socket, room);
 }
 
+/* 연결이 끊겼을 때 : 대기방이면 바로 퇴장, 인게임이면 REJOIN_GRACE_MS 동안 재입장을 기다린다.
+   그 사이 퇴장 알림(GameOut)을 보내지 않으므로 다른 유저 화면에서 AI 로 바뀌지 않고, 방도 삭제되지 않는다. */
+function DisconnectCheckOn(socket) {
+    const room = roomDatas.find(r => r.sockets.includes(socket));
+    if (!room) return;
+
+    if (!room.gameReadyOn) {
+        GameOutOn(socket, room);
+        return;
+    }
+
+    const idx = room.sockets.indexOf(socket);
+    room.sockets[idx] = null;
+
+    const wait = { pending: [], timer: null };
+    wait.timer = setTimeout(() => {
+        // 재입장하지 않았으면 그때 퇴장 처리
+        if (room.waits[idx] !== wait) return;
+        room.waits[idx] = null;
+
+        if (GetRoomDataFromIndex(room.index) === room) {
+            GameOutOn(undefined, room, idx);
+        }
+    }, REJOIN_GRACE_MS);
+
+    room.waits[idx] = wait;
+}
+
+/* 재입장 : 클라이언트가 소켓을 새로 연 뒤 { roomDataIndex, playerEnum } 을 보내면 그 자리에 새 소켓을 연결한다 */
+function RejoinOn(socket, jsonData) {
+    const room = GetRoomDataFromIndex(jsonData.roomDataIndex);
+    const idx = jsonData.playerEnum;
+
+    const rejoinOn = !!room &&
+        room.gameReadyOn &&
+        Number.isInteger(idx) &&
+        idx >= 0 && idx < room.sockets.length &&
+        !room.gameOuts[idx];
+
+    if (rejoinOn) {
+        // 이전 소켓의 종료 이벤트가 아직 안 왔어도, 자리를 새 소켓으로 바꿔두면 나중에 와도 무시된다
+        room.sockets[idx] = socket;
+
+        const wait = room.waits[idx];
+        room.waits[idx] = null;
+        if (wait) clearTimeout(wait.timer);
+
+        sendMessage(socket, JSON.stringify({
+            requestProtocal: PROTOCOL_REJOIN,
+            roomDataIndex: room.index,
+            playerEnum: idx,
+            rejoinOn: true
+        }));
+
+        // 끊겨있는 동안 못 받은 패킷 전달
+        if (wait) wait.pending.forEach(message => sendMessage(socket, message));
+    } else {
+        sendMessage(socket, JSON.stringify({
+            requestProtocal: PROTOCOL_REJOIN,
+            roomDataIndex: jsonData.roomDataIndex,
+            playerEnum: idx,
+            rejoinOn: false
+        }));
+    }
+}
+
 function GameOutOn(socket, room, outPlayerEnum) {
     let idx = room.sockets.indexOf(socket);
 
@@ -240,6 +334,7 @@ function GameOutOn(socket, room, outPlayerEnum) {
     if (!room.gameReadyOn) {
         room.sockets.splice(idx, 1);
         room.gameOuts.splice(idx, 1);
+        room.waits.splice(idx, 1);
         
         // 대기방에 아무도 없으면 파괴
         if (room.sockets.length === 0) {
@@ -255,6 +350,13 @@ function GameOutOn(socket, room, outPlayerEnum) {
     } 
     // 2. 게임 시작 후 (인게임 상태)
     else {
+        if (room.gameOuts[idx]) return; // 이미 퇴장 처리됨
+
+        // 재입장 대기 중이었다면 대기 취소
+        const wait = room.waits[idx];
+        room.waits[idx] = null;
+        if (wait) clearTimeout(wait.timer);
+
         room.gameOuts[idx] = true; // 나감 표시
         room.sockets[idx] = null;  // 소켓 연결 해제 (메모리 정리)
 

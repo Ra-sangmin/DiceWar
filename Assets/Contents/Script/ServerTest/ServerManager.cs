@@ -74,6 +74,9 @@ public class ServerManager : MonoSingleton<ServerManager>
 			receiveThread.IsBackground = true;
 			receiveThread.Start();
 
+			// 게임 중 재연결이면 서버에 원래 자리로 재입장 요청 (다른 패킷보다 먼저 보낸다)
+			RejoinRequestOn();
+
 			//Debug.Log("[TCP] 서버 접속/재접속 및 버퍼 초기화 완벽 성공!");
 		}
 		catch (Exception e)
@@ -138,6 +141,45 @@ public class ServerManager : MonoSingleton<ServerManager>
 			{
 				receiveQueue.Enqueue(jsonString);
 			}
+		}
+	}
+
+	/// <summary>
+	/// 새 소켓은 서버 방에 등록되어 있지 않아서 패킷을 주고받을 수 없다.
+	/// 방에 들어가 있는 상태(roomDataIndex != -1)에서 재연결했다면 원래 플레이어 자리로 재입장을 요청한다.
+	/// 서버는 연결이 끊긴 뒤 일정 시간 동안 자리를 비워두고 기다린다 (Server/diceWarMain.js REJOIN_GRACE_MS).
+	/// </summary>
+	private void RejoinRequestOn()
+	{
+		if (roomDataIndex == -1 || stream == null)
+			return;
+
+		DataManager dataMgr = UnityEngine.Object.FindFirstObjectByType<DataManager>();
+
+		if (dataMgr == null || dataMgr.playerData == null)
+			return;
+
+		RejoinRequest rejoinRequest = new RejoinRequest()
+		{
+			roomDataIndex = roomDataIndex,
+			playerEnum = dataMgr.playerData.pe,
+		};
+
+		try
+		{
+			// 큐를 거치지 않고 바로 보낸다 (재연결 직후 다른 패킷보다 먼저 도착해야 함)
+			byte[] data = Encoding.UTF8.GetBytes(JsonUtility.ToJson(rejoinRequest));
+			byte[] length = BitConverter.GetBytes(data.Length);
+			byte[] packet = new byte[4 + data.Length];
+			Buffer.BlockCopy(length, 0, packet, 0, 4);
+			Buffer.BlockCopy(data, 0, packet, 4, data.Length);
+
+			stream.Write(packet, 0, packet.Length);
+			stream.Flush();
+		}
+		catch (Exception e)
+		{
+			Debug.LogWarning($"[TCP] 재입장 요청 실패: {e.Message}");
 		}
 	}
 
@@ -346,6 +388,7 @@ public class ServerManager : MonoSingleton<ServerManager>
 			case RequestProtocal.AllianceResultRequest: baseRequest = JsonParser<AllianceResultRequest>(str); break;
 			case RequestProtocal.AllianceBetrayRequest: baseRequest = JsonParser<AllianceBetrayRequest>(str); break;
 			case RequestProtocal.ForceGetArea: baseRequest = JsonParser<ForceGetAreaRequest>(str); break;
+			case RequestProtocal.Rejoin: baseRequest = JsonParser<RejoinRequest>(str); break;
 			case RequestProtocal.SkillCardRequest: baseRequest = JsonParser<SkillCardRequest>(str); break;
 		}
 
@@ -687,6 +730,19 @@ public class HeartbeatRequest : BaseTCPRequest
 	}
 }
 
+/// <summary> 재연결 후 원래 자리로 재입장 요청 / 응답 (rejoinOn : 서버가 받아줬는지) </summary>
+[System.Serializable]
+public class RejoinRequest : BaseTCPRequest
+{
+	public PlayerEnum playerEnum;
+	public bool rejoinOn = false;
+
+	public RejoinRequest()
+	{
+		base.requestProtocal = RequestProtocal.Rejoin;
+	}
+}
+
 public enum RequestProtocal
 {
 	None = 0,
@@ -704,6 +760,7 @@ public enum RequestProtocal
 	AllianceBetrayRequest,
 	SkillCardRequest,
 	ForceGetArea,
+	Rejoin = 15, //서버 Server/diceWarMain.js 의 PROTOCOL_REJOIN 과 같은 값
 	Heartbeat = 99
 }
 

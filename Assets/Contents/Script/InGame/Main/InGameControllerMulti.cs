@@ -384,6 +384,9 @@ public class InGameControllerMulti : InGameControllerBase
 
 			case RequestProtocal.SkillCardRequest:
 					SkillCardResponseOn(baseRequest); break;
+
+			case RequestProtocal.Rejoin:
+					RejoinResponseOn(baseRequest); break;
 		}
 	}
 
@@ -1225,6 +1228,23 @@ public class InGameControllerMulti : InGameControllerBase
 		dataManager.mainToastText = LocalizeManager.Instance.GetStrData(LocalizeStatus.Game, 64);
 
 		//GoMainOn 안에서 GameOutRequest 전송 + 메인 씬 이동
+		GoMainOn();
+	}
+
+	/// <summary>
+	/// 재연결 후 재입장 결과. 실패했다면 서버에서 이미 퇴장 처리된 것이므로 메인으로 나간다
+	/// </summary>
+	private void RejoinResponseOn(BaseTCPRequest baseRequest)
+	{
+		RejoinRequest rejoinRequest = (RejoinRequest)baseRequest;
+
+		if (rejoinRequest.rejoinOn || gameEndOn || backgroundOutOn)
+			return;
+
+		backgroundOutOn = true;
+
+		DataManager.Instance.mainToastText = LocalizeManager.Instance.GetStrData(LocalizeStatus.Game, 64);
+
 		GoMainOn();
 	}
 

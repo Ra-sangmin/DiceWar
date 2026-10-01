@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Net.Sockets;
 using System.Threading.Tasks;
@@ -11,7 +12,13 @@ public class ServerManager : MonoSingleton<ServerManager>
     private Socket _socket = null;
     byte[] _recvBuffer = new byte[10240];
 
-    private Queue<BaseRequest> queue = new Queue<BaseRequest>();
+    //ReceiveComplete는 백그라운드 스레드에서 호출되므로 스레드 안전한 큐 사용
+    private ConcurrentQueue<BaseRequest> queue = new ConcurrentQueue<BaseRequest>();
+
+    //TCP는 메시지 경계가 없으므로 여러 JSON이 붙어서 오거나 잘려서 올 수 있음 -> 이어붙여서 완성된 JSON 단위로 분리
+    private System.Text.StringBuilder receiveStringBuilder = new System.Text.StringBuilder();
+    //한글 등 멀티바이트 문자가 두 번의 수신에 걸쳐 잘려도 깨지지 않도록 상태를 유지하는 디코더 사용
+    private System.Text.Decoder utf8Decoder = System.Text.Encoding.UTF8.GetDecoder();
 
     public UnityAction<BaseRequest> receiveDataOn = data => { };
 
@@ -38,6 +45,9 @@ public class ServerManager : MonoSingleton<ServerManager>
             // 서버연결됨
             Debug.Log("connected");
 
+            //수신은 한번만 걸고, 완료 콜백에서 다시 거는 방식 (매 프레임 BeginReceive를 걸면 같은 버퍼에 수신이 쌓여 데이터가 꼬임)
+            receiveMessage();
+
             //sendMessage();
         }
         else
@@ -54,6 +64,7 @@ public class ServerManager : MonoSingleton<ServerManager>
 
         if(_socket == null)
         {
+            Debug.LogError("send fail : socket is null (서버 연결 끊김) " + jsonUserString);
             return;
         }
 
@@ -217,14 +228,22 @@ public class ServerManager : MonoSingleton<ServerManager>
     private void Update()
     {
         QueueListCheck();
-        receiveMessage();
     }
 
     void QueueListCheck()
     {
-        if (queue.Count > 0)
+        //백그라운드 동안 쌓인 메시지까지 한번에 처리
+        while (queue.TryDequeue(out BaseRequest baseRequest))
         {
-            receiveDataOn(queue.Dequeue());
+            receiveDataOn(baseRequest);
+        }
+    }
+
+    void OnApplicationPause(bool pause)
+    {
+        if (pause == false && (_socket == null || _socket.Connected == false))
+        {
+            Debug.LogError("앱 복귀 시 서버 연결이 끊어져 있음");
         }
     }
 
@@ -262,26 +281,33 @@ public class ServerManager : MonoSingleton<ServerManager>
 
             if (len == 0)
             {
-                //Shutdown();
+                //서버가 연결을 끊음
+                Debug.LogError("server disconnected");
+                Shutdown();
+                return;
             }
-            else
+
+            char[] receiveChars = new char[utf8Decoder.GetCharCount(_recvBuffer, 0, len)];
+            utf8Decoder.GetChars(_recvBuffer, 0, len, receiveChars, 0);
+            string receiveString = new string(receiveChars);
+
+            //Debug.LogWarning(receiveString);
+
+            foreach (string jsonString in SplitJsonMessages(receiveString))
             {
-                byte[] cuttingBuffer = new byte[len];
-
-                for (int i = 0; i < len; i++)
+                try
                 {
-                    cuttingBuffer[i] = _recvBuffer[i];
+                    ReceiveRequestDataOn(jsonString);
                 }
-
-                string jsonString = System.Text.Encoding.UTF8.GetString(cuttingBuffer);
-
-                //Debug.LogWarning(jsonString);
-
-                ReceiveRequestDataOn(jsonString);
-
-                //출력이 끝나면 버퍼 초기화
-                System.Array.Clear(_recvBuffer, 0, _recvBuffer.Length);
+                catch (Exception e)
+                {
+                    //파싱 실패한 메시지 하나 때문에 소켓 전체를 끊지 않도록
+                    Debug.LogError("Receive Parse Exception: " + e.Message + " / " + jsonString);
+                }
             }
+
+            //다음 메시지 수신 대기
+            receiveMessage();
         }
 
         catch (Exception e)
@@ -290,6 +316,67 @@ public class ServerManager : MonoSingleton<ServerManager>
             Shutdown();
         }
 
+    }
+
+    //붙어서 들어온 JSON들을 { } 깊이 기준으로 하나씩 분리, 미완성 JSON은 다음 수신때 이어붙임
+    private List<string> SplitJsonMessages(string receiveString)
+    {
+        List<string> jsonList = new List<string>();
+
+        receiveStringBuilder.Append(receiveString);
+        string data = receiveStringBuilder.ToString();
+
+        int depth = 0;
+        int startIndex = -1;
+        bool inString = false;
+        bool escape = false;
+
+        for (int i = 0; i < data.Length; i++)
+        {
+            char c = data[i];
+
+            if (inString)
+            {
+                if (escape)
+                    escape = false;
+                else if (c == '\\')
+                    escape = true;
+                else if (c == '"')
+                    inString = false;
+
+                continue;
+            }
+
+            if (c == '"')
+            {
+                inString = true;
+            }
+            else if (c == '{')
+            {
+                if (depth == 0)
+                    startIndex = i;
+
+                depth++;
+            }
+            else if (c == '}' && depth > 0)
+            {
+                depth--;
+
+                if (depth == 0)
+                {
+                    jsonList.Add(data.Substring(startIndex, i - startIndex + 1));
+                }
+            }
+        }
+
+        receiveStringBuilder.Clear();
+
+        if (depth > 0)
+        {
+            receiveStringBuilder.Append(data.Substring(startIndex));
+        }
+
+        return jsonList;
     }
 
     private void ReceiveRequestDataOn(string jsonString)

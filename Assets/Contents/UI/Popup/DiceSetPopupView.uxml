@@ -2,11 +2,13 @@
     <Style src="PopupView.uss" />
     <ui:VisualElement name="dice-set-root" class="popup-root popup-open-anim">
         <ui:VisualElement name="dice-set-mask" class="dice-set__mask" />
-        <ui:VisualElement name="dice-set-plate" class="popup-plate dice-set__plate" picking-mode="Ignore" />
-        <ui:VisualElement name="dice-set-panel" class="dice-set__bg">
-            <ui:Label name="dice-set-title" text="Dice Setting" class="dice-set__title" picking-mode="Ignore" />
-            <ui:VisualElement name="dice-set-rows" class="popup-root" picking-mode="Ignore" />
-            <ui:Button name="dice-set-close-btn" text="" class="dice-set__close-btn" />
+        <ui:VisualElement name="dice-set-stage" class="popup-stage" picking-mode="Ignore">
+            <ui:VisualElement name="dice-set-plate" class="popup-plate dice-set__plate" picking-mode="Ignore" />
+            <ui:VisualElement name="dice-set-panel" class="dice-set__bg">
+                <ui:Label name="dice-set-title" text="Dice Setting" class="dice-set__title" picking-mode="Ignore" />
+                <ui:VisualElement name="dice-set-rows" class="popup-root" picking-mode="Ignore" />
+                <ui:Button name="dice-set-close-btn" text="" class="dice-set__close-btn" />
+            </ui:VisualElement>
         </ui:VisualElement>
     </ui:VisualElement>
 </ui:UXML>

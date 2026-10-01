@@ -2,13 +2,15 @@
     <Style src="PopupView.uss" />
     <ui:VisualElement name="info-root" class="popup-root popup-open-anim">
         <ui:VisualElement name="info-mask" class="info__mask" />
-        <ui:VisualElement name="info-panel" class="info__panel">
-            <ui:VisualElement name="info-bg" class="info__bg" picking-mode="Ignore" />
-            <ui:ScrollView name="info-scroll" class="info__scroll">
-                <ui:Label name="info-title" text="" class="info__title" picking-mode="Ignore" />
-                <ui:VisualElement name="info-contents" class="info__contents" picking-mode="Ignore" />
-            </ui:ScrollView>
-            <ui:Button name="info-back-btn" text="" class="info__back-btn" />
+        <ui:VisualElement name="info-stage" class="popup-stage" picking-mode="Ignore">
+            <ui:VisualElement name="info-panel" class="info__panel">
+                <ui:VisualElement name="info-bg" class="info__bg" picking-mode="Ignore" />
+                <ui:ScrollView name="info-scroll" class="info__scroll">
+                    <ui:Label name="info-title" text="" class="info__title" picking-mode="Ignore" />
+                    <ui:VisualElement name="info-contents" class="info__contents" picking-mode="Ignore" />
+                </ui:ScrollView>
+                <ui:Button name="info-back-btn" text="" class="info__back-btn" />
+            </ui:VisualElement>
         </ui:VisualElement>
     </ui:VisualElement>
 </ui:UXML>

@@ -2,39 +2,41 @@
     <Style src="PopupView.uss" />
     <ui:VisualElement name="buy-coin-root" class="popup-root popup-open-anim">
         <ui:VisualElement name="buy-coin-mask" class="buy-coin__mask" />
-        <ui:VisualElement name="buy-coin-left" class="buy-coin__left">
-            <ui:Label name="buy-coin-title" text="" class="buy-coin__title buy-coin__title--left" picking-mode="Ignore" />
-            <ui:Label name="buy-coin-my-coin-label" text="" class="buy-coin__my-coin-label" picking-mode="Ignore" />
-            <ui:VisualElement name="my-coin-panel" class="buy-coin__coin-bg" picking-mode="Ignore">
-                <ui:Label name="my-coin-text" text="0" class="buy-coin__coin-bg-text" />
+        <ui:VisualElement name="buy-coin-stage" class="popup-stage" picking-mode="Ignore">
+            <ui:VisualElement name="buy-coin-left" class="buy-coin__left">
+                <ui:Label name="buy-coin-title" text="" class="buy-coin__title buy-coin__title--left" picking-mode="Ignore" />
+                <ui:Label name="buy-coin-my-coin-label" text="" class="buy-coin__my-coin-label" picking-mode="Ignore" />
+                <ui:VisualElement name="my-coin-panel" class="buy-coin__coin-bg" picking-mode="Ignore">
+                    <ui:Label name="my-coin-text" text="0" class="buy-coin__coin-bg-text" />
+                </ui:VisualElement>
+                <ui:VisualElement name="buy-coin-card-0" class="buy-coin__card buy-coin__card--0">
+                    <ui:VisualElement class="buy-coin__coin-icon buy-coin__coin-icon--0" picking-mode="Ignore" />
+                    <ui:Label name="buy-coin-card-text-0" text="" class="buy-coin__card-text buy-coin__card-text--0" picking-mode="Ignore" />
+                    <ui:Button name="buy-coin-btn-0" text="" class="buy-coin__buy-btn buy-coin__buy-btn--0">
+                        <ui:Label name="buy-coin-price-0" text="" class="buy-coin__buy-label" picking-mode="Ignore" />
+                    </ui:Button>
+                </ui:VisualElement>
+                <ui:VisualElement name="buy-coin-card-1" class="buy-coin__card buy-coin__card--1">
+                    <ui:VisualElement class="buy-coin__coin-icon buy-coin__coin-icon--1" picking-mode="Ignore" />
+                    <ui:Label name="buy-coin-card-text-1" text="" class="buy-coin__card-text buy-coin__card-text--1" picking-mode="Ignore" />
+                    <ui:Button name="buy-coin-btn-1" text="" class="buy-coin__buy-btn buy-coin__buy-btn--1">
+                        <ui:Label name="buy-coin-price-1" text="" class="buy-coin__buy-label" picking-mode="Ignore" />
+                    </ui:Button>
+                </ui:VisualElement>
             </ui:VisualElement>
-            <ui:VisualElement name="buy-coin-card-0" class="buy-coin__card buy-coin__card--0">
-                <ui:VisualElement class="buy-coin__coin-icon buy-coin__coin-icon--0" picking-mode="Ignore" />
-                <ui:Label name="buy-coin-card-text-0" text="" class="buy-coin__card-text buy-coin__card-text--0" picking-mode="Ignore" />
-                <ui:Button name="buy-coin-btn-0" text="" class="buy-coin__buy-btn buy-coin__buy-btn--0">
-                    <ui:Label name="buy-coin-price-0" text="" class="buy-coin__buy-label" picking-mode="Ignore" />
+            <ui:VisualElement name="buy-coin-right" class="buy-coin__right">
+                <ui:Label name="buy-coin-free-title" text="" class="buy-coin__title buy-coin__title--right" picking-mode="Ignore" />
+                <ui:VisualElement class="buy-coin__coin-icon buy-coin__coin-icon--free" picking-mode="Ignore" />
+                <ui:Label name="buy-coin-free-text" text="" class="buy-coin__card-text buy-coin__card-text--free" picking-mode="Ignore" />
+                <ui:VisualElement name="buy-coin-time-bar" class="buy-coin__time-bar" picking-mode="Ignore">
+                    <ui:VisualElement class="buy-coin__time-arrow" />
+                    <ui:Label name="buy-coin-time-text" text="" class="buy-coin__time-text" />
+                </ui:VisualElement>
+                <ui:Button name="buy-coin-ads-btn" text="" class="buy-coin__ads-btn">
+                    <ui:Label name="buy-coin-ads-label" text="" class="buy-coin__ads-label" picking-mode="Ignore" />
                 </ui:Button>
             </ui:VisualElement>
-            <ui:VisualElement name="buy-coin-card-1" class="buy-coin__card buy-coin__card--1">
-                <ui:VisualElement class="buy-coin__coin-icon buy-coin__coin-icon--1" picking-mode="Ignore" />
-                <ui:Label name="buy-coin-card-text-1" text="" class="buy-coin__card-text buy-coin__card-text--1" picking-mode="Ignore" />
-                <ui:Button name="buy-coin-btn-1" text="" class="buy-coin__buy-btn buy-coin__buy-btn--1">
-                    <ui:Label name="buy-coin-price-1" text="" class="buy-coin__buy-label" picking-mode="Ignore" />
-                </ui:Button>
-            </ui:VisualElement>
+            <ui:Button name="buy-coin-back-btn" text="" class="buy-coin__back-btn" />
         </ui:VisualElement>
-        <ui:VisualElement name="buy-coin-right" class="buy-coin__right">
-            <ui:Label name="buy-coin-free-title" text="" class="buy-coin__title buy-coin__title--right" picking-mode="Ignore" />
-            <ui:VisualElement class="buy-coin__coin-icon buy-coin__coin-icon--free" picking-mode="Ignore" />
-            <ui:Label name="buy-coin-free-text" text="" class="buy-coin__card-text buy-coin__card-text--free" picking-mode="Ignore" />
-            <ui:VisualElement name="buy-coin-time-bar" class="buy-coin__time-bar" picking-mode="Ignore">
-                <ui:VisualElement class="buy-coin__time-arrow" />
-                <ui:Label name="buy-coin-time-text" text="" class="buy-coin__time-text" />
-            </ui:VisualElement>
-            <ui:Button name="buy-coin-ads-btn" text="" class="buy-coin__ads-btn">
-                <ui:Label name="buy-coin-ads-label" text="" class="buy-coin__ads-label" picking-mode="Ignore" />
-            </ui:Button>
-        </ui:VisualElement>
-        <ui:Button name="buy-coin-back-btn" text="" class="buy-coin__back-btn" />
     </ui:VisualElement>
 </ui:UXML>

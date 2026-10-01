@@ -2,23 +2,25 @@
     <Style src="PopupView.uss" />
     <ui:VisualElement name="main-info-root" class="popup-root popup-open-anim">
         <ui:VisualElement name="main-info-mask" class="main-info__mask" />
-        <ui:VisualElement name="main-info-plate" class="popup-plate main-info__plate" picking-mode="Ignore" />
-        <ui:VisualElement name="main-info-panel" class="main-info__bg">
-            <ui:VisualElement name="main-info-line" class="main-info__line" picking-mode="Ignore" />
-            <ui:Label name="main-info-title" text="" class="main-info__title" picking-mode="Ignore" />
-            <ui:Button name="main-info-contact-btn" text="" class="main-info__btn main-info__btn--contact">
-                <ui:Label name="main-info-contact-label" text="" class="main-info__btn-label" picking-mode="Ignore" />
-            </ui:Button>
-            <ui:Button name="main-info-terms-btn" text="" class="main-info__btn main-info__btn--terms">
-                <ui:Label name="main-info-terms-label" text="" class="main-info__btn-label" picking-mode="Ignore" />
-            </ui:Button>
-            <ui:Button name="main-info-privacy-btn" text="" class="main-info__btn main-info__btn--privacy">
-                <ui:Label name="main-info-privacy-label" text="" class="main-info__btn-label" picking-mode="Ignore" />
-            </ui:Button>
-            <ui:Button name="main-info-rate-btn" text="" class="main-info__btn main-info__btn--rate">
-                <ui:Label name="main-info-rate-label" text="" class="main-info__btn-label" picking-mode="Ignore" />
-            </ui:Button>
-            <ui:Button name="main-info-close-btn" text="" class="main-info__close-btn" />
+        <ui:VisualElement name="main-info-stage" class="popup-stage" picking-mode="Ignore">
+            <ui:VisualElement name="main-info-plate" class="popup-plate main-info__plate" picking-mode="Ignore" />
+            <ui:VisualElement name="main-info-panel" class="main-info__bg">
+                <ui:VisualElement name="main-info-line" class="main-info__line" picking-mode="Ignore" />
+                <ui:Label name="main-info-title" text="" class="main-info__title" picking-mode="Ignore" />
+                <ui:Button name="main-info-contact-btn" text="" class="main-info__btn main-info__btn--contact">
+                    <ui:Label name="main-info-contact-label" text="" class="main-info__btn-label" picking-mode="Ignore" />
+                </ui:Button>
+                <ui:Button name="main-info-terms-btn" text="" class="main-info__btn main-info__btn--terms">
+                    <ui:Label name="main-info-terms-label" text="" class="main-info__btn-label" picking-mode="Ignore" />
+                </ui:Button>
+                <ui:Button name="main-info-privacy-btn" text="" class="main-info__btn main-info__btn--privacy">
+                    <ui:Label name="main-info-privacy-label" text="" class="main-info__btn-label" picking-mode="Ignore" />
+                </ui:Button>
+                <ui:Button name="main-info-rate-btn" text="" class="main-info__btn main-info__btn--rate">
+                    <ui:Label name="main-info-rate-label" text="" class="main-info__btn-label" picking-mode="Ignore" />
+                </ui:Button>
+                <ui:Button name="main-info-close-btn" text="" class="main-info__close-btn" />
+            </ui:VisualElement>
         </ui:VisualElement>
     </ui:VisualElement>
 </ui:UXML>

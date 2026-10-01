@@ -598,7 +598,9 @@ public class MapController : MonoBehaviour
 
         if (playerIcon == null)
         {
-            return null;
+            //여기서 플래그를 풀지 않으면 이후 EndTurnBtnClickOn이 계속 무시되어 턴이 넘어가지 않음
+            diceAddEventOn = false;
+            return new List<AreaData>();
             //yield break;
         }
 

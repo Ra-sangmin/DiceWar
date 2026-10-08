@@ -176,10 +176,13 @@ public class PlayerIconController : MonoBehaviour
             }
 
 			var playerEnumList = resultList.Select(data => data.playerEnum).ToList();
-            var allianceList = DataManager.Instance.GetAllAlliance(myPlayerEnum).allianceDataList;
+            var allianceMemberList = DataManager.Instance.GetAllAlliance(myPlayerEnum).allianceDataList
+                .Select(data => data.playerEnum).ToList();
 
 			//남은 인원이 모두 같은 동맹 인원이라면
-			if (playerEnumList.Count == allianceList.Count)
+			//예전에는 '남은 인원 수 == 동맹 인원 수' 로만 봐서, 땅을 모두 잃은(관전 중인) 동맹원이 있으면
+			//동맹 밖의 플레이어가 남아 있어도 숫자가 같아져 승리 처리됐다 → 남은 사람이 전부 내 동맹원인지 확인 (2026-10-08)
+			if (playerEnumList.All(playerEnum => allianceMemberList.Contains(playerEnum)))
             {
                 gameWinOn();
                 //gameEndOn(InGameDataManager.Instance.playerData.playerEnum);

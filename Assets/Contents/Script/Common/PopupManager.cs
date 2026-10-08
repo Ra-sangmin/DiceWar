@@ -136,6 +136,38 @@ public class PopupManager : MonoSingleton<PopupManager>
 		}
 	}
 
+	/// <summary>
+	/// 카운트다운 안내 : (holder 색 육각형) 카운트다운 / N턴간 M 이상 유지 시 승리, 또는 카운트다운 중단 (2026-10-08)
+	/// Your Turn 과 같은 토스트. delay 초 뒤에 띄운다 (차례 시작 토스트와 겹치지 않게)
+	/// </summary>
+	public void CountdownPopupOn(PlayerEnum holder, string text, float delay = 0f)
+	{
+		CountdownPopupAsync(holder, text, delay).Forget();
+	}
+
+	async Cysharp.Threading.Tasks.UniTaskVoid CountdownPopupAsync(PlayerEnum holder, string text, float delay)
+	{
+		if (delay > 0f)
+		{
+			await Cysharp.Threading.Tasks.UniTask.Delay(System.TimeSpan.FromSeconds(delay));
+		}
+
+		//그 사이 씬이 바뀌었으면 띄우지 않는다
+		if (this == null || parantTranform == null)
+			return;
+
+		YourTurnPopup popup = PopupOrderOn(Instantiate(Resources.Load<YourTurnPopup>("Popup/InGame/YourTurnPopup"), parantTranform));
+
+		if (popup != null)
+		{
+			popup.SetPlayerIcon(holder);
+			popup.SetWide();
+			popup.SetText(text);
+			popup.SetStayTime(1.6f);
+			popup.ActiveOn();
+		}
+	}
+
     public void TimeOverPopupOn()
     {
 		ToastPopup timeOverPopup = PopupOrderOn(Instantiate(Resources.Load<ToastPopup>("Popup/InGame/TimeOverPopup"), parantTranform));

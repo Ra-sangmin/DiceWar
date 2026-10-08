@@ -31,10 +31,23 @@ public class InGameControllerBase : MonoBehaviour
 
 	protected CancellationTokenSource source = new CancellationTokenSource();
 
+	/// <summary> 카운트다운 승리 (싱글 Hard / 멀티, 2026-10-08) </summary>
+	protected CountdownManager countdown;
+
+	/// <summary> 타이머 자리의 카운트다운 남은 턴 </summary>
+	private Label countdownLabel;
+
+	private bool countdownCheckPosted = false;
+
 	protected virtual void Awake()
 	{
 		//PanelRenderer 는 UI 를 비동기로 만든다. 화면 구성은 준비된 뒤 StartReady 에서 (2026-09-29)
 		panelUI = new PanelUI(this, null);
+
+		countdown = new CountdownManager(() => mapController != null ? mapController.playerIconController : null);
+		countdown.popupOn = CountdownPopupOn;
+		countdown.countdownWinOn = CountdownWinOn;
+		countdown.viewChangedOn = UpdateCountdownView;
 
 		SetEvent();
 	}
@@ -42,6 +55,8 @@ public class InGameControllerBase : MonoBehaviour
 	protected virtual void OnDestroy()
 	{
 		panelUI?.Dispose();
+
+		countdown?.Dispose();
 	}
 
 	/// <summary> UI Toolkit HUD 버튼 이벤트 연결 (기존 상단 BtnPanel 의 uGUI 버튼 대체) </summary>
@@ -90,6 +105,9 @@ public class InGameControllerBase : MonoBehaviour
 		//mapController.turnOffOn = TurnOffOn;
 		mapController.selectAreaOn = SelectAreaOn;
 		mapController.SetEvent();
+
+		//땅/동맹이 바뀌어 세력이 다시 계산되면 카운트다운 시작 판정 (2026-10-08)
+		mapController.playerIconController.bundleKeyUpdatedOn = OnBundleKeyUpdated;
 	}
 
 	protected virtual void Start()
@@ -113,6 +131,9 @@ public class InGameControllerBase : MonoBehaviour
 		mapController.inGameBottomController.InitView(UIRoot);
 
 		SetHudEvent();
+
+		countdownLabel = UIRoot.Q<Label>("timer-countdown");
+		UpdateCountdownView();
 
 		//개발용 치트 패널 (Game_Multi 에만 있다). UI Toolkit 요소를 먼저 물려준 뒤 데이터를 넣는다
 		if (areaEditor != null)
@@ -166,6 +187,8 @@ public class InGameControllerBase : MonoBehaviour
 	protected virtual void GameStartOn()
 	{
 		gameEndOn = false;
+
+		countdown.Clear();
 
 		DataManager.Instance.gameStart.SetValueAndForceNotify(true);
 
@@ -247,6 +270,13 @@ public class InGameControllerBase : MonoBehaviour
 		DataManager.Instance.playOn = true;
 
 		mapController.playerIconController.SetIconTurnEffect();
+
+		if (gameEndOn)
+			return;
+
+		//카운트다운 : holder 의 차례면 남은 턴을 줄이고, 세 번째로 돌아왔으면 판정 (2026-10-08)
+		if (countdown.TurnStartOn(DataManager.Instance.currentPlayer))
+			return;
 
 		bool myTurn = DataManager.Instance.IsMyTurn();
 
@@ -486,4 +516,70 @@ public class InGameControllerBase : MonoBehaviour
 		return DataManager.Instance.playerData.pe;
 	}
 
+
+	#region 카운트다운 (2026-10-08)
+
+	/// <summary> 세력이 다시 계산될 때마다 오지만, 한 프레임에 몇 번 와도 판정은 다음 프레임에 한 번만 </summary>
+	void OnBundleKeyUpdated()
+	{
+		if (countdownCheckPosted)
+			return;
+
+		countdownCheckPosted = true;
+
+		UniTask.Post(() =>
+		{
+			countdownCheckPosted = false;
+
+			if (this == null || gameEndOn || DataManager.Instance.gameStart.Value == false)
+				return;
+
+			countdown.CheckStart();
+		});
+	}
+
+	void CountdownPopupOn(PlayerEnum holder, string text, bool turnStartOn)
+	{
+		//차례 시작 때는 Your Turn / Your Color 토스트와 같은 자리라 그게 사라질 즈음 띄운다
+		float delay = turnStartOn ? 1.6f : 0f;
+
+		PopupManager.Instance.CountdownPopupOn(holder, text, delay);
+	}
+
+	void CountdownWinOn(PlayerEnum holder)
+	{
+		//holder 와 같은 편(멀티 : 동맹원, 땅이 없어 관전 중인 동맹원 포함)이면 승리
+		bool myWinOn = CountdownManager.GetGroupMembers(holder).Contains(GetMyPlayer());
+
+		if (myWinOn)
+		{
+			GameWinOn();
+		}
+		else
+		{
+			GameLoseOn();
+		}
+	}
+
+	/// <summary> 타이머 자리에 남은 턴 수. 멀티에서 내 차례면 타이머가 보이도록 숨긴다 </summary>
+	protected void UpdateCountdownView()
+	{
+		if (countdownLabel == null)
+			return;
+
+		int remainTurns = countdown != null ? countdown.GetDisplayRemainTurns() : 0;
+
+		bool showOn = remainTurns > 0 &&
+					  gameEndOn == false &&
+					  (DataManager.Instance.isMultiOn == false || DataManager.Instance.IsMyTurn() == false);
+
+		countdownLabel.style.display = showOn ? DisplayStyle.Flex : DisplayStyle.None;
+
+		if (showOn)
+		{
+			countdownLabel.text = remainTurns.ToString();
+		}
+	}
+
+	#endregion
 }

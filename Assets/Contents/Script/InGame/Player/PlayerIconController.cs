@@ -14,6 +14,9 @@ public class PlayerIconController : MonoBehaviour
     public UnityAction gameWinOn = () => { };
     public UnityAction gameLoseOn = () => { };
 
+    /// <summary> 땅/동맹 변화로 세력(연결 땅 수)이 다시 계산됐다 (카운트다운 시작 판정용, 2026-10-08) </summary>
+    public UnityAction bundleKeyUpdatedOn = () => { };
+
     /// <summary> 멀티에서 동맹이 있는 채로 내 땅이 0 이 됐다 (퇴장 / 관전 선택 팝업, 2026-09-26) </summary>
     public UnityAction myLandZeroWithAllianceOn = () => { };
     private bool myLandZeroCheckedOn = false;
@@ -105,6 +108,8 @@ public class PlayerIconController : MonoBehaviour
         {
             SetBundleKey(checkList[i]);
         }
+
+        bundleKeyUpdatedOn();
 
 		PlayerEnum myPlayerEnum = DataManager.Instance.playerData.pe;
 

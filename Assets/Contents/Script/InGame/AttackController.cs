@@ -269,9 +269,15 @@ public class AttackController
 	/// </summary>
 	AttackData GetBridgeAttackData()
 	{
+		HashSet<PlayerEnum> countdownTargetSet = GetCountdownTargetSet();
+
 		foreach (var target in DataManager.Instance.areaDataList)
 		{
 			if (target.player == currentPlayerEnum)
+				continue;
+
+			//카운트다운 중에는 세력 1위의 땅만 (2026-10-08)
+			if (countdownTargetSet != null && countdownTargetSet.Contains(target.player) == false)
 				continue;
 
 			if (DataManager.Instance.IsAllAlliance(new List<PlayerEnum>() { currentPlayerEnum, target.player }))
@@ -341,6 +347,9 @@ public class AttackController
 		List<AreaData> myAreaList = DataManager.Instance.areaDataList.Where(data => data.player == currentPlayerEnum).ToList();
 
 		List<AreaData> bigAreaList = GetBigAreaDataList(anchorArea);
+
+		//카운트다운 중(과반을 차지한 편이 있음)이면 세력이 '가장 큰' 편의 땅'만' 공격한다 (AI 알고리즘 수정-261004, 2026-10-08)
+		HashSet<PlayerEnum> countdownTargetSet = GetCountdownTargetSet();
 		HashSet<int> bigIdSet = new HashSet<int>(bigAreaList.Select(data => data.id));
 
 		//가장 큰 덩어리가 아닌 내 땅 (첫째 순위의 '다른 덩어리')
@@ -353,7 +362,8 @@ public class AttackController
 		{
 			foreach (var adj in bigArea.GetAdjList())
 			{
-				if (IsEnemyArea(adj) && targetDic.ContainsKey(adj.id) == false)
+				if (IsEnemyArea(adj) && targetDic.ContainsKey(adj.id) == false &&
+					(countdownTargetSet == null || countdownTargetSet.Contains(adj.player)))
 				{
 					targetDic.Add(adj.id, adj);
 				}
@@ -419,6 +429,26 @@ public class AttackController
 		}
 
 		return null;
+	}
+
+	/// <summary>
+	/// 카운트다운 중일 때 공격해도 되는 플레이어 (세력이 가장 큰 편). 제한이 없으면 null.
+	/// 공격하는 AI 자신이 가장 큰 편이면(과반을 가진 AI) 평소 규칙대로 공격한다.
+	/// 공격할 때마다 세력이 바뀌므로 매번 다시 구한다.
+	/// </summary>
+	HashSet<PlayerEnum> GetCountdownTargetSet()
+	{
+		CountdownManager countdown = CountdownManager.Current;
+
+		if (countdown == null || countdown.IsCountdownOn == false || playerIconController == null)
+			return null;
+
+		HashSet<PlayerEnum> leaderSet = CountdownManager.GetLeaderPlayers(playerIconController);
+
+		if (leaderSet.Count == 0 || leaderSet.Contains(currentPlayerEnum))
+			return null;
+
+		return leaderSet;
 	}
 
 	bool IsEnemyArea(AreaData areaData)

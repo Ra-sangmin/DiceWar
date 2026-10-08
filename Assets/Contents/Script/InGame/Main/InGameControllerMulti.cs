@@ -449,7 +449,8 @@ public class InGameControllerMulti : InGameControllerBase
 				TurnCheck();
 			}
 
-			if (myTurn)
+			//카운트다운 판정으로 게임이 끝났으면 타이머를 켜지 않는다 (2026-10-08)
+			if (myTurn && gameEndOn == false && playerIcon != null)
 			{
 				timer.SetTimerOn(true, playerIcon.connectedCount == 0, isFirstMyTurn);
 				isFirstMyTurn = false;
@@ -601,11 +602,12 @@ public class InGameControllerMulti : InGameControllerBase
 		}
 		else
 		{
-			//내가 제안해서 실패했을 경우 — 거절은 카드 소모, 수락했는데 땅 주인이 바뀌어 불성립이면 환불
-			if (tradeData.fromPlayerEnum == GetMyPlayer() && rejectedOn == false)
-			{
-				DataManager.Instance.SkillCardCountAdd(1);
-			}
+			//모든 제안은 일단 제안되면 결과와 상관없이 카드를 소모한다 (AI 알고리즘 수정-261004 규칙, 2026-10-08)
+			//예전에는 수락했는데 그 사이 땅 주인이 바뀌어 불성립이면 카드를 돌려줬다
+			//if (tradeData.fromPlayerEnum == GetMyPlayer() && rejectedOn == false)
+			//{
+			//	DataManager.Instance.SkillCardCountAdd(1);
+			//}
 		}
 	}
 
@@ -1347,12 +1349,15 @@ public class InGameControllerMulti : InGameControllerBase
 	#region AI 동맹 수락 / 제안 규칙 (AI 알고리즘 수정-260927.pptx, 2026-09-28)
 
 	/// <summary>
-	/// AI 동맹 수락 알고리즘. AI 턴 시작 때(주사위 공격 전) 한 바퀴만 돈다.
+	/// AI 동맹 수락 알고리즘 (AI 알고리즘 수정-261004.pptx, 2026-10-08). AI 턴 시작 때(주사위 공격 전) 한 바퀴만 돈다.
 	/// 1. AI 제안이 있으면 그 제안 수락 (나머지는 모두 거절)
-	/// 2. 내 몫이 '1/N 몫'(유저 동맹 팝업 기본 배분) 미만인 제안 모두 거절
-	/// 3. 남은 제안이 하나면 수락
-	/// 4. 여럿이면 : 동맹 성립 시 세력 1위가 되는 제안과 안 되는 제안이 섞여 있으면 안 되는 쪽을 모두 거절,
-	///    아니면(전부 1위 / 전부 1위 아님) 내 몫이 가장 적은 제안 하나만 거절. 나머지는 다음 턴에 다시 본다
+	/// 2. AI 자신이 (모든 플레이어/동맹과 비교해) 혼자서 세력 1위면 모두 거절 — 동맹 없이도 이길 수 있다
+	/// 3. 동맹 성립 시 세력 1위가 되는 제안과 안 되는 제안이 섞여 있으면 안 되는 쪽을 모두 거절 → 5 로
+	/// 4. 그 밖(전부 1위 / 전부 1위 아님)이면 카운트다운 중인지 본다.
+	///    카운트다운 중이면, 세력이 가장 큰 편이 아닌 사람의 제안 중 합쳤을 때 세력이 가장 큰 제안을 몫과 상관없이 수락.
+	///    (어떻게든 동맹을 만들어 막아야 할 때는 몫보다 동맹의 세력이 중요하다.
+	///     1위가 마구 공격해 놓고 1코인씩 제안하는 꼼수는 막도록, 1위의 제안은 평소처럼 5 에서 몫을 따진다)
+	/// 5. 내 몫이 '1/N 몫' 미만인 제안 모두 거절 → 남은 게 하나면 수락, 여럿이면 몫이 가장 적은 제안 하나만 거절
 	/// </summary>
 	async UniTask AIAllianceApproveCheckOn(PlayerEnum aiPlayer)
 	{
@@ -1363,6 +1368,13 @@ public class InGameControllerMulti : InGameControllerBase
 		aiAllianceOfferList.RemoveAll(data => mapController.playerIconController.GetPlayerIcon(data.allianceRequest.orderData.playerEnum) == null);
 
 		List<AIAllianceOfferData> offerList = aiAllianceOfferList.Where(data => data.aiPlayer == aiPlayer).ToList();
+
+		//이미 동맹이 있는 AI 는 수락 대신 배신 알고리즘 (제안이 없어도 돈다, 2026-10-08)
+		if (DataManager.Instance.IsAlliance(aiPlayer))
+		{
+			await AIBetrayCheckOn(aiPlayer, offerList);
+			return;
+		}
 
 		if (offerList.Count == 0)
 			return;
@@ -1376,32 +1388,19 @@ public class InGameControllerMulti : InGameControllerBase
 			return;
 		}
 
-		//2. 내 몫이 1/N 몫 이상이 아닌 제안 모두 거절
-		List<AIAllianceOfferData> remainList = new List<AIAllianceOfferData>();
-
-		foreach (var offer in offerList)
+		//2. AI 자신이 모든 플레이어/동맹을 합쳐 봐도 혼자서 세력 1위인가 → 거절 (동맹 안 맺어도 이길 수 있음)
+		if (IsSoloTopPowerOn(aiPlayer))
 		{
-			if (IsAIAllianceShareEnoughOn(offer))
-			{
-				remainList.Add(offer);
-			}
-			else
+			foreach (var offer in offerList)
 			{
 				await AIAllianceOfferReplyOn(offer, false);
 			}
-		}
-
-		if (remainList.Count == 0)
-			return;
-
-		//3. 복수의 제안이 아니면 수락
-		if (remainList.Count == 1)
-		{
-			await AIAllianceOfferAcceptOn(remainList[0], remainList);
 			return;
 		}
 
-		//4. 복수의 제안
+		List<AIAllianceOfferData> remainList = new List<AIAllianceOfferData>(offerList);
+
+		//3. 동맹 성립 시 세력 1위가 되는 제안 / 안 되는 제안
 		List<AIAllianceOfferData> topList = remainList.Where(data => IsAllianceTopPowerOn(data.allianceRequest)).ToList();
 
 		if (topList.Count > 0 && topList.Count < remainList.Count)
@@ -1411,14 +1410,179 @@ public class InGameControllerMulti : InGameControllerBase
 			{
 				await AIAllianceOfferReplyOn(offer, false);
 			}
+
+			remainList = topList;
+		}
+		else if (countdown != null && countdown.IsCountdownOn)
+		{
+			//4. 카운트다운 중 : 세력이 가장 큰 편이 아닌 사람의 제안 중, 합쳤을 때 세력이 가장 큰 제안을 수락 (몫은 상관없음)
+			HashSet<PlayerEnum> leaderSet = CountdownManager.GetLeaderPlayers(mapController.playerIconController);
+
+			AIAllianceOfferData bestOffer = remainList
+				.Where(data => leaderSet.Contains(data.allianceRequest.orderData.playerEnum) == false)
+				.OrderByDescending(data => GetAllianceRequestPower(data.allianceRequest))
+				.FirstOrDefault();
+
+			if (bestOffer != null)
+			{
+				await AIAllianceOfferAcceptOn(bestOffer, remainList);
+				return;
+			}
+		}
+
+		//5. 내 몫이 1/N 몫 이상이 아닌 제안 모두 거절
+		List<AIAllianceOfferData> enoughList = new List<AIAllianceOfferData>();
+
+		foreach (var offer in remainList)
+		{
+			if (IsAIAllianceShareEnoughOn(offer))
+			{
+				enoughList.Add(offer);
+			}
+			else
+			{
+				await AIAllianceOfferReplyOn(offer, false);
+			}
+		}
+
+		if (enoughList.Count == 0)
+			return;
+
+		//복수의 제안이 아니면 수락
+		if (enoughList.Count == 1)
+		{
+			await AIAllianceOfferAcceptOn(enoughList[0], enoughList);
+			return;
+		}
+
+		//복수의 제안 : 자신의 몫이 가장 적은 제안 '하나만' 거절 (나머지는 다음 턴에 다시 본다)
+		AIAllianceOfferData minOffer = enoughList.OrderBy(data => GetAIAllianceShare(data)).First();
+
+		await AIAllianceOfferReplyOn(minOffer, false);
+	}
+
+	/// <summary>
+	/// AI 배신 알고리즘 (AI 알고리즘 수정-261004.pptx 슬라이드 10, 2026-10-08). 동맹이 있는 AI 의 턴 시작 때 한 바퀴.
+	/// 1. 배신하면 혼자서 세력이 가장 크고 (총 상금 − 배신 패널티) &gt; 배신 패널티면 → 무조건 배신 (새 동맹 제안이 없어도)
+	/// 2. 새 동맹 제안이 없으면 배신하지 않는다
+	/// 3. 내 동맹이 세력 1위면 : 새 동맹이 1위가 되는 제안 중 (새 몫 − 패널티) &gt; 지금 몫 인 것만 남긴다
+	///    내 동맹이 1위가 아니고 카운트다운 중이면 : (지면 몫이 없으니) 새 몫 &gt; 패널티 인 것만 남긴다
+	///    그 밖이면 : (새 몫 − 패널티) &gt; 지금 몫 인 것만 남긴다
+	/// 4. 남은 제안이 하나면 수락, 여럿이면 몫이 가장 적은 제안 하나만 거절
+	/// 새 동맹 제안을 수락해도, 그 동맹이 성립(모두 동의)했을 때만 배신 처리된다 (AllianceResultResponseOn → OrderBetrayOn)
+	/// </summary>
+	async UniTask AIBetrayCheckOn(PlayerEnum aiPlayer, List<AIAllianceOfferData> offerList)
+	{
+		AllianceData myAllianceData = DataManager.Instance.GetAllianceData(aiPlayer);
+
+		int currentShare = myAllianceData != null ? myAllianceData.coinCount : 0;
+		int penalty = Mathf.RoundToInt(currentShare / 2.0f);   //DataManager.OrderBetrayOn 과 같은 계산
+		int totalPrize = DataManager.Instance.GetMultiRewardCoin();
+
+		//1. 자신이 배신하면 단독으로 세력이 가장 큰가 → 배신하고 이기는 게 배신 안 하고 이기는 것보다 이득이면 무조건 배신
+		if (IsSoloTopPowerOn(aiPlayer) && totalPrize - penalty > penalty)
+		{
+			foreach (var offer in offerList)
+			{
+				await AIAllianceOfferReplyOn(offer, false);
+			}
+
+			Debug.Log($"[AI 배신] {aiPlayer} 단독 1위 → 배신 (패널티 {penalty})");
+
+			await DataManager.Instance.OrderBetrayOn(aiPlayer);
+			return;
+		}
+
+		//2. 새로운 동맹 제안이 없으면 배신하지 않는다
+		if (offerList.Count == 0)
+			return;
+
+		List<AIAllianceOfferData> remainList = new List<AIAllianceOfferData>(offerList);
+
+		bool myAllianceTopOn = CountdownManager.GetLeaderPlayers(mapController.playerIconController).Contains(aiPlayer);
+
+		System.Func<AIAllianceOfferData, bool> keepOn;
+
+		if (myAllianceTopOn)
+		{
+			//새로 동맹을 결성하면 세력 1위인가 + 배신하고 이기면 배신 안 하고 이기는 것보다 이득인가
+			keepOn = offer => IsAllianceTopPowerOn(offer.allianceRequest) && GetAIAllianceShare(offer) - penalty > currentShare;
+		}
+		else if (countdown != null && countdown.IsCountdownOn)
+		{
+			//배신 안 하면 진다 → 새 몫이 패널티보다 크기만 하면 이득 (26.10.08 기획 확인)
+			keepOn = offer => GetAIAllianceShare(offer) > penalty;
 		}
 		else
 		{
-			//자신의 몫이 가장 적은 제안 '하나만' 거절
-			AIAllianceOfferData minOffer = remainList.OrderBy(data => GetAIAllianceShare(data)).First();
-
-			await AIAllianceOfferReplyOn(minOffer, false);
+			keepOn = offer => GetAIAllianceShare(offer) - penalty > currentShare;
 		}
+
+		foreach (var offer in offerList)
+		{
+			if (keepOn(offer))
+				continue;
+
+			remainList.Remove(offer);
+
+			await AIAllianceOfferReplyOn(offer, false);
+		}
+
+		if (remainList.Count == 0)
+			return;
+
+		if (remainList.Count == 1)
+		{
+			Debug.Log($"[AI 배신] {aiPlayer} 새 동맹 제안 수락 (제안자 {remainList[0].allianceRequest.orderData.playerEnum})");
+
+			await AIAllianceOfferAcceptOn(remainList[0], remainList);
+			return;
+		}
+
+		//복수의 제안 : 자신의 몫이 가장 적은 제안 '하나만' 거절
+		AIAllianceOfferData minOffer = remainList.OrderBy(data => GetAIAllianceShare(data)).First();
+
+		await AIAllianceOfferReplyOn(minOffer, false);
+	}
+
+	/// <summary> 제안된 동맹원의 세력 합 </summary>
+	int GetAllianceRequestPower(AllianceRequest allianceRequest)
+	{
+		PlayerIconController playerIconController = mapController.playerIconController;
+
+		return allianceRequest.allianceDataList.Sum(data => playerIconController.GetPlayerIcon(data.playerEnum)?.connectedCount ?? 0);
+	}
+
+	/// <summary> 이 플레이어 혼자의 세력이 다른 모든 플레이어/동맹(동맹은 합산)보다 큰가 </summary>
+	bool IsSoloTopPowerOn(PlayerEnum playerEnum)
+	{
+		PlayerIconController playerIconController = mapController.playerIconController;
+
+		int myPower = playerIconController.GetPlayerIcon(playerEnum)?.connectedCount ?? 0;
+
+		HashSet<PlayerEnum> countedSet = new HashSet<PlayerEnum>() { playerEnum };
+
+		foreach (var playerIcon in playerIconController.GetActiveList())
+		{
+			if (countedSet.Contains(playerIcon.playerEnum))
+				continue;
+
+			List<PlayerEnum> memberList = CountdownManager.GetGroupMembers(playerIcon.playerEnum)
+				.Where(member => member != playerEnum)
+				.ToList();
+
+			foreach (var member in memberList)
+			{
+				countedSet.Add(member);
+			}
+
+			int power = memberList.Sum(member => playerIconController.GetPlayerIcon(member)?.connectedCount ?? 0);
+
+			if (power >= myPower)
+				return false;
+		}
+
+		return true;
 	}
 
 	/// <summary> 수락 시 나머지 제안은 모두 거절 </summary>

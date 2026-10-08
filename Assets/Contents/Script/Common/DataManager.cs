@@ -84,7 +84,8 @@ public class DataManager : MonoSingleton<DataManager>
     public bool myBetrayWaitOn = false;
 
     /// <summary> 신규 유저 시작 코인 (기획 시트 : Get Coin 삭제 대신 시작 시 200코인, 2026-09-26) </summary>
-    public const int StartCoin = 200;
+    //신규 유저 시작 코인 (26.10.04 수정 제안 : 100). 실제 신규 유저는 서버 DB 의 coin 기본값으로 정해진다 — 이 값은 에디터/PC 테스트용
+    public const int StartCoin = 100;
 
     /// <summary> 메인 씬에 들어가자마자 띄울 토스트 문구 (멀티 중 앱 이탈로 퇴장된 경우 등) </summary>
     public string mainToastText = string.Empty;
@@ -305,7 +306,10 @@ public class DataManager : MonoSingleton<DataManager>
 			//땅 하나의 주사위 최소/최대 : Dice Setting 팝업(DiceCountManager) 의 난이도별 · 유저/AI 별 값 (2026-09-26)
 			DiceCountData diceCountData = DiceCountManager.Instance.GetData(isAI, aiLevel);
 
-			SetInitDice(GetAreaDtaList(playerDataList[i].pe), diceTotalPerPlayer, diceCountData);
+			//싱글 쉬움/중간 : 유저는 다른 플레이어보다 4개 / 2개 더 가지고 시작한다 (26.10.04 수정 제안, 2026-10-08)
+			int diceTotal = diceTotalPerPlayer + (isAI == false && isMultiOn == false ? GetUserStartDiceBonus(aiLevel) : 0);
+
+			SetInitDice(GetAreaDtaList(playerDataList[i].pe), diceTotal, diceCountData);
         }
     }
 
@@ -602,6 +606,43 @@ public class DataManager : MonoSingleton<DataManager>
         this.playerData.ci = currentPlayerColorIndex;
         return GetPlayerColor(currentPlayerColorIndex);
     }
+    #region 난이도별 맵 크기 / 인원 / 시작 주사위 (26.10.04 수정 제안, 2026-10-08)
+
+    /// <summary> 싱글 난이도별 맵 크기 고정 : 쉬움 작은 맵 / 중간 중간 맵 / 어려움 큰 맵 </summary>
+    public static MapSizeEnum GetDifficultyMapSize(AILevel level)
+    {
+        switch (level)
+        {
+            case AILevel.Easy: return MapSizeEnum.Small;
+            case AILevel.Normal: return MapSizeEnum.Medium;
+            default: return MapSizeEnum.Large;
+        }
+    }
+
+    /// <summary> 싱글 난이도별 참가 인원 범위 (x = 최소, y = 최대). 보상은 그대로 난이도 × 인원 → 2~3 / 8~10 / 18~21 </summary>
+    public static Vector2Int GetDifficultyPlayerRange(AILevel level)
+    {
+        switch (level)
+        {
+            case AILevel.Easy: return new Vector2Int(2, 3);
+            case AILevel.Normal: return new Vector2Int(4, 5);
+            default: return new Vector2Int(6, 7);
+        }
+    }
+
+    /// <summary> 싱글에서 유저가 더 받는 시작 주사위 (쉬움 4 / 중간 2 / 어려움 0) </summary>
+    public static int GetUserStartDiceBonus(AILevel level)
+    {
+        switch (level)
+        {
+            case AILevel.Easy: return 4;
+            case AILevel.Normal: return 2;
+            default: return 0;
+        }
+    }
+
+    #endregion
+
     public int ActivePlayerCount()
     {
         return mapDataDic[mapSizeEnum].activePlayerCount;
@@ -737,7 +778,8 @@ public class DataManager : MonoSingleton<DataManager>
 
 	public int GetMultiRewardCoin(int resultPlayCount = 1)
 	{
-        return 60;
+        //멀티 상금 (26.10.04 수정 제안 : 60 → 120, 참가비 10 → 20 과 같이 모두 ×2)
+        return 120;
 	}
 
     public int GetNeedBetrayCoin()
@@ -845,7 +887,7 @@ public class DataManager : MonoSingleton<DataManager>
 
         if (isMultiOn)
         {
-            needCoin = 10;
+            needCoin = 20;   //멀티 참가비 (26.10.04 수정 제안 : 10 → 20)
 		}
         else
         {

@@ -42,6 +42,7 @@
                             <ui:VisualElement name="timer-fill" class="timer__fill" />
                         </ui:VisualElement>
                     </ui:VisualElement>
+                    <ui:Label name="timer-countdown" text="" class="timer__countdown" picking-mode="Ignore" />
                 </ui:VisualElement>
                 <ui:Button name="end-turn-btn" class="end-turn-btn">
                     <ui:Label name="end-turn-label" text="" class="end-turn-btn__label" />

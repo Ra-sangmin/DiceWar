@@ -99,19 +99,21 @@ public class CoinBoxElement
 		addCoinPanel.style.display = activeOn ? DisplayStyle.Flex : DisplayStyle.None;
 	}
 
+	/// <summary> 동맹 몫 조절 단위 (26.10.04 수정 제안 : 1 → 2, 2026-10-08) </summary>
+	public const int CoinStep = 2;
+
 	public void CoinCountChange(bool addOn)
 	{
 		if (addOn)
 		{
-			coinCount.Value++;
+			coinCount.Value += CoinStep;
 		}
 		else
 		{
-			coinCount.Value--;
-
-			if (coinCount.Value <= 0)
+			//1 아래로는 내리지 않는다. 한 번에 CoinStep 만큼만 움직여야 남은 코인을 0 으로 맞출 수 있다
+			if (coinCount.Value - CoinStep >= 1)
 			{
-				coinCount.Value = 1;
+				coinCount.Value -= CoinStep;
 			}
 		}
 

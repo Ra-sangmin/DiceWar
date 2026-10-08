@@ -79,10 +79,11 @@ public class InGameControllerSingle : InGameControllerBase
 
 		await UniTask.Delay(200);
 
-		if (DataManager.Instance.CheckLeaveEarly(mapController.playerIconController))
-		{
-			LeaveEarlyPopupOn();
-		}
+		//조기 종료는 카운트다운으로 대체했다 (26.10.04 수정 제안, 2026-10-08)
+		//if (DataManager.Instance.CheckLeaveEarly(mapController.playerIconController))
+		//{
+		//	LeaveEarlyPopupOn();
+		//}
 
 		TurnOffOn();
 	}

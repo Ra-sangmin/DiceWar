@@ -248,6 +248,9 @@ public class PlaySetPopup : BasePopup
 		}
 		else
 		{
+			//난이도에 맞춰 맵 크기 / 인원 범위를 다시 맞춘다 (2026-10-08)
+			SetMapSizeToggle();
+
 			SetColorData();
 		}
 	}
@@ -324,29 +327,30 @@ public class PlaySetPopup : BasePopup
 		SetVictoryRewardText();
 	}
 
+	/// <summary>
+	/// 싱글 : 난이도마다 맵 크기는 고정, 인원은 범위 안에서 고른다 (26.10.04 수정 제안, 2026-10-08)
+	///  쉬움 = 작은 맵 2~3인 / 중간 = 중간 맵 4~5인 / 어려움 = 큰 맵 6~7인
+	/// </summary>
 	void SetMapSizeToggle()
 	{
-		int activeCount = 0;
-
 		AILevel aiLevel = DataManager.Instance.aiLevel;
 
-		switch (aiLevel)
-		{
-			case AILevel.Easy: activeCount = 1; break;
-			case AILevel.Normal: activeCount = 1; break;
-			case AILevel.Hard: activeCount = 2; break;
-		}
+		MapSizeEnum fixedMapSize = DataManager.GetDifficultyMapSize(aiLevel);
+		int fixedIndex = (int)fixedMapSize;
 
 		for (int i = 0; i < mapSizeToggleList.Count; i++)
 		{
-			bool interactableOn = i <= activeCount;
-			mapSizeToggleList[i].interactable.Value = interactableOn;
+			mapSizeToggleList[i].interactable.Value = i == fixedIndex;
 		}
 
-		if ((int)DataManager.Instance.mapSizeEnum > activeCount)
+		DataManager.Instance.SetMapSizeEnum(fixedMapSize);
+
+		if (fixedIndex < mapSizeToggleList.Count)
 		{
-			MapSizeToggleChangeOn(activeCount);
+			mapSizeToggleList[fixedIndex].toggleValue.Value = true;
 		}
+
+		SetPlayerSelectToggle();
 
 		SetNeedCoinCheck();
 	}
@@ -373,19 +377,23 @@ public class PlaySetPopup : BasePopup
 	{
 		int activeCount = DataManager.Instance.ActivePlayerCount();
 
+		//난이도별 인원 범위 (쉬움 2~3 / 중간 4~5 / 어려움 6~7, 2026-10-08)
+		Vector2Int range = DataManager.GetDifficultyPlayerRange(DataManager.Instance.aiLevel);
+
 		for (int i = 0; i < playersCountToggleList.Count; i++)
 		{
-			bool interactableOn = i <= activeCount;
+			int playerCount = i + 2;
+			bool interactableOn = i <= activeCount && playerCount >= range.x && playerCount <= range.y;
 			playersCountToggleList[i].interactable.SetValueAndForceNotify(interactableOn);
 		}
 
-		int playerMaxCnt = DataManager.Instance.num_player;
+		int targetCount = Mathf.Clamp(DataManager.Instance.num_player, range.x, Mathf.Min(range.y, activeCount + 2));
+		int targetIndex = targetCount - 2;
 
-		playerMaxCnt -= 2;
-
-		if (playerMaxCnt > activeCount)
+		if (targetCount != DataManager.Instance.num_player ||
+			(targetIndex < playersCountToggleList.Count && playersCountToggleList[targetIndex].toggleValue.Value == false))
 		{
-			PlayersCountToggleChangeOn(activeCount);
+			PlayersCountToggleChangeOn(targetIndex);
 		}
 	}
 

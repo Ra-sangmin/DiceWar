@@ -515,6 +515,24 @@
     -unity-background-scale-mode: stretch-to-fill;
 }
 
+/* 카운트다운 남은 턴 (타이머 자리, 2026-10-08). 멀티에서 내 차례면 숨기고 타이머가 보인다 */
+.timer__countdown {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    margin: 0;
+    padding: 0;
+    display: none;
+    font-size: 48px;
+    color: rgb(255, 214, 102);
+    -unity-text-align: middle-center;
+    -unity-font-definition: url("/Assets/Contents/Font/GyeonggiTitle-Bold.ttf");
+    -unity-font-style: normal;
+    text-shadow: 0 0 8px rgba(255, 170, 40, 0.85);
+}
+
 /* ---------- 턴 종료 버튼 (원본 1646.2,958.4 250x93.3) ---------- */
 .end-turn-btn {
     position: absolute;

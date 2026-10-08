@@ -78,6 +78,25 @@ public class ToastPopup : MonoBehaviour
 		});
 	}
 
+	/// <summary> 폭이 넓은 토스트로 (두 줄짜리 카운트다운 안내, 2026-10-08) </summary>
+	public void SetWide()
+	{
+		panelUI.Run(() =>
+		{
+			if (toastRoot != null)
+			{
+				toastRoot.AddToClassList("toast-popup--wide");
+				toastRoot.AddToClassList("toast-popup--countdown");
+			}
+		});
+	}
+
+	/// <summary> 완전히 보이는 상태로 머무는 시간 (ActiveOn 전에 부른다) </summary>
+	public void SetStayTime(float stayTime)
+	{
+		fadeDelay = stayTime;
+	}
+
 	public void ActiveOn()
 	{
 		//UI 가 준비된 뒤에 페이드를 시작한다 (PanelRenderer, 2026-09-29)

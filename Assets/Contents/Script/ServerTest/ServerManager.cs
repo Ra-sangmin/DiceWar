@@ -608,6 +608,9 @@ public class TurnRequest : BaseTCPRequest
 	public PlayerEnum playerEnum = PlayerEnum.Player_0;
 	public bool turnStartOn = false;
 	public List<SendAreaData> areaDataList = new List<SendAreaData>();
+
+	/// <summary> 이번 판 AI 난이도 (방장이 게임 시작 때 고른 값, -1 = 없음). 서버는 그대로 중계한다 (2026-10-08) </summary>
+	public int aiLevel = -1;
 	public int turnCount = 0;
 
 	public TurnRequest()

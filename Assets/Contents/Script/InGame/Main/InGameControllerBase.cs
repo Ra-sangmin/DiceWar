@@ -188,6 +188,9 @@ public class InGameControllerBase : MonoBehaviour
 	{
 		gameEndOn = false;
 
+		//이번 판 AI 난이도 = 게임 시작 때 유저가 고른 난이도 (멀티는 방장 값이 첫 TurnRequest 로 덮어쓴다, 2026-10-08)
+		DataManager.Instance.gameAILevel = DataManager.Instance.aiLevel;
+
 		countdown.Clear();
 
 		DataManager.Instance.gameStart.SetValueAndForceNotify(true);

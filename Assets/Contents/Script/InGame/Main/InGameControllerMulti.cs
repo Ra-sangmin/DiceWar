@@ -326,6 +326,7 @@ public class InGameControllerMulti : InGameControllerBase
 			{
 				playerEnum = DataManager.Instance.playerData.pe,
 				turnStartOn = true,
+				aiLevel = (int)DataManager.Instance.gameAILevel,   //방장이 고른 난이도를 모두에게 (2026-10-08)
 			};
 
 			ServerManager.Instance.SendMessageOn(turnRequest);
@@ -338,6 +339,7 @@ public class InGameControllerMulti : InGameControllerBase
 
 		turnRequest.playerEnum = nextPlayer;
 		turnRequest.turnStartOn = true;
+		turnRequest.aiLevel = (int)DataManager.Instance.gameAILevel;   //매 차례 같이 보내서 재입장한 사람도 맞춘다
 
 		await UniTask.Delay(0, cancellationToken: source.Token);
 
@@ -397,6 +399,12 @@ public class InGameControllerMulti : InGameControllerBase
 	private void TurnResponseOn(BaseTCPRequest baseRequest)
 	{
 		TurnRequest turnRequest = (TurnRequest)baseRequest;
+
+		//방장이 정한 이번 판 AI 난이도로 맞춘다 (방장이 바뀌어도 같은 값이 계속 중계된다, 2026-10-08)
+		if (turnRequest.aiLevel >= 0)
+		{
+			DataManager.Instance.gameAILevel = (AILevel)turnRequest.aiLevel;
+		}
 
 		mapController.SelectClearOn();
 

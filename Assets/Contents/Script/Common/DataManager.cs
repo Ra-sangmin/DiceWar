@@ -12,6 +12,12 @@ public class DataManager : MonoSingleton<DataManager>
     public bool isMultiOn = false;
 
 	public AILevel aiLevel = AILevel.Normal;
+
+	/// <summary>
+	/// 이번 판 AI 가 쓰는 난이도 (2026-10-08). 게임 시작 때 유저가 고른 난이도(aiLevel)로 정해지고 판 도중엔 바뀌지 않는다.
+	/// 멀티는 방장이 고른 난이도를 첫 TurnRequest 로 모두에게 알려서 같게 맞춘다 (방장이 나가 바뀌어도 그대로)
+	/// </summary>
+	public AILevel gameAILevel = AILevel.Normal;
     public MapSizeEnum mapSizeEnum = MapSizeEnum.Small;
     Dictionary<MapSizeEnum, MapData> mapDataDic = new Dictionary<MapSizeEnum, MapData>();
     

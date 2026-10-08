@@ -64,7 +64,7 @@ public class CountdownManager
 	{
 		DataManager dataManager = DataManager.Instance;
 
-		return dataManager.isMultiOn || dataManager.aiLevel == AILevel.Hard;
+		return dataManager.isMultiOn || dataManager.gameAILevel == AILevel.Hard;
 	}
 
 	/// <summary> 진행 중인 카운트다운이 있는가 (AI 알고리즘의 '카운트다운 중인가?') </summary>

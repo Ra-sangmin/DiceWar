@@ -31,7 +31,8 @@ public class AttackController
 
 		await UniTask.Delay(500 , cancellationToken: source.Token);
 
-		switch (DataManager.Instance.aiLevel)
+		//게임 시작 때 정해진 이번 판 난이도 (멀티도 방장이 고른 값으로 통일, 2026-10-08)
+		switch (DataManager.Instance.gameAILevel)
 		{
 			case AILevel.Easy:		await EasyAttackOn(source);
 				break;

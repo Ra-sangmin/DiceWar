@@ -53,7 +53,7 @@ public class DiceWarUIController : MonoBehaviour
 
         int diceMax = Mathf.Max(myDiceWarData.diceResult.Count, enemyDiceWarData.diceResult.Count);
 
-        bool isHardOn = DataManager.Instance.aiLevel == AILevel.Hard;
+        bool isHardOn = DataManager.Instance.gameAILevel == AILevel.Hard;   //이번 판 난이도 (2026-10-08)
 		int delay = isHardOn ? 0 : 50;
 
 		for (int i = 0; i < diceMax; i++)

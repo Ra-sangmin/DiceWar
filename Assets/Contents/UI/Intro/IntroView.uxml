@@ -1,11 +1,26 @@
-<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" editor-extension-mode="False">
+﻿<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" editor-extension-mode="False">
+    <Style src="../Common/TitleView.uss" />
     <Style src="IntroView.uss" />
-    <ui:VisualElement name="intro-root" class="intro-root">
+    <ui:VisualElement name="intro-root" class="title-root intro-root">
+        <ui:VisualElement name="intro-glow" class="title-glow" picking-mode="Ignore" />
+        <ui:VisualElement name="intro-dice-left" class="title-dice title-dice--left" picking-mode="Ignore" />
+        <ui:VisualElement name="intro-dice-right" class="title-dice title-dice--right" picking-mode="Ignore" />
+        <ui:VisualElement name="intro-vignette" class="title-vignette" picking-mode="Ignore" />
+        <ui:VisualElement name="intro-stage" class="title-stage" picking-mode="Ignore">
+            <ui:VisualElement name="intro-logo" class="title-logo intro-logo" picking-mode="Ignore" />
+            <ui:VisualElement name="intro-rule" class="title-rule intro-rule" picking-mode="Ignore">
+                <ui:VisualElement class="title-rule__gem" picking-mode="Ignore" />
+            </ui:VisualElement>
+            <ui:VisualElement name="btn-panel" class="btn-panel" picking-mode="Ignore">
+                <ui:Button name="google-btn" text="" class="signin-btn signin-btn--google">
+                    <ui:Label name="google-label" text="Sign in with Google" class="signin-btn__label" picking-mode="Ignore" />
+                </ui:Button>
+                <ui:Button name="apple-btn" text="" class="signin-btn signin-btn--apple">
+                    <ui:Label name="apple-label" text="Sign in with Apple" class="signin-btn__label" picking-mode="Ignore" />
+                </ui:Button>
+            </ui:VisualElement>
+        </ui:VisualElement>
         <ui:Button name="info-btn" text="" class="corner-btn corner-btn--info" />
         <ui:Button name="setting-btn" text="" class="corner-btn corner-btn--setting" />
-        <ui:VisualElement name="btn-panel" class="btn-panel">
-            <ui:Button name="google-btn" text="" class="signin-btn signin-btn--google" />
-            <ui:Button name="apple-btn" text="" class="signin-btn signin-btn--apple" />
-        </ui:VisualElement>
     </ui:VisualElement>
 </ui:UXML>

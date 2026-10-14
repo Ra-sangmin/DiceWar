@@ -2,6 +2,8 @@
     <Style src="InGameView.uss" />
     <ui:VisualElement name="ingame-root" class="ingame-root">
         <ui:VisualElement name="ingame-bg" class="ingame-bg" picking-mode="Ignore" />
+        <ui:VisualElement name="ingame-glow" class="ingame-glow" picking-mode="Ignore" />
+        <ui:VisualElement name="ingame-vignette" class="ingame-vignette" picking-mode="Ignore" />
         <ui:VisualElement name="map-layer" class="map-layer" />
         <ui:VisualElement name="hud-layer" class="hud-layer" picking-mode="Ignore">
             <ui:Button name="tutorial-btn" text="" class="ingame-corner-btn ingame-corner-btn--tutorial" />
@@ -47,9 +49,9 @@
                 <ui:Button name="end-turn-btn" class="end-turn-btn">
                     <ui:Label name="end-turn-label" text="" class="end-turn-btn__label" />
                 </ui:Button>
-                <ui:VisualElement name="stash-panel" class="stash-panel">
-                    <ui:VisualElement class="stash-panel__dice" />
-                    <ui:Label name="stash-text" text="" class="stash-panel__text" />
+                <ui:VisualElement name="stash-panel" class="stash-panel" picking-mode="Ignore">
+                    <ui:VisualElement class="stash-panel__dice" picking-mode="Ignore" />
+                    <ui:Label name="stash-text" text="" class="stash-panel__text" picking-mode="Ignore" />
                 </ui:VisualElement>
             </ui:VisualElement>
             <ui:VisualElement name="map-select-panel" class="map-select-panel">

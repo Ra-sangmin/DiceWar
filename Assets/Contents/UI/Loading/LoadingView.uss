@@ -1,162 +1,187 @@
-﻿/* ===== 기본 폰트 (경기천년제목 Medium / normal, 2026-09-26 변경) =====
-   개별 규칙이 없는 요소가 Unity 기본 테마 폰트(NotInter)로 떨어지지 않도록
-   루트에 한 번 지정해 상속시킨다. (2026-09-19) */
+﻿/* ===== 기본 폰트 (경기천년제목 Medium / normal) =====
+   개별 규칙이 없는 요소가 Unity 기본 테마 폰트(NotInter)로 떨어지지 않도록 루트에 한 번 지정해 상속시킨다. */
 :root {
     -unity-font-definition: url("/Assets/Contents/Font/GyeonggiTitle-Medium.ttf");
     -unity-font-style: normal;
 }
 
-/* ===== Loading 화면 (UGUI Canvas → UI Toolkit 이식) =====
-   좌표는 1920x1080 기준. 기존 RectTransform 의 anchor / pivot / anchoredPosition 을 그대로 옮겼다.
-   2026-09-18 : 피그마 시안에 맞춰 폰트(WantedSans) / 시간 패널 색 / 아이콘 크기 조정 */
+/* ===== Loading 화면 (2026-10-13 고급화 + 모든 화면 비율 대응) =====
+   배경 / 빛 / 비네트 / 주사위 / 로고 / 장식선은 ../Common/TitleView.uss (Intro, Main 과 공통).
+   내용은 가운데 1920x1080 스테이지(.title-stage) 기준 좌표.
+     로고(작게) → 장식선 → 상태 문구 → 플레이어 아이콘 카드 → 대기 시간(멀티만)
+   요소 이름은 예전 그대로라 LoadingController 는 고치지 않았다. */
 
-.loading-root {
-    flex-grow: 1;
-    background-image: url("/Assets/Contents/Image/BG/Main/LoadingBG.png");
-    -unity-background-scale-mode: scale-and-crop;
+/* 로딩 화면은 주사위를 조금 흐리게 해서 가운데 내용에 눈이 가게 */
+.loading-dice {
+    opacity: 0.75;
 }
 
-/* ---------- 상태 문구 (Finding Players / Matching Completed / Loading) ----------
-   원본: anchor(0.5,1) pivot(0.5,1) pos(0,-385) size 500x100
-   ChakraPetch 에는 한글 글리프가 없어서 시스템 폰트로 대체돼 글자가 커 보였다.
-   피그마와 같은 WantedSans 를 -unity-font-definition 으로 지정한다 (크기는 50 그대로). */
+/* 로고 : 원본 1577x216 의 0.6 배 */
+.loading-logo {
+    top: 170px;
+    width: 946px;
+    height: 130px;
+    margin-left: -473px;
+}
+
+.loading-rule {
+    top: 346px;
+    width: 520px;
+    margin-left: -260px;
+}
+
+/* ---------- 상태 문구 (Finding Players / Matching Completed / Loading) ---------- */
 .loading-title {
     position: absolute;
     left: 50%;
-    top: 371px;
-    width: 500px;
-    height: 100px;
-    margin: 0;
+    top: 392px;
+    width: 1000px;
+    height: 90px;
+    margin: 0 0 0 -500px;
     padding: 0;
-    translate: -50% 0;
     font-size: 50px;
-    color: rgb(135, 233, 244);
-    -unity-font-definition: url("/Assets/Contents/Font/GyeonggiTitle-Medium.ttf");
-    -unity-font-style: normal;
+    letter-spacing: 4px;
+    color: rgb(139, 230, 234);
     -unity-text-align: middle-center;
+    text-shadow: 0 0 14px rgba(120, 225, 230, 0.45);
 }
 
-/* ---------- 대기 시간 패널 (멀티플레이에서만 표시) ----------
-   원본: anchor/pivot 중앙, pos(0,-183.3), size 190x80
-   timeBG.png(180x77) 는 흰색 알파 10% 채움 + 청록 4px 테두리인데,
-   프로젝트가 Linear 색공간이라 10% 흰색이 sRGB 시안보다 훨씬 밝게(92,95,100) 합성된다.
-   그래서 스프라이트를 버리고 USS 로 직접 그린다 (시안 실측색 rgb(49,58,72)).
-   크기도 스프라이트 원본 크기 180x77 로 되돌렸다. */
-.time-panel {
+/* ---------- 플레이어 아이콘 줄 (로딩 인디케이터) — 2026-10-13 다시 디자인 ----------
+   판(카드) 없이, 양끝이 사라지는 가는 시안 선 위에 작은 육각형 7개.
+   꺼진 칸은 작고 흐리게, 켜진 칸(.player-icon--on)은 크고 밝게 + 뒤에 자기 색 원형 빛.
+   C# 은 0.15초마다 다음 칸에 --on 을 옮긴다 → 빛이 왼쪽에서 오른쪽으로 흐르는 느낌 */
+.player-icon-card {
     position: absolute;
     left: 50%;
-    top: 50%;
-    width: 180px;
-    height: 77px;
-    margin-top: 180.6px;
-    translate: -50% -50%;
-    background-color: rgb(49, 58, 72);
-    border-width: 4px;
-    border-color: rgb(135, 233, 244);
-    border-radius: 19px;
+    top: 548px;
+    width: 640px;
+    height: 72px;
+    margin-left: -320px;
 }
 
-/* 원본: 패널 중앙 기준 pos(0.9, 0.6), size 193.1x96 */
-.time-text {
+/* 아이콘 뒤를 지나가는 가는 선 */
+.player-icon-track {
     position: absolute;
-    left: 50%;
-    top: 50%;
-    width: 193.1px;
-    height: 96px;
-    margin-left: 0.9px;
-    margin-top: -0.6px;
-    padding: 0;
-    translate: -50% -50%;
-    font-size: 46px;
-    color: rgb(244, 248, 252);
-    -unity-font-definition: url("/Assets/Contents/Font/GyeonggiTitle-Medium.ttf");
-    -unity-font-style: normal;
-    -unity-text-align: middle-center;
+    left: 0;
+    right: 0;
+    top: 35px;
+    height: 2px;
+    background-image: linear-gradient(to right, rgba(120, 225, 230, 0), rgba(120, 225, 230, 0.35), rgba(120, 225, 230, 0));
 }
 
-/* 원본: 패널 상단 기준 anchor(0.5,1) pivot(0.5,1) pos(0.4,-66.5), size 427.51x100 */
-.waiting-label {
-    position: absolute;
-    left: 50%;
-    top: 54.5px;
-    width: 427.51px;
-    height: 100px;
-    margin-left: 0.4px;
-    padding: 0;
-    translate: -50% 0;
-    font-size: 34px;
-    color: rgb(244, 248, 252);
-    -unity-font-definition: url("/Assets/Contents/Font/GyeonggiTitle-Medium.ttf");
-    -unity-font-style: normal;
-    -unity-text-align: middle-center;
-}
-
-/* ---------- 플레이어 아이콘 줄 (로딩 인디케이터) ----------
-   원본: HorizontalLayoutGroup(spacing 28, MiddleCenter), anchor/pivot 중앙, pos(4.1,-31.9), size 1323x212.97
-   피그마는 아이콘 70x70 / 간격 14 (가로 피치 84) 이다. */
 .player-icon-panel {
     position: absolute;
-    left: 50%;
-    top: 50%;
-    width: 1323px;
-    height: 212.97px;
-    margin-left: 4.1px;
-    margin-top: 31.9px;
-    translate: -50% -50%;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
     flex-direction: row;
     justify-content: center;
     align-items: center;
-    /* 6.7 gap: 형제 간격 (2026-09-29) */
-    gap: 14px;
+    gap: 30px;
 }
 
-/* 토글 하나의 영역 (피그마 70x70), spacing 14 → 좌우 7px 씩 */
+/* 칸 하나 40x40 */
 .player-icon {
-    width: 70px;
-    height: 70px;
+    width: 40px;
+    height: 40px;
 }
 
-/* 평상시 깔리는 육각 배경 (원본 스프라이트 62x62 → 70x70 로 확대) */
+/* 육각형 */
 .player-icon__bg {
     position: absolute;
-    left: 50%;
-    top: 50%;
-    width: 70px;
-    height: 70px;
-    translate: -50% -50%;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    opacity: 0.35;
+    scale: 0.74 0.74;
     -unity-background-scale-mode: scale-to-fit;
+    transition-property: opacity, scale;
+    transition-duration: 0.12s;
 }
 
-/* 차례가 돌아왔을 때 밝게 켜지는 아이콘 (원본 105x110 → 같은 비율로 확대, Toggle Fade 0.1s) */
+/* 켜진 칸 뒤의 빛 : 자기 색 원형 그라데이션 (예전 큰 빛 이미지 대신, 2026-10-13)
+   UXML 에서 육각형(bg)보다 앞에 두어 뒤에 깔린다 */
 .player-icon__fg {
     position: absolute;
     left: 50%;
     top: 50%;
-    width: 118.5px;
-    height: 124.2px;
+    width: 96px;
+    height: 96px;
     translate: -50% -50%;
     opacity: 0;
-    transition-property: opacity;
-    transition-duration: 0.1s;
-    -unity-background-scale-mode: scale-to-fit;
+    scale: 0.6 0.6;
+    transition-property: opacity, scale;
+    transition-duration: 0.12s;
+}
+
+.player-icon--on .player-icon__bg {
+    opacity: 1;
+    scale: 1.18 1.18;
 }
 
 .player-icon--on .player-icon__fg {
     opacity: 1;
+    scale: 1 1;
+}
+
+.player-icon--0 .player-icon__fg { background-image: radial-gradient(circle at center, rgba(255, 70, 90, 0.55) 0%, rgba(255, 70, 90, 0) 70%); }
+.player-icon--1 .player-icon__fg { background-image: radial-gradient(circle at center, rgba(255, 235, 90, 0.55) 0%, rgba(255, 235, 90, 0) 70%); }
+.player-icon--2 .player-icon__fg { background-image: radial-gradient(circle at center, rgba(170, 235, 60, 0.55) 0%, rgba(170, 235, 60, 0) 70%); }
+.player-icon--3 .player-icon__fg { background-image: radial-gradient(circle at center, rgba(110, 225, 240, 0.55) 0%, rgba(110, 225, 240, 0) 70%); }
+.player-icon--4 .player-icon__fg { background-image: radial-gradient(circle at center, rgba(140, 125, 255, 0.55) 0%, rgba(140, 125, 255, 0) 70%); }
+.player-icon--5 .player-icon__fg { background-image: radial-gradient(circle at center, rgba(255, 140, 200, 0.55) 0%, rgba(255, 140, 200, 0) 70%); }
+.player-icon--6 .player-icon__fg { background-image: radial-gradient(circle at center, rgba(40, 210, 160, 0.55) 0%, rgba(40, 210, 160, 0) 70%); }
+
+/* ---------- 대기 시간 (멀티플레이에서만 표시) ----------
+   Main 의 코인 알약과 같은 모양 : 어두운 판 + 얇은 테두리, 아래에 작은 설명 글자 */
+.time-panel {
+    position: absolute;
+    left: 50%;
+    top: 670px;
+    width: 280px;
+    height: 92px;
+    margin-left: -140px;
+    border-width: 2px;
+    border-radius: 46px;
+    border-color: rgba(120, 225, 230, 0.55);
+    background-color: rgba(8, 14, 24, 0.85);
+}
+
+.time-text {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    margin: 0;
+    padding: 0;
+    font-size: 46px;
+    letter-spacing: 2px;
+    color: rgb(226, 248, 251);
+    -unity-text-align: middle-center;
+}
+
+.waiting-label {
+    position: absolute;
+    left: 50%;
+    top: 104px;
+    width: 600px;
+    height: 50px;
+    margin: 0 0 0 -300px;
+    padding: 0;
+    font-size: 30px;
+    letter-spacing: 3px;
+    color: rgb(150, 176, 196);
+    -unity-text-align: middle-center;
 }
 
 /* 색 순서는 피그마 시안 기준 : 빨강 / 노랑 / 연두 / 청록 / 보라 / 분홍 / 초록 */
 .player-icon--0 .player-icon__bg { background-image: url("/Assets/Contents/Image/hexagon/Old/player_hax_bg_0.png"); }
-.player-icon--0 .player-icon__fg { background-image: url("/Assets/Contents/Image/BG/player/player_0.png"); }
 .player-icon--1 .player-icon__bg { background-image: url("/Assets/Contents/Image/hexagon/Old/player_hax_bg_1.png"); }
-.player-icon--1 .player-icon__fg { background-image: url("/Assets/Contents/Image/BG/player/player_1.png"); }
 .player-icon--2 .player-icon__bg { background-image: url("/Assets/Contents/Image/hexagon/Old/player_hax_bg_2.png"); }
-.player-icon--2 .player-icon__fg { background-image: url("/Assets/Contents/Image/BG/player/player_2.png"); }
 .player-icon--3 .player-icon__bg { background-image: url("/Assets/Contents/Image/hexagon/Old/player_hax_bg_4.png"); }
-.player-icon--3 .player-icon__fg { background-image: url("/Assets/Contents/Image/BG/player/player_4.png"); }
 .player-icon--4 .player-icon__bg { background-image: url("/Assets/Contents/Image/hexagon/Old/player_hax_bg_6.png"); }
-.player-icon--4 .player-icon__fg { background-image: url("/Assets/Contents/Image/BG/player/player_6.png"); }
 .player-icon--5 .player-icon__bg { background-image: url("/Assets/Contents/Image/hexagon/Old/player_hax_bg_5.png"); }
-.player-icon--5 .player-icon__fg { background-image: url("/Assets/Contents/Image/BG/player/player_5.png"); }
 .player-icon--6 .player-icon__bg { background-image: url("/Assets/Contents/Image/hexagon/Old/player_hax_bg_3.png"); }
-.player-icon--6 .player-icon__fg { background-image: url("/Assets/Contents/Image/BG/player/player_3.png"); }

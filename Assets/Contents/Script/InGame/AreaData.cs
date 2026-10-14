@@ -237,24 +237,128 @@ public class AreaData
             return null;
         }
 
-        int left =   (int)hexagonList.Select(data => data.pos.x).Min();
-        int right =  (int)hexagonList.Select(data => data.pos.x).Max();
-        int bottom = (int)hexagonList.Select(data => data.pos.y).Min();
-        int top = (int)hexagonList.Select(data => data.pos.y).Max();
+        //주사위를 놓을 칸 고르기 (2026-10-13)
+        //예전 : 격자 좌표 사각형의 가운데에 가장 가까운 '주변이 모두 같은 땅' 칸
+        //       → 격자 좌표는 홀수 줄이 반 칸 밀려 있고, ㄱ / C 자 땅은 사각형 가운데가 땅 밖이라 가장자리에 붙는 일이 많았다.
+        //지금 : 실제 화면 위치의 무게중심에 가깝고, 경계에서 안쪽으로 들어간 칸일수록 좋게 본다.
+        HexagonElement bestHexagon = FindDiceHexagon();
 
-        int cx = (left + right) / 2;
-        int cy = (top + bottom) / 2;
+        return SetCenterHexagon(new List<HexagonElement> { bestHexagon }, bestHexagon.pos);
+    }
 
-        Vector2 centerValue = new Vector2(cx, cy);
+    /// <summary>
+    /// 영토 중앙에 가장 가까운 칸.
+    /// 점수 = (경계에서 떨어진 칸 수, 최대 2) x 칸 너비
+    ///      + 위쪽 칸 보너스 (주사위 더미가 위로 그려지므로 윗줄 2칸 / 두 줄 위 칸이 같은 땅이면 +, 아니면 -)
+    ///      - 무게중심까지 거리 → 가장 큰 칸.
+    /// 같은 점수면 인덱스가 작은 칸 (모든 클라이언트에서 같은 결과).
+    /// </summary>
+    HexagonElement FindDiceHexagon()
+    {
+        Dictionary<int, HexagonElement> hexagonMap = new Dictionary<int, HexagonElement>();
 
-        var checkList = hexagonList.Where(data => data.AllCenterCheck()).ToList();
-
-        if (checkList.Count == 0) 
+        foreach (var hexagon in hexagonList)
         {
-            checkList = hexagonList;
+            hexagonMap[hexagon.index] = hexagon;
         }
 
-        return SetCenterHexagon(checkList , centerValue);
+        //1. 화면 위치 무게중심
+        Vector2 centroid = Vector2.zero;
+
+        foreach (var hexagon in hexagonList)
+        {
+            centroid += hexagon.GetAnchoredPosition();
+        }
+
+        centroid /= hexagonList.Count;
+
+        //2. 경계에서의 깊이 (경계 칸 = 0, 그 안쪽 = 1, ...) : 경계 칸들에서 시작하는 BFS
+        Dictionary<int, int> depthMap = new Dictionary<int, int>();
+        Queue<HexagonElement> queue = new Queue<HexagonElement>();
+
+        foreach (var hexagon in hexagonList)
+        {
+            if (hexagon.AllCenterCheck() == false)
+            {
+                depthMap[hexagon.index] = 0;
+                queue.Enqueue(hexagon);
+            }
+        }
+
+        while (queue.Count > 0)
+        {
+            HexagonElement current = queue.Dequeue();
+            int nextDepth = depthMap[current.index] + 1;
+
+            foreach (int neighborIndex in current.join.dir)
+            {
+                if (neighborIndex == -1 || depthMap.ContainsKey(neighborIndex))
+                    continue;
+
+                if (hexagonMap.TryGetValue(neighborIndex, out HexagonElement neighbor))
+                {
+                    depthMap[neighborIndex] = nextDepth;
+                    queue.Enqueue(neighbor);
+                }
+            }
+        }
+
+        //3. 칸 너비 (이웃 칸 사이 거리) : 가장 가까운 두 칸의 거리
+        float cellWidth = 0f;
+
+        if (hexagonList.Count > 1)
+        {
+            Vector2 first = hexagonList[0].GetAnchoredPosition();
+            cellWidth = hexagonList.Skip(1).Min(data => Vector2.Distance(first, data.GetAnchoredPosition()));
+        }
+
+        //4. 점수
+        HexagonElement result = null;
+        float bestScore = float.MinValue;
+
+        //주사위 더미는 칸 중심에서 위로 1~2 줄 높이까지 그려진다 → 위쪽 칸들이 같은 땅이어야 경계를 넘어 보이지 않는다
+        int mapWidth = (int)DataManager.Instance.GetMapSize().x;
+
+        foreach (var hexagon in hexagonList.OrderBy(data => data.index))
+        {
+            int depth = depthMap.TryGetValue(hexagon.index, out int value) ? value : 2;
+
+            //바로 윗줄 이웃 2칸 (격자 y 가 1 큰 칸 = 화면에서 위)
+            int upCount = 0;
+            int upTotal = 0;
+
+            foreach (int neighborIndex in hexagon.join.dir)
+            {
+                if (neighborIndex == -1)
+                    continue;
+
+                if ((int)DataManager.Instance.GetPos(neighborIndex).y != (int)hexagon.pos.y + 1)
+                    continue;
+
+                upTotal++;
+
+                if (hexagonMap.ContainsKey(neighborIndex))
+                    upCount++;
+            }
+
+            bool upAllOn = upTotal == 2 && upCount == 2;
+
+            //두 줄 위 (같은 x) 칸
+            bool up2On = hexagonMap.ContainsKey(hexagon.index + (mapWidth * 2));
+
+            float score = Mathf.Min(depth, 2) * cellWidth
+                        + (upAllOn ? 1.5f : -1.5f * (2 - upCount)) * cellWidth
+                        + (up2On ? 0.8f : 0f) * cellWidth
+                        - Vector2.Distance(centroid, hexagon.GetAnchoredPosition());
+
+            if (score > bestScore + 0.01f)
+            {
+                bestScore = score;
+                result = hexagon;
+            }
+        }
+
+        return result ?? hexagonList[0];
     }
 
     public HexagonElement SetCenterHexagon(List<HexagonElement> checkList , Vector2 centerValue)

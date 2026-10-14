@@ -10,7 +10,8 @@ public class BetrayPopup : BasePopup
 {
 	private PanelUI panelUI;
 
-	private PlayerToggleIconElement playerToggleIcon;
+	/// <summary> "-N 코인" (2026-10-14 시안 재조립 : 플레이어 아이콘 / 내 코인 대신 은화 + 패널티 문구) </summary>
+	private Label coinText;
 
 	public UnityAction BetrayClearOn = () => { };
 
@@ -24,13 +25,7 @@ public class BetrayPopup : BasePopup
 	/// <summary> PanelRenderer 의 UI 가 준비되면 한 번 호출된다 (예전 Awake 의 요소 찾기 / 이벤트 등록, 2026-09-29) </summary>
 	private void OnUIReady(VisualElement root)
 	{
-		VisualElement iconHolder = root.Q<VisualElement>("betray-player-toggle");
-
-		playerToggleIcon = new PlayerToggleIconElement(true);
-		playerToggleIcon.Root.style.position = Position.Absolute;
-		playerToggleIcon.Root.style.left = 0;
-		playerToggleIcon.Root.style.top = 0;
-		iconHolder.Add(playerToggleIcon.Root);
+		coinText = root.Q<Label>("betray-coin-text");
 
 		UnityEngine.UIElements.Button cancelBtn = root.Q<UnityEngine.UIElements.Button>("betray-cancel-btn");
 		UnityEngine.UIElements.Button okBtn = root.Q<UnityEngine.UIElements.Button>("betray-ok-btn");
@@ -40,7 +35,6 @@ public class BetrayPopup : BasePopup
 		if (backBtn != null) backBtn.clicked += () => { PlayClickSe(); CloseBtnClickOn(); };
 		if (okBtn != null) okBtn.clicked += () => { PlayClickSe(); BetrayBtnClickOn(); };
 
-		PopupMyCoinView.Bind(root, gameObject);
 
 		LocalizeTextSet(root);
 	}
@@ -69,12 +63,12 @@ public class BetrayPopup : BasePopup
 		Label cancelLabel = root.Q<Label>("betray-cancel-label");
 		Label okLabel = root.Q<Label>("betray-ok-label");
 
-		if (title != null) title.text = localize.GetStrData(LocalizeStatus.Game, 28);
+		//시안 제목은 버튼과 같은 "배신하기"
+		if (title != null) title.text = localize.GetStrData(LocalizeStatus.Game, 36);
 		if (subText != null) subText.text = localize.GetStrData(LocalizeStatus.Game, 35);
 		if (cancelLabel != null) cancelLabel.text = localize.GetStrData(LocalizeStatus.Common, 1);
 		if (okLabel != null) okLabel.text = localize.GetStrData(LocalizeStatus.Game, 36);
 
-		playerToggleIcon.SetDiscriptText(localize.GetStrData(LocalizeStatus.Game, 37));
 	}
 
 	public void SetData()
@@ -84,9 +78,8 @@ public class BetrayPopup : BasePopup
 		//만들자마자 불리므로 UI 가 준비된 뒤에 채운다 (PanelRenderer, 2026-09-29)
 		panelUI.Run(() =>
 		{
-			playerToggleIcon.SetPlayerData(DataManager.Instance.playerData.pe);
-			playerToggleIcon.SelectOn(true);
-			playerToggleIcon.coinBox.SetCoinCount(addCoin);
+			if (coinText != null)
+				coinText.text = "-" + addCoin + " " + LocalizeManager.Instance.GetStrData(LocalizeStatus.Game, 47);
 		});
 	}
 

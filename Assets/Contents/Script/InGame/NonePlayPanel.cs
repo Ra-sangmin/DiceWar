@@ -56,6 +56,14 @@ public class NonePlayPanel : MonoBehaviour
         skillBtnPanel = root.Q<VisualElement>("skill-btn-panel");
         stashPanel = root.Q<VisualElement>("stash-panel");
         stashText = root.Q<Label>("stash-text");
+
+        //Stash 표시는 투명(opacity 0)일 때도 그 자리를 차지해서, 바로 위에 붙은 "교환" 버튼 클릭을 가로챘다 (2026-10-10)
+        //보기만 하는 표시라 클릭을 받지 않게 한다 (UXML 에도 picking-mode="Ignore")
+        if (stashPanel != null)
+        {
+            stashPanel.pickingMode = PickingMode.Ignore;
+            stashPanel.Query<VisualElement>().ForEach(element => element.pickingMode = PickingMode.Ignore);
+        }
         skillCardIcon = root.Q<VisualElement>("skill-card-icon");
 
         //btnList 순서는 InGameButtonStatus (Ally, Sell, Buy, Betray, Cancel) 와 같아야 한다
@@ -136,6 +144,13 @@ public class NonePlayPanel : MonoBehaviour
 
         introText.text = LocalizeManager.Instance.GetStrData(LocalizeStatus.Game, key);
         introText.style.display = DisplayStyle.Flex;
+
+        //안내 문구와 직전 주사위 대결 결과가 같은 줄에 겹쳐 보이지 않게 결과를 지운다 (2026-10-10)
+        //(동맹/교환 메뉴를 열었다 닫으면 공격 결과가 남은 채로 안내 문구가 다시 켜졌다)
+        if (diceWarUIController != null)
+        {
+            diceWarUIController.DiceClear();
+        }
     }
 
     private bool exchangeModeOn = false;

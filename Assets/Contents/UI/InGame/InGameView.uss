@@ -11,27 +11,41 @@
 
 .ingame-root {
     flex-grow: 1;
-    /* 원본 BGPanel 은 스프라이트 없는 검정 Image 였다 */
-    background-color: rgb(0, 0, 0);
+    background-color: rgb(9, 12, 18);
 }
 
-/* 배경(Snack bar.png).
-   스프라이트(714x221)는 사방 41px 이 회색 그라디언트 테두리이고 안쪽은 균일한 어두운 면이다.
-   url() 이 Texture2D 가 아니라 Sprite(Snack bar_0)로 해석되기 때문에
-   -unity-slice-* 는 무시되고 스프라이트 border(0)만 쓰인다 → 9-slice 는 못 쓴다.
-   대신 요소를 사방 400px 화면 밖으로 빼서 늘어난 테두리까지 전부 화면 밖에 놓는다.
-   1080 높이 기준 세로 배율이 가장 커서 세로가 기준이 된다:
-     테두리두께 = 41 * (1080 + 2*400) / 221 = 349px < 400px  → 화면에 안 보임
-     가로는  41 * (1920 + 2*400) / 714 = 156px < 400px
-   비율이 바뀌어도(세로형/울트라와이드) 둘 다 400px 아래로 유지된다. */
+/* ===== 배경 (2026-10-13 고급화) =====
+   Intro / Main / Loading 과 같은 계열 : 짙은 남색 + 육각 무늬(흐리게) + 가운데 푸른 빛 + 가장자리 어둡게.
+   예전 Snack bar.png 를 화면 밖까지 늘리던 방식은 버렸다. 세 겹 모두 루트 전체를 덮어 어떤 화면 비율에도 맞는다. */
 .ingame-bg {
     position: absolute;
-    left: -400px;
-    top: -400px;
-    right: -400px;
-    bottom: -400px;
-    background-image: url("/Assets/Contents/Image/BG/InGame/Snack bar.png");
-    -unity-background-scale-mode: stretch-to-fill;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    /* 2026-10-14 : 미래지향 인게임 배경 (1920x1080 생성 이미지).
+       짙은 남색 + 원근 바닥 그리드 + 지평선 빛 띠 + 옅은 회로선 + 가운데 HUD 링 + 빛 입자 + 스캔라인 + 비네트.
+       이전 버전(색 구름 + 점 격자)은 ingame_bg_premium.png */
+    background-image: url("/Assets/Contents/Image/BG/InGame/ingame_bg_future.png");
+    -unity-background-scale-mode: scale-and-crop;
+}
+
+.ingame-glow {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    background-image: radial-gradient(ellipse at center, rgba(52, 110, 190, 0.08) 0%, rgba(0, 0, 0, 0) 70%);
+}
+
+.ingame-vignette {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    background-image: radial-gradient(ellipse at center, rgba(0, 0, 0, 0) 55%, rgba(0, 0, 0, 0.45) 100%);
 }
 
 /* ---------- 맵 레이어 ---------- */
@@ -72,8 +86,18 @@
     top: 0;
     right: -2px;
     bottom: 0;
-    background-image: url("/Assets/Contents/Image/hexagon/hexagon.png");
+    /* 2026-10-13 : 칸마다 은은한 입체 테두리가 있는 타일 (위쪽 밝고 아래쪽 어두운 베벨) → 영토 안에 입체적인 육각 선이 보인다.
+       사용자가 고른 버전. 180px, 플레이어 색 틴트. 원본은 hexagon.png */
+    background-image: url("/Assets/Contents/Image/hexagon/hexagon_premium.png");
     -unity-background-scale-mode: stretch-to-fill;
+}
+
+/* 영토가 없는 칸 (2026-10-13) : 보드판 격자. 맵 칸과 크기·위치가 같아서 배경 무늬처럼 어긋나지 않는다 */
+.hexagon--empty .hexagon__center {
+    left: 0;
+    right: 0;
+    background-image: url("/Assets/Contents/Image/hexagon/hexagon_empty.png");
+    -unity-background-image-tint-color: rgba(140, 184, 242, 0.17);
 }
 
 .hexagon__area-text {
@@ -102,7 +126,8 @@
    (맵 크기마다 변의 각도가 달라서 USS 고정 회전값으로는 맞출 수 없다). */
 .hexagon-line__seg {
     position: absolute;
-    background-color: rgb(188, 188, 188);
+    /* 2026-10-13 : 회색 → 배경과 같은 짙은 남색. 영토가 섬처럼 또렷하게 나뉜다 */
+    background-color: rgb(14, 19, 29);
 }
 
 /* ---------- 주사위 더미 ---------- */
@@ -112,8 +137,26 @@
 
 .map-dice__dice {
     position: absolute;
+    /* 원본 주사위 그대로 (2026-10-13 : 3D 렌더 / 평면 주사위를 시도했지만 사용자가 원본을 선호 → 되돌림. 더미 아래 그림자만 추가) */
     background-image: url("/Assets/Contents/Image/dice/3Ddice_1.png");
     -unity-background-scale-mode: stretch-to-fill;
+}
+
+/* 주사위 더미 아래 부드러운 바닥 그림자 (2026-10-13). 첫 줄 맨 아래 주사위(중심 35,63.5 / 바닥 약 93) 기준 */
+.map-dice__shadow {
+    position: absolute;
+    left: 6px;
+    top: 78px;
+    width: 60px;
+    height: 26px;
+    background-image: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.3) 0%, rgba(0, 0, 0, 0) 70%);
+}
+
+/* 두 번째 줄(오른쪽 아래, 바닥 약 109)까지 덮도록 */
+.map-dice__shadow--wide {
+    width: 94px;
+    height: 40px;
+    top: 80px;
 }
 
 .map-dice__area-text {
@@ -274,8 +317,10 @@
    =================================================================== */
 .none-play-panel {
     position: absolute;
-    left: 0;
-    top: 930px;
+    /* 2026-10-13 : 화면 비율 대응 — 아래쪽에 붙이고 가로 가운데 (예전 top 930 / left 0 은 폴드에서 화면 가운데, 와이드에서 왼쪽에 쏠렸다) */
+    left: 50%;
+    bottom: 0;
+    margin-left: -960px;
     width: 1920px;
     height: 150px;
     display: none;
@@ -283,24 +328,30 @@
 
 /* bottom_bg.png (0,934 1920x142) */
 .none-play__bg {
+    /* 하단 유리판 : 화면 양끝까지 (패널 밖으로 넓힌다) + 위쪽 가는 시안 선 (2026-10-13) */
     position: absolute;
-    left: 0;
+    left: -1200px;
+    right: -1200px;
     top: 4px;
-    width: 1920px;
-    height: 142px;
-    background-image: url("/Assets/Contents/Image/BG/InGame/bottom_bg.png");
-    -unity-background-scale-mode: stretch-to-fill;
+    bottom: -40px;
+    border-top-width: 1px;
+    border-color: rgba(120, 225, 230, 0.25);
+    background-image: linear-gradient(to bottom, rgba(10, 18, 30, 0.82), rgba(5, 9, 16, 0.96));
 }
 
 /* bottom_bg2.png (140,958.5 1366.5x93) */
 .none-play__message-bar {
+    /* 안내 문구 판 : Main 버튼과 같은 계열의 유리판 (2026-10-13) */
     position: absolute;
     left: 140px;
     top: 28.5px;
     width: 1366.5px;
     height: 93px;
-    background-image: url("/Assets/Contents/Image/BG/InGame/bottom_bg2.png");
-    -unity-background-scale-mode: stretch-to-fill;
+    border-width: 2px;
+    border-radius: 46px;
+    border-color: rgba(120, 225, 230, 0.32);
+    background-color: rgba(12, 22, 36, 0.85);
+    background-image: linear-gradient(to bottom, rgba(28, 54, 86, 0.9), rgba(10, 18, 30, 0.92));
 }
 
 .none-play__intro-text {
@@ -542,16 +593,12 @@
     height: 93.3px;
     margin: 0;
     padding: 0;
-    background-color: rgba(0, 0, 0, 0);
-    border-width: 0;
-    border-radius: 0;
-    background-image: url("/Assets/Contents/Image/Button/btn_bg3.png");
-    -unity-slice-left: 20;
-    -unity-slice-right: 20;
-    -unity-slice-top: 20;
-    -unity-slice-bottom: 20;
-    /* 원본 uGUI Button ColorTint : 활성 빨강 / 비활성 회색 */
-    -unity-background-image-tint-color: rgb(255, 69, 73);
+    /* 2026-10-13 : 이미지(btn_bg3 + 틴트) 대신 붉은 그라데이션 + 밝은 테두리 */
+    border-width: 2px;
+    border-radius: 20px;
+    border-color: rgba(255, 170, 170, 0.6);
+    background-color: rgb(230, 52, 62);
+    background-image: linear-gradient(to bottom, rgb(255, 96, 100), rgb(206, 36, 50));
     transition-property: scale;
     transition-duration: 0.08s;
 }
@@ -560,7 +607,9 @@
 .end-turn-btn:active { scale: 0.97 0.97; }
 
 .end-turn-btn:disabled {
-    -unity-background-image-tint-color: rgb(94, 98, 104);
+    border-color: rgba(255, 255, 255, 0.14);
+    background-color: rgb(80, 86, 94);
+    background-image: linear-gradient(to bottom, rgb(96, 102, 110), rgb(64, 69, 76));
 }
 
 .end-turn-btn__label {
@@ -568,6 +617,7 @@
     margin: 0;
     padding: 0;
     font-size: 44px;
+    letter-spacing: 2px;
     color: rgb(255, 255, 255);
     -unity-font-definition: url("/Assets/Contents/Font/GyeonggiTitle-Medium.ttf");
     -unity-font-style: normal;
@@ -576,37 +626,43 @@
 
 /* ---------- 비축 주사위 (원본 20,830 330x85) ---------- */
 .stash-panel {
+    /* 2026-10-14 : 비축 주사위 표시를 하단 바 바로 위 오른쪽(턴 종료 버튼 위)의 유리 알약으로.
+       예전엔 배경 없이 글자가 맵 위에 겹치고 주사위 아이콘이 아래로 삐져나왔다. 왼쪽은 스킬 메뉴가 위로 펼쳐지는 자리라 오른쪽에 둔다.
+       내용 길이에 맞춰 늘어난다. 숨김은 코드가 opacity 0/1 로 한다.
+       2026-10-14 : 개발용 톱니 버튼을 왼쪽(스킬 카드 위)으로 옮겨서 오른쪽 끝(턴 종료 버튼 오른쪽 끝선)에 붙인다 */
     position: absolute;
-    left: 20px;
-    top: -100px;
-    width: 330px;
-    height: 85px;
+    right: 24px;
+    top: -76px;
+    height: 64px;
+    padding: 0 26px 0 14px;
+    flex-direction: row;
+    align-items: center;
+    border-width: 2px;
+    border-radius: 32px;
+    border-color: rgba(120, 225, 230, 0.4);
+    background-color: rgba(10, 18, 30, 0.82);
+    background-image: linear-gradient(to bottom, rgba(32, 58, 94, 0.9), rgba(10, 15, 24, 0.92));
     opacity: 0;
 }
 
 .stash-panel__dice {
-    position: absolute;
-    left: 4px;
-    top: 58.5px;
-    width: 55px;
-    height: 53px;
+    width: 40px;
+    height: 43px;
+    margin-right: 12px;
+    flex-shrink: 0;
     background-image: url("/Assets/Contents/Image/dice/3Ddice_1.png");
-    -unity-background-scale-mode: stretch-to-fill;
+    -unity-background-scale-mode: scale-to-fit;
 }
 
 .stash-panel__text {
-    position: absolute;
-    left: 101.5px;
-    top: 9.5px;
-    width: 188px;
-    height: 66px;
     margin: 0;
     padding: 0;
-    font-size: 45px;
-    color: rgb(255, 255, 255);
+    font-size: 34px;
+    white-space: nowrap;
+    color: rgb(226, 248, 251);
     -unity-font-definition: url("/Assets/Contents/Font/GyeonggiTitle-Medium.ttf");
     -unity-font-style: normal;
-    -unity-text-align: middle-right;
+    -unity-text-align: middle-left;
 }
 
 /* ===================================================================
@@ -616,7 +672,8 @@
 .map-select-panel {
     position: absolute;
     left: 50%;
-    bottom: 66.5px;
+    /* 2026-10-14 : 더 아래로 (66.5 → -10). 보이는 판(.map-select__bg)이 패널 위아래 37px 안쪽이라 화면 바닥에서 27px 떨어진다 */
+    bottom: -10px;
     translate: -50% 0;
     width: 964px;
     height: 174px;
@@ -624,16 +681,17 @@
 
 /* BG : Snack bar.png (border 80,60,80,60) 패널 전체 stretch */
 .map-select__bg {
+    /* 2026-10-13 : Snack bar.png 대신 유리판. 세로는 내용(버튼 73)에 맞춰 얇게 — 패널(174) 위아래 37px 씩 비운다 */
     position: absolute;
     left: 0;
-    top: 0;
+    top: 37px;
     right: 0;
-    bottom: 0;
-    background-image: url("/Assets/Contents/Image/BG/InGame/Snack bar.png");
-    -unity-slice-left: 80;
-    -unity-slice-right: 80;
-    -unity-slice-top: 60;
-    -unity-slice-bottom: 60;
+    bottom: 37px;
+    border-width: 2px;
+    border-radius: 28px;
+    border-color: rgba(120, 225, 230, 0.32);
+    background-color: rgba(12, 22, 36, 0.9);
+    background-image: linear-gradient(to bottom, rgba(28, 54, 86, 0.92), rgba(10, 18, 30, 0.95));
 }
 
 /* "플레이어:" 텍스트 + 내 아이콘 (원본 Text pos(90,-3.5), 자식 Icon 은 우측 17px 간격) */
@@ -693,15 +751,12 @@
     bottom: 3px;
     margin: 0;
     padding: 0;
-    background-color: rgba(0, 0, 0, 0);
-    border-width: 0;
-    border-radius: 0;
-    background-image: url("/Assets/Contents/Image/Button/btn_bg4.png");
-    -unity-slice-left: 15;
-    -unity-slice-right: 15;
-    -unity-slice-top: 15;
-    -unity-slice-bottom: 15;
-    -unity-background-image-tint-color: rgb(255, 255, 255);
+    /* 2026-10-14 : 이미지(btn_bg4) → 시안 유리 버튼 (메인의 플레이 버튼과 같은 계열) */
+    border-width: 2px;
+    border-radius: 18px;
+    border-color: rgba(120, 225, 230, 0.7);
+    background-color: rgb(12, 24, 40);
+    background-image: linear-gradient(to bottom, rgb(40, 84, 128), rgb(12, 26, 44));
     transition-property: scale;
     transition-duration: 0.08s;
 }
@@ -711,30 +766,31 @@
 
 /* 원본 uGUI Button ColorTint disabledColor (0.784,0.784,0.784,0.502) */
 .map-select__ad-btn:disabled {
-    -unity-background-image-tint-color: rgba(200, 200, 200, 0.502);
-    opacity: 0.8;
+    opacity: 0.5;
 }
 
 .map-select__ad-icon {
     position: absolute;
-    left: 30px;
-    top: 16px;
-    width: 35px;
-    height: 35px;
+    left: 22px;
+    top: 17px;
+    width: 32px;
+    height: 32px;
     background-image: url("/Assets/Contents/Image/Button/adIcon.png");
     -unity-background-scale-mode: scale-to-fit;
+    -unity-background-image-tint-color: rgb(139, 230, 234);
 }
 
 .map-select__ad-label {
     position: absolute;
-    left: 65px;
+    left: 62px;
     top: -16.5px;
-    width: 168px;
+    width: 176px;
     height: 100px;
     margin: 0;
     padding: 0;
-    font-size: 38px;
-    color: rgb(126, 215, 226);
+    font-size: 36px;
+    letter-spacing: 1px;
+    color: rgb(226, 248, 251);
     -unity-font-definition: url("/Assets/Contents/Font/GyeonggiTitle-Medium.ttf");
     -unity-font-style: normal;
     -unity-text-align: middle-center;
@@ -829,15 +885,12 @@
     height: 73px;
     margin: 0;
     padding: 0;
-    background-color: rgba(0, 0, 0, 0);
-    border-width: 0;
-    border-radius: 0;
-    background-image: url("/Assets/Contents/Image/Button/btn_bg3.png");
-    -unity-slice-left: 20;
-    -unity-slice-right: 20;
-    -unity-slice-top: 20;
-    -unity-slice-bottom: 20;
-    -unity-background-image-tint-color: rgb(255, 69, 73);
+    /* 2026-10-13 : 턴 종료 버튼과 같은 붉은 그라데이션 */
+    border-width: 2px;
+    border-radius: 18px;
+    border-color: rgba(255, 170, 170, 0.6);
+    background-color: rgb(230, 52, 62);
+    background-image: linear-gradient(to bottom, rgb(255, 96, 100), rgb(206, 36, 50));
     transition-property: scale;
     transition-duration: 0.08s;
 }
@@ -962,9 +1015,11 @@
    =================================================================== */
 .alliance-approve-panel {
     position: absolute;
-    left: 0;
+    /* 2026-10-13 : 가로 가운데 1920 폭, 세로 전체 — 안의 바는 아래쪽 기준 */
+    left: 50%;
+    margin-left: -960px;
+    width: 1920px;
     top: 0;
-    right: 0;
     bottom: 0;
     opacity: 0;
     display: none;
@@ -977,14 +1032,15 @@
 .alliance-approve__bar {
     position: absolute;
     left: 211px;
-    top: 747px;
+    bottom: 194px;
     width: 1399px;
     height: 139px;
-    background-image: url("/Assets/Contents/Image/BG/InGame/bottom_bg2.png");
-    -unity-background-scale-mode: stretch-to-fill;
-    /* 시안의 반투명 바 색을 Linear 색공간에서 역산한 값이다.
-       bottom_bg2(40,46,54) 를 검은 배경 위에서 (24,31,32) 로 보이게 맞춘 틴트 (2026-09-19) */
-    -unity-background-image-tint-color: rgba(191, 204, 183, 0.83);
+    /* 2026-10-14 : 반투명 유리판 — 뒤의 영토가 비쳐 보여야 바 아래 땅을 보고 누를 수 있다 (바는 picking-mode Ignore 라 터치는 통과) */
+    border-width: 2px;
+    border-radius: 28px;
+    border-color: rgba(120, 225, 230, 0.32);
+    background-color: rgba(10, 18, 30, 0.5);
+    background-image: linear-gradient(to bottom, rgba(28, 54, 86, 0.45), rgba(10, 18, 30, 0.6));
 }
 
 .alliance-approve__title {
@@ -1214,13 +1270,16 @@
 .approve-alliance__bar {
     position: absolute;
     left: 210px;
-    top: 747px;
+    bottom: 194px;
     width: 1400px;
     height: 139px;
     display: none;
-    background-image: url("/Assets/Contents/Image/BG/InGame/bottom_bg2.png");
-    -unity-background-scale-mode: stretch-to-fill;
-    -unity-background-image-tint-color: rgba(191, 204, 183, 0.83);
+    /* 2026-10-14 : 반투명 유리판 — 뒤의 영토가 비쳐 보여야 바 아래 땅을 보고 누를 수 있다 (바는 picking-mode Ignore 라 터치는 통과) */
+    border-width: 2px;
+    border-radius: 28px;
+    border-color: rgba(120, 225, 230, 0.32);
+    background-color: rgba(10, 18, 30, 0.5);
+    background-image: linear-gradient(to bottom, rgba(28, 54, 86, 0.45), rgba(10, 18, 30, 0.6));
 }
 
 .approve-alliance__title {
@@ -1387,9 +1446,11 @@
    =================================================================== */
 .approve-layer {
     position: absolute;
-    left: 0;
+    /* 2026-10-13 : 가로 가운데 1920 폭, 세로 전체 — 안의 바는 아래쪽 기준 */
+    left: 50%;
+    margin-left: -960px;
+    width: 1920px;
     top: 0;
-    right: 0;
     bottom: 0;
 }
 
@@ -1397,7 +1458,7 @@
 .approve-popup {
     position: absolute;
     left: 135px;
-    top: 745px;
+    bottom: 175px;
     width: 1500px;
     height: 160px;
     display: none;
@@ -1618,7 +1679,7 @@
 .approve__nav-btn {
     position: absolute;
     /* 시안 '동맹 제안 받기_복수 제안' : 138x138, 바(752~890) 와 같은 높이 (2026-09-26) */
-    top: 747.5px;
+    bottom: 194.5px;
     width: 138px;
     height: 138px;
     margin: 0;
@@ -1684,17 +1745,20 @@
    원본 실측 : OnBtn(1833,846) 70x70 / Panel(105,915) 1430x175
    =================================================================== */
 .area-editor {
+    /* 2026-10-13 : 가로 가운데 1920 폭, 아래쪽 기준 (개발용 치트 패널) */
     position: absolute;
-    left: 0;
+    left: 50%;
+    margin-left: -960px;
+    width: 1920px;
     top: 0;
-    right: 0;
     bottom: 0;
 }
 
 .area-editor__on-btn {
     position: absolute;
-    left: 1833px;
-    top: 846px;
+    /* 2026-10-14 : 오른쪽 끝(저장소 자리) → 왼쪽 스킬 카드(15~107) 바로 위 가운데 */
+    left: 26px;
+    bottom: 164px;
     width: 70px;
     height: 70px;
     margin: 0;
@@ -1711,7 +1775,7 @@
 .area-editor__panel {
     position: absolute;
     left: 105px;
-    top: 915px;
+    bottom: -10px;
     width: 1430px;
     height: 175px;
     background-image: url("/Assets/Contents/Image/BG/InGame/Snack bar.png");
@@ -1820,4 +1884,215 @@
     border-radius: 0;
     -unity-background-scale-mode: scale-to-fit;
     display: none;
+}
+
+
+/* ===================================================================
+   2026-10-14 인게임 HUD 미래지향 테마
+   팝업 / 게임 설정과 같은 언어 : 짙은 남색 유리 + 시안 테두리, 각진 모서리(14), 시안 글리프.
+   위의 원래 규칙은 그대로 두고 여기서 덮어쓴다 (같은 선택자 → 나중 규칙이 이김).
+   =================================================================== */
+
+/* ---------- 좌상단 도움말 / 우상단 메뉴 : 유리 사각 버튼 + 시안 글리프 ---------- */
+.ingame-corner-btn {
+    width: 120px;
+    height: 120px;
+    border-width: 2px;
+    border-radius: 14px;
+    border-color: rgba(120, 225, 230, 0.5);
+    background-color: rgba(12, 22, 36, 0.88);
+}
+
+.ingame-corner-btn--tutorial {
+    left: 22px;
+    top: 18px;
+    background-image: url("/Assets/Contents/Image/Button/icon_help_glyph.png");
+}
+
+.ingame-corner-btn--option {
+    right: 18px;
+    top: 18px;
+    background-image: url("/Assets/Contents/Image/Button/icon_menu_glyph.png");
+}
+
+/* ---------- 타이머 : 시안 링 (Timer.cs 가 fill 이미지를 부채꼴로 그린다 → 링 이미지라 원호 진행 표시가 된다) ---------- */
+.timer__inactive {
+    background-image: url("/Assets/Contents/Image/BG/InGame/timer_track_future.png");
+    -unity-background-image-tint-color: rgb(150, 165, 178);
+    opacity: 0.75;
+}
+
+.timer__active {
+    background-image: url("/Assets/Contents/Image/BG/InGame/timer_track_future.png");
+}
+
+.timer__fill {
+    background-image: url("/Assets/Contents/Image/BG/InGame/timer_fg_future.png");
+}
+
+/* ---------- 스킬 메뉴 (배신 / 동맹 / 판매 / 구매 / 취소) ---------- */
+.skill-menu-btn {
+    border-width: 2px;
+    border-radius: 14px;
+}
+
+.skill-menu-btn--normal {
+    border-color: rgba(120, 225, 230, 0.6);
+    background-color: rgb(12, 22, 36);
+    background-image: linear-gradient(to bottom, rgb(36, 74, 116), rgb(12, 24, 40));
+}
+
+.skill-menu-btn--cancel {
+    border-color: rgba(170, 200, 215, 0.28);
+    background-color: rgb(30, 38, 50);
+    background-image: linear-gradient(to bottom, rgb(48, 58, 72), rgb(22, 28, 38));
+    -unity-slice-left: 0;
+    -unity-slice-right: 0;
+    -unity-slice-top: 0;
+    -unity-slice-bottom: 0;
+}
+
+.skill-menu-btn--cancel .skill-menu-btn__label {
+    color: rgb(214, 226, 234);
+}
+
+/* ---------- 맵 선택 바 : 바꾸기(-1) 버튼도 시안 유리 + 어두운 가격 칩 ---------- */
+.map-select__play-btn {
+    border-width: 2px;
+    border-radius: 18px;
+    border-color: rgba(120, 225, 230, 0.7);
+    background-color: rgb(12, 24, 40);
+    background-image: linear-gradient(to bottom, rgb(40, 84, 128), rgb(12, 26, 44));
+    -unity-background-image-tint-color: rgb(255, 255, 255);
+    -unity-slice-left: 0;
+    -unity-slice-right: 0;
+    -unity-slice-top: 0;
+    -unity-slice-bottom: 0;
+}
+
+.map-select__play-label {
+    color: rgb(226, 248, 251);
+}
+
+.map-select__need-coin-panel {
+    border-width: 1px;
+    border-radius: 10px;
+    border-color: rgba(255, 210, 110, 0.45);
+    background-color: rgba(4, 10, 18, 0.75);
+    background-image: none;
+}
+
+.map-select__need-coin-text {
+    color: rgb(255, 226, 150);
+}
+
+/* ---------- 플레이어 상세 패널 (아이콘 클릭 시 펼쳐짐) ---------- */
+.player-data-panel {
+    border-width: 2px;
+    border-radius: 16px;
+    border-color: rgba(120, 225, 230, 0.4);
+    background-color: rgba(10, 18, 30, 0.9);
+    background-image: linear-gradient(to bottom, rgba(30, 56, 88, 0.92), rgba(10, 16, 26, 0.95));
+    -unity-slice-left: 0;
+    -unity-slice-right: 0;
+    -unity-slice-top: 0;
+    -unity-slice-bottom: 0;
+}
+
+.player-data__line {
+    background-color: rgba(120, 225, 230, 0.3);
+}
+
+/* ---------- 동맹 / 거래 받기 바의 버튼 : 거절 = 짙은 유리, 수락 = 붉은 그라데이션 ---------- */
+.approve-alliance__refuse-btn,
+.alliance-approve__cancel-btn {
+    border-width: 2px;
+    border-radius: 14px;
+    border-color: rgba(170, 200, 215, 0.3);
+    background-color: rgb(30, 38, 50);
+    background-image: linear-gradient(to bottom, rgb(50, 60, 75), rgb(22, 28, 38));
+}
+
+.approve-alliance__accept-btn {
+    border-width: 2px;
+    border-radius: 14px;
+    border-color: rgba(255, 170, 170, 0.6);
+    background-color: rgb(230, 52, 62);
+    background-image: linear-gradient(to bottom, rgb(255, 96, 100), rgb(206, 36, 50));
+}
+
+/* ---------- 승인 팝업 (예전 ApprovePopup) ---------- */
+.approve__contens-0,
+.approve__contens-1 {
+    border-width: 2px;
+    border-radius: 16px;
+    border-color: rgba(120, 225, 230, 0.32);
+    background-color: rgba(10, 18, 30, 0.6);
+    background-image: linear-gradient(to bottom, rgba(28, 54, 86, 0.55), rgba(10, 18, 30, 0.7));
+    -unity-slice-left: 0;
+    -unity-slice-right: 0;
+    -unity-slice-top: 0;
+    -unity-slice-bottom: 0;
+}
+
+.approve__contents-panel {
+    background-image: none;
+}
+
+.approve__refuse-btn,
+.approve__accept-btn {
+    border-width: 2px;
+    border-radius: 14px;
+    -unity-background-image-tint-color: rgb(255, 255, 255);
+    -unity-slice-left: 0;
+    -unity-slice-right: 0;
+    -unity-slice-top: 0;
+    -unity-slice-bottom: 0;
+}
+
+.approve__refuse-btn {
+    border-color: rgba(170, 200, 215, 0.3);
+    background-color: rgb(30, 38, 50);
+    background-image: linear-gradient(to bottom, rgb(50, 60, 75), rgb(22, 28, 38));
+}
+
+.approve__accept-btn {
+    border-color: rgba(255, 170, 170, 0.6);
+    background-color: rgb(230, 52, 62);
+    background-image: linear-gradient(to bottom, rgb(255, 96, 100), rgb(206, 36, 50));
+}
+
+.approve__accept-btn:disabled {
+    border-color: rgba(255, 255, 255, 0.14);
+    background-color: rgb(64, 70, 78);
+    background-image: linear-gradient(to bottom, rgb(84, 90, 98), rgb(56, 61, 68));
+}
+
+/* 여러 제안 넘기기 ‹ › : 유리 사각 + 시안 꺾쇠 */
+.approve__nav-btn {
+    width: 120px;
+    height: 120px;
+    bottom: 203.5px;
+    border-width: 2px;
+    border-radius: 14px;
+    border-color: rgba(120, 225, 230, 0.5);
+    background-color: rgba(12, 22, 36, 0.88);
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.approve__nav-btn--before {
+    left: 69px;
+    background-image: url("/Assets/Contents/Image/Button/back_chevron.png");
+}
+
+.approve__nav-btn--after {
+    left: 1631px;
+    background-image: url("/Assets/Contents/Image/Button/next_chevron.png");
+}
+
+.approve__count-badge {
+    left: 92px;
+    top: -14px;
+    border-width: 2px;
+    border-color: rgba(255, 190, 190, 0.8);
 }

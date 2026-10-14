@@ -426,9 +426,12 @@ public class GameResultPopup : MonoBehaviour
 		Destroy(gameObject); //숨기기 대신 삭제 : 숨긴 채 남으면 타이머(서버 퇴장 요청)가 계속 돈다 (2026-09-29)
 	}
 
+	/// <summary>
+	/// X 버튼 = '그만하기' (메인으로). 2026-10-14 : 예전에는 팝업만 닫혀서 끝난 게임 화면에 갇혔다
+	/// </summary>
 	public void CloseBtnClickOn()
 	{
-		Destroy(gameObject); //숨기기 대신 삭제 : 숨긴 채 남으면 타이머(서버 퇴장 요청)가 계속 돈다 (2026-09-29)
+		GoMainBtnClickOn();
 	}
 
 	void SetRowValue(int index, int value, string coinStr, bool minusOn)

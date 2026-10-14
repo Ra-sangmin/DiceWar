@@ -1,0 +1,130 @@
+
+/* ===================================================================
+   2026-10-14 배신 팝업 재조립 (시안 '배신하기' 내용 + 미래지향)
+   판 1150x720 화면 가운데 : 제목 → 은화(HUD 링 + 빛) → "-N 코인" → 취소 / 배신하기
+   =================================================================== */
+.betray__bg {
+    left: 385px;
+    top: 180px;
+    width: 1150px;
+    height: 720px;
+}
+
+.betray__title {
+    left: 560px;
+    top: 232px;
+    width: 800px;
+    height: 110px;
+    font-size: 66px;
+    letter-spacing: 2px;
+    color: rgb(255, 255, 255);
+    -unity-font-definition: url("/Assets/Contents/Font/GyeonggiTitle-Bold.ttf");
+}
+
+.betray__back-btn {
+    left: 1398px;
+    top: 237px;
+    width: 92px;
+    height: 92px;
+}
+
+/* 은화 뒤 은은한 빛 */
+.betray__glow {
+    position: absolute;
+    left: 760px;
+    top: 290px;
+    width: 400px;
+    height: 360px;
+    background-image: radial-gradient(ellipse at center, rgba(200, 225, 240, 0.22) 0%, rgba(120, 225, 230, 0.06) 40%, rgba(0, 0, 0, 0) 70%);
+}
+
+/* HUD 링 두 겹 (은화 중심 960, 470) */
+.betray__ring {
+    position: absolute;
+    border-width: 2px;
+}
+
+.betray__ring--outer {
+    left: 840px;
+    top: 350px;
+    width: 240px;
+    height: 240px;
+    border-radius: 120px;
+    border-color: rgba(120, 225, 230, 0.16);
+}
+
+.betray__ring--inner {
+    left: 868px;
+    top: 378px;
+    width: 184px;
+    height: 184px;
+    border-radius: 92px;
+    border-color: rgba(120, 225, 230, 0.4);
+    border-left-color: rgba(120, 225, 230, 0.08);
+    border-right-color: rgba(120, 225, 230, 0.08);
+    background-color: rgba(10, 18, 30, 0.55);
+}
+
+/* 링 좌우로 뻗는 가는 눈금선 */
+.betray__tick {
+    position: absolute;
+    top: 469px;
+    width: 170px;
+    height: 2px;
+}
+
+.betray__tick--left {
+    left: 660px;
+    background-image: linear-gradient(to right, rgba(120, 225, 230, 0), rgba(120, 225, 230, 0.55));
+}
+
+.betray__tick--right {
+    left: 1090px;
+    background-image: linear-gradient(to right, rgba(120, 225, 230, 0.55), rgba(120, 225, 230, 0));
+}
+
+/* 은화 (패배 결과의 은화와 같은 이미지) */
+.betray__coin {
+    position: absolute;
+    left: 895px;
+    top: 405px;
+    width: 130px;
+    height: 130px;
+    background-image: url("/Assets/Contents/Image/BG/Main/coin_image.png");
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+/* "-N 코인" */
+.betray__coin-text {
+    position: absolute;
+    left: 660px;
+    top: 600px;
+    width: 600px;
+    height: 80px;
+    margin: 0;
+    padding: 0;
+    font-size: 54px;
+    color: rgb(244, 248, 252);
+    -unity-font-definition: url("/Assets/Contents/Font/GyeonggiTitle-Medium.ttf");
+    -unity-font-style: normal;
+    -unity-text-align: middle-center;
+}
+
+/* 취소 / 배신하기 : 시안처럼 가운데 두 개 */
+.betray__btn {
+    top: 742px;
+    width: 330px;
+    height: 104px;
+}
+
+.betray__cancel-btn {
+    left: 617px;
+}
+
+.betray__ok-btn {
+    left: 973px;
+}
+
+.betray__ok-btn .betray__btn-label {
+    color: rgb(255, 255, 255);
+}

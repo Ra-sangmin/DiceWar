@@ -130,9 +130,22 @@ public class AlliancePopup : MonoBehaviour
 	{
 		PlayerEnum myPlayerEnum = DataManager.Instance.playerData.pe;
 
+		bool firstVisibleOn = true;
+
 		foreach (var playerToggleIcon in playerToggleIconList)
 		{
-			playerToggleIcon.SelectOn(playerToggleIcon.playerEnum == myPlayerEnum);
+			//땅을 모두 잃고 탈락한 플레이어는 동맹 대상에서 뺀다 (2026-10-13 — 예전엔 0 코인으로 목록에 남아 선택까지 됐다)
+			bool activeOn = playerToggleIcon.playerEnum == myPlayerEnum || IsActivePlayer(playerToggleIcon.playerEnum);
+
+			playerToggleIcon.SetActive(activeOn);
+			playerToggleIcon.SelectOn(activeOn && playerToggleIcon.playerEnum == myPlayerEnum);
+
+			//보이는 아이콘끼리만 간격(원본 HorizontalLayoutGroup spacing 142)
+			if (activeOn)
+			{
+				playerToggleIcon.Root.style.marginLeft = firstVisibleOn ? 0 : 142;
+				firstVisibleOn = false;
+			}
 		}
 
 		maxCoinCount = DataManager.Instance.GetMultiRewardCoin();
@@ -210,13 +223,19 @@ public class AlliancePopup : MonoBehaviour
 		return icon;
 	}
 
+	/// <summary> 아직 땅이 남아 게임에 참여 중인 플레이어인가 </summary>
+	bool IsActivePlayer(PlayerEnum playerEnum)
+	{
+		return playerIconController != null && playerIconController.GetPlayerIcon(playerEnum) != null;
+	}
+
 	public void PlayerSelectOn(int selectIndex)
 	{
 		PlayerToggleIconElement currentSelectPlayer = playerToggleIconList[selectIndex];
 
 		PlayerEnum myPlayerEnum = DataManager.Instance.playerData.pe;
 
-		if (currentSelectPlayer.playerEnum == myPlayerEnum)
+		if (currentSelectPlayer.playerEnum == myPlayerEnum || IsActivePlayer(currentSelectPlayer.playerEnum) == false)
 		{
 			return;
 		}

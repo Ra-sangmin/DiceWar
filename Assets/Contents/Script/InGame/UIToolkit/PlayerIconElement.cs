@@ -19,7 +19,7 @@ public class PlayerIconElement
 	private Color playerColor = Color.white;
 
 	/// <summary> 기본 패널 색 (시안 : 아웃라인 없는 어두운 패널) </summary>
-	private static readonly Color PanelColor = new Color32(44, 48, 54, 255);
+	private static readonly Color PanelColor = new Color32(60, 112, 130, 255); // 2026-10-14 : 차례가 아닐 때 옅은 시안 테두리 (미래지향)
 
 	public PlayerEnum playerEnum = PlayerEnum.Player_None;
 	public int connectedCount;
@@ -119,7 +119,7 @@ public class PlayerIconElement
 		int colorIndex = DataManager.Instance.GetPlayerColorIndex(playerEnum);
 
 		Color color = playerEnum == PlayerEnum.Player_None
-			? new Color32(44, 48, 54, 255)
+			? new Color32(14, 24, 38, 255)
 			: DataManager.Instance.GetPlayerColor(colorIndex);
 
 		centerBGImage.style.unityBackgroundImageTintColor = color;

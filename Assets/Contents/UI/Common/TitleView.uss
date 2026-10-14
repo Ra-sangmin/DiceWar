@@ -1,0 +1,140 @@
+﻿/* ===== 타이틀 화면 공통 (Intro / Main, 2026-10-13) =====
+   예전에는 로고·주사위가 박힌 배경 한 장(BG2 / BG3)을 scale-and-crop 으로 깔아서
+   화면 비율이 16:9 와 다르면(갤럭시 폴드, 태블릿) 로고 양끝이 잘렸다.
+   지금은 층을 나눈다.
+     배경     : 무늬만 있는 LoadingBG — 화면 전체를 덮는다 (잘려도 무늬라 티가 안 남)
+     빛 / 비네트 : USS 그라데이션
+     주사위   : 왼쪽 아래 / 오른쪽 아래 모서리에 붙인다 (main_dice_left / right.png)
+     로고·버튼 : 1920x1080 스테이지를 화면 가운데에 둔다 (PanelSettings 가 Expand 라 스테이지는 항상 화면 안에 들어온다)
+     모서리 버튼(정보 / 설정) : 화면 모서리 기준 */
+
+.title-root {
+    flex-grow: 1;
+    background-color: rgb(9, 12, 18);
+    /* 2026-10-14 : 게임 씬과 같은 미래지향 배경 (예전 LoadingBG.png 육각 무늬) */
+    background-image: url("/Assets/Contents/Image/BG/InGame/ingame_bg_future.png");
+    -unity-background-scale-mode: scale-and-crop;
+}
+
+/* 가운데 푸른 빛 (로고 뒤) */
+.title-glow {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    background-image: radial-gradient(ellipse at center, rgba(52, 110, 190, 0.2) 0%, rgba(0, 0, 0, 0) 65%);
+}
+
+/* 가장자리 어둡게 */
+.title-vignette {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    background-image: radial-gradient(ellipse at center, rgba(0, 0, 0, 0) 55%, rgba(0, 0, 0, 0.6) 100%);
+}
+
+.title-dice {
+    position: absolute;
+    bottom: 0;
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.title-dice--left {
+    left: 0;
+    width: 551px;
+    height: 525px;
+    background-image: url("/Assets/Contents/Image/BG/Main/main_dice_left_v2.png");
+}
+
+.title-dice--right {
+    right: 0;
+    width: 522px;
+    height: 439px;
+    background-image: url("/Assets/Contents/Image/BG/Main/main_dice_right_v2.png");
+}
+
+.title-stage {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 1920px;
+    height: 1080px;
+    margin-left: -960px;
+    margin-top: -540px;
+}
+
+/* 로고 (원본 1577x216 을 0.82 배) + 붉은 빛 번짐 */
+.title-logo {
+    position: absolute;
+    left: 50%;
+    top: 128px;
+    width: 1293px;
+    height: 177px;
+    margin-left: -646px;
+    background-image: url("/Assets/Contents/Image/BG/Main/main_logo.png");
+    -unity-background-scale-mode: scale-to-fit;
+    filter: drop-shadow(0px 6px 22px rgba(255, 40, 60, 0.45));
+}
+
+/* 로고 아래 가는 장식선 + 가운데 마름모 */
+.title-rule {
+    position: absolute;
+    left: 50%;
+    top: 344px;
+    width: 640px;
+    height: 2px;
+    margin-left: -320px;
+    background-image: linear-gradient(to right, rgba(120, 225, 230, 0), rgba(120, 225, 230, 0.75), rgba(120, 225, 230, 0));
+}
+
+.title-rule__gem {
+    position: absolute;
+    left: 50%;
+    top: -6px;
+    width: 14px;
+    height: 14px;
+    margin-left: -7px;
+    rotate: 45deg;
+    background-color: rgb(139, 230, 234);
+    border-width: 2px;
+    border-color: rgb(9, 12, 18);
+}
+
+/* ---------- 모서리 아이콘 버튼 (정보 / 설정) ---------- */
+.corner-btn {
+    position: absolute;
+    top: 28px;
+    width: 120px;
+    height: 120px;
+    margin: 0;
+    padding: 0;
+    background-color: rgba(0, 0, 0, 0);
+    border-width: 0;
+    border-radius: 0;
+    -unity-background-scale-mode: scale-to-fit;
+    transition-property: scale, opacity;
+    transition-duration: 0.12s;
+    opacity: 0.92;
+}
+
+.corner-btn:hover {
+    scale: 1.05 1.05;
+    opacity: 1;
+}
+
+.corner-btn:active {
+    scale: 0.95 0.95;
+}
+
+.corner-btn--info {
+    left: 28px;
+    background-image: url("/Assets/Contents/Image/Button/info_btn.png");
+}
+
+.corner-btn--setting {
+    right: 28px;
+    background-image: url("/Assets/Contents/Image/Button/setting_btn.png");
+}

@@ -1,0 +1,18 @@
+
+/* 내 코인 칩 : 예전 coin_bg.png 에 그려져 있던 코인 아이콘을 배경 이미지로 다시 얹는다 (칩 판은 USS) */
+.my-coin-panel {
+    background-image: url("/Assets/Contents/Image/BG/Main/Coin.png");
+    background-repeat: no-repeat;
+    background-position-y: center;
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.trade-popup__my-coin {
+    background-position-x: left 28px;
+    background-size: 70px 70px;
+}
+
+.betray__my-coin {
+    background-position-x: left 24px;
+    background-size: 62px 62px;
+}

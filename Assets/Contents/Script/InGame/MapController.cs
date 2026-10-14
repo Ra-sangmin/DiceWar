@@ -135,6 +135,8 @@ public class MapController : MonoBehaviour
 
             hexagon.SetActive(true);
             hexagon.SetPos(i);
+            //이웃 정보 (2026-10-13) : 예전에는 넣는 곳이 없어 모두 -1 이었다 → AllCenterCheck / 영토 테두리 / 주사위 위치 계산이 이웃을 못 봤다
+            hexagon.SetJoin(join[i]);
             hexagon.clickOn = HexagonClickOn;
 
             hexagonList.Add(hexagon);
@@ -186,11 +188,14 @@ public class MapController : MonoBehaviour
 
             if (areaData == null)
             {
+                //빈 칸은 숨긴다 (2026-10-13 : 연한 격자로 보여주는 방식을 시도했다가 사용자 요청으로 다시 숨김)
+                hexagon.SetEmpty(true);
                 hexagon.SetActive(false);
                 continue;
             }
 
             hexagon.SetActive(true);
+            hexagon.SetEmpty(false);
 
             hexagon.SetArea(areaData.id);
             hexagon.SetPlayer(areaData.player);

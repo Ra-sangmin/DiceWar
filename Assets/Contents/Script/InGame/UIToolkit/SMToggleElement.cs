@@ -22,7 +22,8 @@ public class SMToggleElement
 	static readonly Color bgFalse = new Color(0.267f, 0.286f, 0.310f);
 	static readonly Color bgDisable = new Color(0.369f, 0.384f, 0.408f);
 
-	static readonly Color textTrue = new Color(0.165f, 0.196f, 0.208f);
+	//2026-10-14 : 켜짐 배경이 짙은 청록 + 빛나는 테두리로 바뀌어 글자는 밝은 흰색 (예전 짙은 회색)
+	static readonly Color textTrue = new Color(0.94f, 0.99f, 1f);
 	static readonly Color textFalse = new Color(0.529f, 0.914f, 0.957f);
 	static readonly Color textDisable = new Color(0.475f, 0.490f, 0.506f);
 
@@ -103,6 +104,11 @@ public class SMToggleElement
 
 	void SetColor()
 	{
+		//상태 클래스 (2026-10-14) : USS 테마가 배경 / 테두리 / 빛을 상태별로 그린다 (PopupView.uss '미래지향 토글')
+		root.EnableInClassList("sm-toggle--on", interactable.Value && toggleValue.Value);
+		root.EnableInClassList("sm-toggle--off", interactable.Value && toggleValue.Value == false);
+		root.EnableInClassList("sm-toggle--disabled", interactable.Value == false);
+
 		if (interactable.Value)
 		{
 			root.style.unityBackgroundImageTintColor = toggleValue.Value ? bgTrue : bgFalse;

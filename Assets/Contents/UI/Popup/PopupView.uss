@@ -27,10 +27,13 @@
 .popup-stage {
     position: absolute;
     left: 50%;
-    top: 0;
+    top: 50%;
     width: 1920px;
     height: 1080px;
     margin-left: -960px;
+    /* 화면이 16:9 보다 좁으면(갤럭시 폴드, 태블릿) PanelSettings(Expand) 가 폭을 1920 으로 맞추고 높이를 늘린다
+       → 세로도 가운데에 둔다 (2026-10-13) */
+    margin-top: -540px;
 }
 
 /* 6.7 키프레임 애니메이션 (2026-09-29) : 팝업이 뜰 때.
@@ -3973,4 +3976,630 @@
     -unity-font-definition: url("/Assets/Contents/Font/GyeonggiTitle-Medium.ttf");
     -unity-font-style: normal;
     -unity-text-align: middle-right;
+}
+
+
+/* ===================================================================
+   2026-10-13 고급화 테마 (모든 팝업 공통)
+   Intro / Main / InGame 과 같은 언어 : 짙은 남색 유리판 + 시안 테두리, 붉은 그라데이션 주 버튼,
+   시안 유리 보조 버튼, 회색 유리 취소 버튼. 이미지(btn_bg*, BG4~6, popup_bg 등)를 USS 로 대신한다.
+   위의 원래 규칙은 그대로 두고 여기서 덮어쓴다 (같은 선택자 → 나중 규칙이 이김).
+   위치 / 크기는 바꾸지 않는다.
+   =================================================================== */
+
+/* ---------- 전체 화면 막 : 불투명 검정 → 흐림 + 남색 (뒤 화면이 은은히 비친다) ---------- */
+.trade-popup__mask,
+.buy-coin__mask,
+.play-set__mask {
+    backdrop-filter: blur(12px);
+    background-color: rgba(5, 9, 16, 0.86);
+}
+
+/* ---------- 판 (패널) ---------- */
+.popup-plate,
+.give-up__bg,
+.option__bg,
+.betray__bg,
+.game-result--multi .game-result__bg,
+.game-result--single .game-result__bg,
+.buy-coin__left,
+.buy-coin__right,
+.play-set__left,
+.play-set__right {
+    /* 2026-10-14 : 미래지향 판 이미지 — 위→아래 남색, 미세 격자, 위쪽 빛, 네 모서리 시안 브래킷, 위 가운데 강조선.
+       9-slice 72 (모서리 브래킷이 늘어나지 않게). 이미지 모서리가 각져 있어 반경은 작게 */
+    border-width: 2px;
+    border-radius: 10px;
+    border-color: rgba(120, 225, 230, 0.38);
+    background-color: rgb(10, 14, 22);
+    background-image: url("/Assets/Contents/Image/BG/Main/popup_panel_future.png");
+    -unity-background-scale-mode: stretch-to-fill;
+    -unity-slice-left: 72;
+    -unity-slice-right: 72;
+    -unity-slice-top: 72;
+    -unity-slice-bottom: 72;
+}
+
+/* 작은 바 형태 팝업 (중도하차 / 코인 부족 / 토스트) */
+.leave-early-popup,
+.need-coin-popup,
+.toast-popup {
+    border-width: 2px;
+    border-radius: 28px;
+    border-color: rgba(120, 225, 230, 0.4);
+    background-color: rgb(12, 18, 28);
+    background-image: linear-gradient(to bottom, rgba(32, 58, 94, 0.97), rgba(10, 15, 24, 0.97));
+    -unity-slice-left: 0;
+    -unity-slice-right: 0;
+    -unity-slice-top: 0;
+    -unity-slice-bottom: 0;
+}
+
+/* 코인 상품 카드 (BG6 는 거의 투명한 판이었다) */
+.buy-coin__card {
+    border-width: 1px;
+    border-radius: 18px;
+    border-color: rgba(120, 225, 230, 0.22);
+    background-image: linear-gradient(to bottom, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.02));
+}
+
+/* ---------- 주 버튼 : 붉은 그라데이션 ---------- */
+.leave-early__continue-btn,
+.popup-btn--return,
+.game-result__play-btn,
+.trade-popup__propose-btn,
+.trade-popup__propose-btn--alliance,
+.buy-coin__ads-btn,
+.play-set__play-btn,
+.option__continue-btn,
+.betray__ok-btn,
+.main-info__btn--rate,
+.ok-popup__cancel-btn {
+    border-width: 2px;
+    border-radius: 16px;
+    border-color: rgba(255, 170, 170, 0.6);
+    background-color: rgb(230, 52, 62);
+    background-image: linear-gradient(to bottom, rgb(255, 96, 100), rgb(204, 36, 50));
+    -unity-background-image-tint-color: rgb(255, 255, 255);
+    -unity-slice-left: 0;
+    -unity-slice-right: 0;
+    -unity-slice-top: 0;
+    -unity-slice-bottom: 0;
+}
+
+/* ---------- 보조 버튼 : 시안 유리 (Main 의 플레이 버튼과 같은 계열) ---------- */
+.popup-btn--main,
+.option__btn,
+.option__play-btn,
+.main-info__btn,
+.game-result__ad-btn,
+.option__ad-btn,
+.buy-coin__buy-btn,
+.play-set__ad-btn {
+    border-width: 2px;
+    border-radius: 16px;
+    border-color: rgba(120, 225, 230, 0.55);
+    background-color: rgb(12, 22, 36);
+    background-image: linear-gradient(to bottom, rgb(36, 74, 116), rgb(12, 24, 40));
+    -unity-background-image-tint-color: rgb(255, 255, 255);
+    -unity-slice-left: 0;
+    -unity-slice-right: 0;
+    -unity-slice-top: 0;
+    -unity-slice-bottom: 0;
+}
+
+/* ---------- 취소 / 회색 버튼 : 회색 유리 ---------- */
+.trade-popup__cancel-btn,
+.betray__cancel-btn,
+.ok-popup__ok-btn,
+.main-setting__logout-btn,
+.my-coin-panel__plus-btn {
+    border-width: 2px;
+    border-radius: 16px;
+    border-color: rgba(255, 255, 255, 0.16);
+    background-color: rgb(60, 66, 74);
+    background-image: linear-gradient(to bottom, rgb(84, 91, 101), rgb(50, 55, 62));
+    -unity-background-image-tint-color: rgb(255, 255, 255);
+    -unity-slice-left: 0;
+    -unity-slice-right: 0;
+    -unity-slice-top: 0;
+    -unity-slice-bottom: 0;
+}
+
+/* ---------- 비활성 ---------- */
+.game-result__play-btn:disabled,
+.buy-coin__ads-btn:disabled,
+.trade-popup__propose-btn--alliance:disabled {
+    border-color: rgba(255, 255, 255, 0.14);
+    background-color: rgb(80, 86, 94);
+    background-image: linear-gradient(to bottom, rgb(96, 102, 110), rgb(64, 69, 76));
+    -unity-background-image-tint-color: rgb(255, 255, 255);
+}
+
+.game-result__ad-btn:disabled,
+.option__ad-btn:disabled,
+.play-set__ad-btn:disabled {
+    -unity-background-image-tint-color: rgb(255, 255, 255);
+    opacity: 0.5;
+}
+
+
+/* ===================================================================
+   2026-10-14 미래지향 토글 / 버튼 (설정 팝업 등 공통)
+   - sm-toggle (언어, 난이도, 맵 크기, 인원 등) : 이미지 대신 각진 유리판. 상태 클래스는 SMToggleElement 가 붙인다
+     켜짐 = 시안 그라데이션 + 밝은 테두리, 꺼짐 = 짙은 유리 + 옅은 시안 테두리, 비활성 = 흐리게
+   - 소리 토글 : 이미지 대신 알약 트랙 + 동그란 손잡이 (켜지면 트랙이 시안으로 차고 손잡이가 오른쪽)
+   - 로그아웃 : 짙은 유리 + 시안 테두리
+   =================================================================== */
+.sm-toggle {
+    background-image: none;
+    border-width: 2px;
+    border-radius: 12px;
+    border-color: rgba(120, 225, 230, 0.3);
+    background-color: rgba(12, 22, 36, 0.9);
+    -unity-slice-left: 0;
+    -unity-slice-right: 0;
+    -unity-slice-top: 0;
+    -unity-slice-bottom: 0;
+    transition-property: scale, border-color, background-color;
+    transition-duration: 0.12s;
+}
+
+.sm-toggle--off {
+    background-image: linear-gradient(to bottom, rgba(30, 50, 76, 0.9), rgba(10, 18, 30, 0.95));
+}
+
+/* 켜짐 (2026-10-14 2차) : 파스텔 하늘색 채움 → 짙은 청록 + 빛나는 시안 테두리, 글자 흰색 (SMToggleElement.textTrue) */
+.sm-toggle--on {
+    border-color: rgb(120, 236, 250);
+    background-color: rgb(14, 70, 96);
+    background-image: linear-gradient(to bottom, rgb(28, 120, 152), rgb(10, 52, 76));
+}
+
+.sm-toggle--disabled {
+    border-color: rgba(255, 255, 255, 0.08);
+    background-color: rgba(40, 46, 54, 0.6);
+    background-image: none;
+}
+
+/* 소리 토글 (2026-10-14 2차) : 트랙 132x64, 손잡이 48. 손잡이가 트랙 안쪽 6px 여백 안에만 있도록 맞춤
+   (1차는 켜짐 판이 트랙 밖으로 2px 나가고 손잡이가 오른쪽 끝에 붙어 잘려 보였다) */
+.main-setting__sound-btn {
+    left: 1003px;
+    top: 68px;
+    width: 132px;
+    height: 64px;
+    overflow: visible;
+    border-width: 2px;
+    border-radius: 32px;
+    border-color: rgba(120, 225, 230, 0.35);
+    background-color: rgb(10, 18, 30);
+    background-image: linear-gradient(to bottom, rgb(10, 18, 30), rgb(22, 36, 54));
+    transition-property: scale;
+    transition-duration: 0.08s;
+}
+
+.main-setting__sound-btn:active {
+    scale: 0.97 0.97;
+}
+
+/* 켜짐 : 트랙 안쪽(테두리 안)을 시안으로 채운다. 코드가 display 로 켜고 끈다 */
+/* 켜짐 (2차) : 언어 버튼 켜짐과 같은 짙은 청록 + 빛나는 시안 테두리. 트랙 바깥선과 정확히 겹치도록 -2 */
+.main-setting__sound-check {
+    left: -2px;
+    top: -2px;
+    right: -2px;
+    bottom: -2px;
+    width: auto;
+    height: auto;
+    border-width: 2px;
+    border-radius: 32px;
+    border-color: rgb(120, 236, 250);
+    background-color: rgb(14, 70, 96);
+    background-image: linear-gradient(to bottom, rgb(28, 120, 152), rgb(10, 52, 76));
+}
+
+.main-setting__sound-knob {
+    position: absolute;
+    top: 6px;
+    width: 48px;
+    height: 48px;
+    border-radius: 24px;
+    border-width: 2px;
+}
+
+/* 꺼짐 손잡이 : 왼쪽, 어두운 금속 + 옅은 시안 테두리 */
+.main-setting__sound-knob--off {
+    left: 6px;
+    border-color: rgba(120, 225, 230, 0.45);
+    background-color: rgb(58, 70, 86);
+    background-image: linear-gradient(to bottom, rgb(92, 106, 124), rgb(46, 56, 70));
+}
+
+/* 켜짐 손잡이 : 오른쪽 (128 - 48 - 6 = 74), 흰색 */
+.main-setting__sound-knob--on {
+    left: 74px;
+    top: 6px;
+    border-color: rgb(150, 242, 252);
+    background-color: rgb(236, 252, 255);
+    background-image: linear-gradient(to bottom, rgb(255, 255, 255), rgb(190, 238, 248));
+}
+
+/* 로그아웃 : 짙은 유리 + 시안 테두리 */
+.main-setting__logout-btn {
+    border-color: rgba(120, 225, 230, 0.45);
+    border-radius: 12px;
+    background-color: rgb(12, 22, 36);
+    background-image: linear-gradient(to bottom, rgb(30, 54, 84), rgb(12, 22, 36));
+}
+
+.main-setting__logout-label {
+    color: rgb(226, 248, 251);
+    letter-spacing: 1px;
+}
+
+
+/* ===================================================================
+   2026-10-14 게임 설정(PlaySet) 아래 줄 + 뒤로 버튼 미래지향
+   =================================================================== */
+
+/* 뒤로 버튼 (게임 설정 / 코인 구매 공용) : 어두운 판 이미지 → 유리판 + 시안 테두리 + 밝은 꺾쇠(back_chevron.png) */
+.buy-coin__back-btn {
+    left: 30px;
+    top: 90px;
+    width: 118px;
+    height: 118px;
+    border-width: 2px;
+    border-radius: 14px;
+    border-color: rgba(120, 225, 230, 0.5);
+    background-color: rgba(12, 22, 36, 0.92);
+    background-image: url("/Assets/Contents/Image/Button/back_chevron.png");
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+/* 보상 : 유리 칩 (코인 / 시작하기와 같은 높이) */
+.play-set__reward-row {
+    top: 866.7px;
+    height: 104px;
+    padding: 0 34px;
+    border-width: 2px;
+    border-radius: 14px;
+    border-color: rgba(120, 225, 230, 0.35);
+    background-color: rgba(12, 22, 36, 0.9);
+    background-image: linear-gradient(to bottom, rgba(30, 54, 84, 0.9), rgba(10, 18, 30, 0.95));
+}
+
+.play-set__reward-label {
+    height: 100px;
+    font-size: 40px;
+    letter-spacing: 1px;
+    color: rgb(150, 200, 215);
+}
+
+.play-set__reward-value {
+    height: 100px;
+    font-size: 44px;
+    color: rgb(255, 214, 102);
+}
+
+.play-set__reward-coin {
+    width: 42px;
+    height: 42px;
+    margin-left: 12px;
+}
+
+/* 내 코인 : 어두운 유리 + 금색 테두리 */
+.play-set__coin-bg {
+    border-width: 2px;
+    border-radius: 14px;
+    border-color: rgba(240, 196, 90, 0.6);
+    background-color: rgba(12, 18, 28, 0.92);
+    background-image: linear-gradient(to bottom, rgba(40, 36, 24, 0.9), rgba(12, 14, 20, 0.95));
+    -unity-background-image-tint-color: rgb(255, 255, 255);
+    -unity-slice-left: 0;
+    -unity-slice-right: 0;
+    -unity-slice-top: 0;
+    -unity-slice-bottom: 0;
+}
+
+.play-set__coin-text {
+    color: rgb(255, 232, 170);
+}
+
+/* 코인이 모자랄 때 코인 칸 둘레 경고 : 빨간 이미지 → 빨간 빛 테두리 */
+.play-set__need-coin-bg {
+    border-width: 3px;
+    border-radius: 16px;
+    border-color: rgb(255, 84, 96);
+    background-color: rgba(255, 60, 70, 0.12);
+    background-image: none;
+    -unity-background-image-tint-color: rgb(255, 255, 255);
+}
+
+/* 시작하기 : 붉은 그라데이션은 테마 그대로, 모서리만 각지게. 필요 코인 칩은 어두운 유리 */
+.play-set__play-btn {
+    border-radius: 14px;
+}
+
+.play-set__need-coin-panel {
+    border-width: 1px;
+    border-radius: 10px;
+    border-color: rgba(255, 255, 255, 0.22);
+    background-color: rgba(60, 0, 8, 0.35);
+    background-image: none;
+    -unity-background-image-tint-color: rgb(255, 255, 255);
+}
+
+.play-set__ad-btn {
+    border-radius: 14px;
+}
+
+
+/* ===================================================================
+   2026-10-14 인게임 팝업 미래지향 마무리
+   - 작은 판(중도하차 / 코인 부족 / 토스트) 도 큰 팝업과 같은 미래지향 판 이미지
+   - 회색 버튼 → 짙은 유리 (옅은 시안 테두리)
+   - 내 코인 / 필요 코인 칩 → 짙은 유리 + 금색 테두리
+   - 튜토리얼 : Skip / 설명 카드 / 다음 버튼
+   =================================================================== */
+
+/* ---------- 작은 판 ---------- */
+.leave-early-popup,
+.need-coin-popup,
+.toast-popup {
+    border-width: 2px;
+    border-radius: 10px;
+    border-color: rgba(120, 225, 230, 0.45);
+    background-color: rgb(10, 14, 22);
+    background-image: url("/Assets/Contents/Image/BG/Main/popup_panel_future.png");
+    -unity-background-scale-mode: stretch-to-fill;
+    -unity-slice-left: 72;
+    -unity-slice-right: 72;
+    -unity-slice-top: 72;
+    -unity-slice-bottom: 72;
+}
+
+/* 토스트는 높이가 161 이라 판 이미지의 위아래 72 슬라이스가 거의 다 차지한다 → 모서리 브래킷만 살도록 슬라이스를 줄인다 */
+.toast-popup {
+    -unity-slice-top: 56;
+    -unity-slice-bottom: 56;
+}
+
+/* ---------- 회색 버튼 → 짙은 유리 ---------- */
+.trade-popup__cancel-btn,
+.betray__cancel-btn,
+.ok-popup__ok-btn,
+.leave-early__finish-btn,
+.my-coin-panel__plus-btn {
+    border-width: 2px;
+    border-radius: 14px;
+    border-color: rgba(170, 200, 215, 0.32);
+    background-color: rgb(30, 38, 50);
+    background-image: linear-gradient(to bottom, rgb(50, 60, 75), rgb(22, 28, 38));
+    -unity-background-image-tint-color: rgb(255, 255, 255);
+    -unity-slice-left: 0;
+    -unity-slice-right: 0;
+    -unity-slice-top: 0;
+    -unity-slice-bottom: 0;
+}
+
+.trade-popup__cancel-btn .trade-popup__btn-label,
+.betray__cancel-btn .betray__btn-label {
+    color: rgb(214, 226, 234);
+}
+
+/* 주 버튼 모서리도 같은 각으로 */
+.leave-early__continue-btn,
+.trade-popup__propose-btn,
+.trade-popup__propose-btn--alliance,
+.betray__ok-btn,
+.ok-popup__cancel-btn {
+    border-radius: 14px;
+}
+
+/* 중도하차 '끝내기' 안의 +N 칩 */
+.leave-early__coin-bg {
+    border-width: 1px;
+    border-radius: 10px;
+    border-color: rgba(255, 210, 110, 0.45);
+    background-color: rgba(4, 10, 18, 0.75);
+    background-image: none;
+}
+
+.leave-early__coin-value {
+    color: rgb(255, 226, 150);
+}
+
+/* ---------- 내 코인 / 필요 코인 칩 ---------- */
+.my-coin-panel {
+    border-width: 2px;
+    border-radius: 18px;
+    border-color: rgba(255, 205, 100, 0.6);
+    background-color: rgba(10, 16, 26, 0.92);
+    background-image: linear-gradient(to bottom, rgba(36, 44, 58, 0.95), rgba(10, 14, 22, 0.95));
+}
+
+.alliance__need-coin {
+    border-width: 2px;
+    border-radius: 18px;
+    border-color: rgba(255, 205, 100, 0.6);
+    background-color: rgba(10, 16, 26, 0.92);
+    background-image: linear-gradient(to bottom, rgba(36, 44, 58, 0.95), rgba(10, 14, 22, 0.95));
+}
+
+/* ---------- 튜토리얼 ---------- */
+.tutorial__skip-btn {
+    border-width: 2px;
+    border-radius: 12px;
+    border-color: rgba(120, 225, 230, 0.45);
+    background-color: rgba(12, 22, 36, 0.9);
+    background-image: none;
+}
+
+.tutorial__skip-label {
+    color: rgb(190, 236, 244);
+}
+
+.tutorial__card {
+    border-width: 2px;
+    border-radius: 14px;
+    border-color: rgba(120, 225, 230, 0.32);
+    background-color: rgb(12, 20, 32);
+    background-image: linear-gradient(to bottom, rgb(28, 50, 78), rgb(10, 16, 26));
+}
+
+.tutorial__nav-btn {
+    border-width: 2px;
+    border-color: rgba(120, 225, 230, 0.7);
+    background-color: rgb(12, 24, 40);
+    background-image: linear-gradient(to bottom, rgb(40, 84, 128), rgb(12, 26, 44));
+}
+
+/* 내 코인 칩 : 예전 coin_bg.png 에 그려져 있던 코인 아이콘을 배경 이미지로 다시 얹는다 (칩 판은 USS) */
+.my-coin-panel {
+    background-image: url("/Assets/Contents/Image/BG/Main/Coin.png");
+    background-repeat: no-repeat;
+    background-position-y: center;
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.trade-popup__my-coin {
+    background-position-x: left 28px;
+    background-size: 70px 70px;
+}
+
+.betray__my-coin {
+    background-position-x: left 24px;
+    background-size: 62px 62px;
+}
+
+/* ===================================================================
+   2026-10-14 배신 팝업 재조립 (시안 '배신하기' 내용 + 미래지향)
+   판 1150x720 화면 가운데 : 제목 → 은화(HUD 링 + 빛) → "-N 코인" → 취소 / 배신하기
+   =================================================================== */
+.betray__bg {
+    left: 385px;
+    top: 180px;
+    width: 1150px;
+    height: 720px;
+}
+
+.betray__title {
+    left: 560px;
+    top: 232px;
+    width: 800px;
+    height: 110px;
+    font-size: 66px;
+    letter-spacing: 2px;
+    color: rgb(255, 255, 255);
+    -unity-font-definition: url("/Assets/Contents/Font/GyeonggiTitle-Bold.ttf");
+}
+
+.betray__back-btn {
+    left: 1398px;
+    top: 237px;
+    width: 92px;
+    height: 92px;
+}
+
+/* 은화 뒤 은은한 빛 */
+.betray__glow {
+    position: absolute;
+    left: 760px;
+    top: 290px;
+    width: 400px;
+    height: 360px;
+    background-image: radial-gradient(ellipse at center, rgba(200, 225, 240, 0.22) 0%, rgba(120, 225, 230, 0.06) 40%, rgba(0, 0, 0, 0) 70%);
+}
+
+/* HUD 링 두 겹 (은화 중심 960, 470) */
+.betray__ring {
+    position: absolute;
+    border-width: 2px;
+}
+
+.betray__ring--outer {
+    left: 840px;
+    top: 350px;
+    width: 240px;
+    height: 240px;
+    border-radius: 120px;
+    border-color: rgba(120, 225, 230, 0.16);
+}
+
+.betray__ring--inner {
+    left: 868px;
+    top: 378px;
+    width: 184px;
+    height: 184px;
+    border-radius: 92px;
+    border-color: rgba(120, 225, 230, 0.4);
+    border-left-color: rgba(120, 225, 230, 0.08);
+    border-right-color: rgba(120, 225, 230, 0.08);
+    background-color: rgba(10, 18, 30, 0.55);
+}
+
+/* 링 좌우로 뻗는 가는 눈금선 */
+.betray__tick {
+    position: absolute;
+    top: 469px;
+    width: 170px;
+    height: 2px;
+}
+
+.betray__tick--left {
+    left: 660px;
+    background-image: linear-gradient(to right, rgba(120, 225, 230, 0), rgba(120, 225, 230, 0.55));
+}
+
+.betray__tick--right {
+    left: 1090px;
+    background-image: linear-gradient(to right, rgba(120, 225, 230, 0.55), rgba(120, 225, 230, 0));
+}
+
+/* 은화 (패배 결과의 은화와 같은 이미지) */
+.betray__coin {
+    position: absolute;
+    /* coin_image.png 는 여백이 커서 상자를 크게 잡는다 (실제 은화 약 110px) */
+    left: 810px;
+    top: 320px;
+    width: 300px;
+    height: 300px;
+    background-image: url("/Assets/Contents/Image/BG/Main/coin_image.png");
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+/* "-N 코인" */
+.betray__coin-text {
+    position: absolute;
+    left: 660px;
+    top: 600px;
+    width: 600px;
+    height: 80px;
+    margin: 0;
+    padding: 0;
+    font-size: 54px;
+    color: rgb(244, 248, 252);
+    -unity-font-definition: url("/Assets/Contents/Font/GyeonggiTitle-Medium.ttf");
+    -unity-font-style: normal;
+    -unity-text-align: middle-center;
+}
+
+/* 취소 / 배신하기 : 시안처럼 가운데 두 개 */
+.betray__btn {
+    top: 742px;
+    width: 330px;
+    height: 104px;
+}
+
+.betray__cancel-btn {
+    left: 617px;
+}
+
+.betray__ok-btn {
+    left: 973px;
+}
+
+.betray__ok-btn .betray__btn-label {
+    color: rgb(255, 255, 255);
 }

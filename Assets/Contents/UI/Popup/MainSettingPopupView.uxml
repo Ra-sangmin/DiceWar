@@ -9,7 +9,10 @@
                 <ui:VisualElement name="main-setting-sound-row" class="main-setting__row main-setting__row--sound">
                     <ui:Label name="main-setting-sound-label" text="" class="main-setting__row-label" picking-mode="Ignore" />
                     <ui:Button name="main-setting-sound-btn" text="" class="main-setting__sound-btn">
-                        <ui:VisualElement name="main-setting-sound-check" class="main-setting__sound-check" picking-mode="Ignore" />
+                        <ui:VisualElement name="main-setting-sound-knob-off" class="main-setting__sound-knob main-setting__sound-knob--off" picking-mode="Ignore" />
+                        <ui:VisualElement name="main-setting-sound-check" class="main-setting__sound-check" picking-mode="Ignore">
+                            <ui:VisualElement name="main-setting-sound-knob-on" class="main-setting__sound-knob main-setting__sound-knob--on" picking-mode="Ignore" />
+                        </ui:VisualElement>
                     </ui:Button>
                 </ui:VisualElement>
                 <ui:VisualElement name="main-setting-lang-row" class="main-setting__row main-setting__row--lang">

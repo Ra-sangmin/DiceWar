@@ -85,3 +85,5 @@ crashlytics-build.properties
 !.env.example
 # 서버 의존성
 Server/node_modules/
+# 빌드 결과물 폴더 (apk / zip 등)
+/apk/
